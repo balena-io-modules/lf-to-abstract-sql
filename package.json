@@ -1,6 +1,6 @@
 {
   "name": "lf-to-abstract-sql",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
