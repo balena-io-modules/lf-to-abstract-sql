@@ -257,8 +257,15 @@
         AttrTermForm: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, term;
             term = this._apply("anything");
-            this.identifiers[term[1]] = factType;
-            return this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+            return function() {
+                this.identifiers[term[1]] = factType;
+                this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+                for (var i = 0; factType.length > i; i++) if ("Term" === factType[i][0]) {
+                    var extraFactType = [ term, [ "Verb", "has", !1 ], factType[i] ];
+                    this.AddFactType(extraFactType, extraFactType);
+                    this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? "Attribute" : "ForeignKey";
+                }
+            }.call(this);
         },
         AttrNecessity: function(tableID) {
             var $elf = this, _fromIdx = this.input.idx;
