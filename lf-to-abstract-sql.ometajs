@@ -173,8 +173,16 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		AddFactType(synForm, factType),
 	AttrTermForm :factType =
 		:term
-		{this.identifiers[term[1]] = factType}
-		{this.tables[this.GetResourceName(term[1])] = this.GetTable(factType)},
+		{	this.identifiers[term[1]] = factType;
+			this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+			for(var i = 0; i < factType.length; i++) {
+				if(factType[i][0] === 'Term') {
+					var extraFactType = [term, ['Verb', 'has', false], factType[i]];
+					this.AddFactType(extraFactType, extraFactType);
+					this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? 'Attribute' : 'ForeignKey';
+				}
+			}
+		},
 	AttrNecessity :tableID =
 		Rule,
 	
