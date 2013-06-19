@@ -1,6 +1,6 @@
 {
   "name": "lf-to-abstract-sql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "license": "BSD",
   "dependencies": {
     "ometa-js": "~1.0.3",
-    "lodash": "~1.2.1",
+    "lodash": "~1.3.1",
     "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.7"
   }
 }

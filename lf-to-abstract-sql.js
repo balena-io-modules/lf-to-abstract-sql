@@ -97,6 +97,7 @@
                 fields: [],
                 primitive: !1,
                 name: null,
+                indexes: [],
                 idField: null
             };
             return identifierName;
@@ -272,7 +273,7 @@
             return this._apply("Rule");
         },
         FactType: function() {
-            var $elf = this, _fromIdx = this.input.idx, attributes, factType, factTypePart, fkTable, identifier, identifierTable, linkTable, negated, resourceName, verb;
+            var $elf = this, _fromIdx = this.input.idx, attributes, factType, factTypePart, fieldName, fkTable, identifier, identifierTable, linkTable, negated, resourceName, uniqueFields, verb;
             this._lookahead(function() {
                 return factType = this._many1(function() {
                     factTypePart = this._apply("anything");
@@ -308,17 +309,22 @@
                     linkTable = this.tables[resourceName] = {
                         fields: [],
                         primitive: !1,
-                        name: null
+                        name: null,
+                        indexes: [],
+                        idField: null
                     };
-                    return this._many1(function() {
+                    uniqueFields = [];
+                    this._many1(function() {
                         return this._or(function() {
                             identifier = this._apply("Identifier");
+                            fieldName = identifier.name + identifier.num;
+                            uniqueFields.push(fieldName);
                             fkTable = this._applyWithArgs("GetTable", identifier.name);
                             return this._or(function() {
                                 this._pred(fkTable.primitive);
-                                return this._applyWithArgs("AddTableField", linkTable, identifier.name + identifier.num, fkTable.primitive, !0);
+                                return this._applyWithArgs("AddTableField", linkTable, fieldName, fkTable.primitive, !0);
                             }, function() {
-                                return this._applyWithArgs("AddTableField", linkTable, identifier.name + identifier.num, "ForeignKey", !0, null, {
+                                return this._applyWithArgs("AddTableField", linkTable, fieldName, "ForeignKey", !0, null, {
                                     tableName: fkTable.name,
                                     fieldName: fkTable.idField
                                 });
@@ -330,6 +336,10 @@
                                 return negated = this._apply("anything");
                             });
                         });
+                    });
+                    return linkTable.indexes.push({
+                        type: "UNIQUE",
+                        fields: uniqueFields
                     });
                 });
             });
