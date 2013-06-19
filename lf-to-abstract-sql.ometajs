@@ -56,7 +56,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	{console.error('We already have an identifier with a name of: ' + identifierName)} ?(false)
 		)
 		{this.identifiers[identifierName] = identifierName}
-		{this.tables[resourceName] = {fields: [], primitive: false, name: null, idField: null}}
+		{this.tables[resourceName] = {fields: [], primitive: false, name: null, indexes: [], idField: null}}
 		-> identifierName,
 	Attributes :termOrFactType =
 			end
@@ -200,15 +200,19 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				GetTable(factType[0][1]):identifierTable
 				AddTableField(identifierTable, factType[1][1], 'Boolean', true)
 				{this.tables[resourceName] = 'BooleanAttribute'}
-			|	{this.tables[resourceName] = {fields: [], primitive: false, name: null}}:linkTable
+			|	{this.tables[resourceName] = {fields: [], primitive: false, name: null, indexes: [], idField: null}}:linkTable
+				{[]}:uniqueFields
 				(	Identifier:identifier
+					{identifier.name + identifier.num}:fieldName
+					{uniqueFields.push(fieldName)}
 					GetTable(identifier.name):fkTable
 					(	?fkTable.primitive
-						AddTableField(linkTable, identifier.name + identifier.num, fkTable.primitive, true)
-					|	AddTableField(linkTable, identifier.name + identifier.num, 'ForeignKey', true, null, {tableName: fkTable.name, fieldName: fkTable.idField})
+						AddTableField(linkTable, fieldName, fkTable.primitive, true)
+					|	AddTableField(linkTable, fieldName, 'ForeignKey', true, null, {tableName: fkTable.name, fieldName: fkTable.idField})
 					)
 				|	['Verb' :verb :negated]
 				)+
+				{linkTable.indexes.push({type: 'UNIQUE', fields: uniqueFields})}
 			)
 		)
 		-> factType,
