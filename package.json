@@ -4,6 +4,7 @@
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
+    "pretest": "npm run-script prepublish",
     "test": "mocha",
     "prepublish": "node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && node node_modules/ometa-js/bin/ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
@@ -11,8 +12,8 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "ometa-js": "~1.0.3",
-    "lodash": "~2.0.0",
-    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.9"
+    "ometa-js": "~1.0.4",
+    "lodash": "~2.2.1",
+    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.10"
   }
 }
