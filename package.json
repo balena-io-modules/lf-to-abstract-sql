@@ -12,8 +12,8 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "ometa-js": "~1.0.4",
-    "lodash": "~2.2.1",
-    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.10"
+    "ometa-js": "~1.1.0",
+    "lodash": "~2.3.0",
+    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.11"
   }
 }
