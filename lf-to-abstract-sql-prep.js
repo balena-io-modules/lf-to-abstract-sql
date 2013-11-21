@@ -1,8 +1,8 @@
-(function(root, factory) {
+!function(root, factory) {
     "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "./sbvr-compiler-libs", "sbvr-parser/lf-optimiser", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
         return root[moduleName];
     }, root, root.OMeta);
-})(this, function(require, exports, OMeta) {
+}(this, function(require, exports, OMeta) {
     var SBVRCompilerLibs = require("./sbvr-compiler-libs").SBVRCompilerLibs, LFOptimiser = require("sbvr-parser/lf-optimiser").LFOptimiser, _ = require("lodash"), LF2AbstractSQLPrep = exports.LF2AbstractSQLPrep = LFOptimiser._extend({
         AttrConceptType: function(termName) {
             var $elf = this, _fromIdx = this.input.idx, conceptType;
@@ -16,7 +16,7 @@
         },
         AttrDatabaseAttribute: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, attrVal, newAttrVal;
-            attrVal = this._apply("anything");
+            attrVal = this.anything();
             newAttrVal = "Term" == termOrFactType[0] && (!this.attributes.hasOwnProperty(termOrFactType[3]) || this.attributes[termOrFactType[3]] === !0) || "FactType" == termOrFactType[0] && 4 == termOrFactType.length && (!this.attributes.hasOwnProperty(termOrFactType[3]) || this.attributes[termOrFactType[3]] === !0) && this.primitives.hasOwnProperty(termOrFactType[3]) && this.primitives[termOrFactType[3]] !== !1;
             this.attributes[termOrFactType] = newAttrVal;
             this._opt(function() {
@@ -27,7 +27,7 @@
         },
         AttrDatabasePrimitive: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, attrVal, newAttrVal;
-            attrVal = this._apply("anything");
+            attrVal = this.anything();
             newAttrVal = attrVal;
             this._opt(function() {
                 this._pred(this.primitives.hasOwnProperty(termOrFactType));
@@ -41,7 +41,7 @@
         AttrTermForm: function(factType) {
             var $elf = this, _fromIdx = this.input.idx;
             this.termForms[factType] = !0;
-            return this._apply("anything");
+            return this.anything();
         },
         UniversalQuantification: function() {
             var $elf = this, _fromIdx = this.input.idx, v, xs;
@@ -104,28 +104,24 @@
         CardinalityOptimisation: function() {
             var $elf = this, _fromIdx = this.input.idx, v1;
             return this._form(function() {
-                return function() {
-                    switch (this._apply("anything")) {
-                      case "LogicalNegation":
+                switch (this.anything()) {
+                  case "LogicalNegation":
+                    return this._form(function() {
+                        this._applyWithArgs("exactly", "ExistentialQuantification");
+                        v1 = this._applyWithArgs("token", "Variable");
                         return this._form(function() {
-                            this._applyWithArgs("exactly", "ExistentialQuantification");
-                            v1 = this._applyWithArgs("token", "Variable");
-                            return this._form(function() {
-                                this._applyWithArgs("exactly", "LogicalNegation");
-                                return this._applyWithArgs("CardinalityOptimisation2", v1);
-                            });
-                        });
-
-                      case "UniversalQuantification":
-                        return function() {
-                            v1 = this._applyWithArgs("token", "Variable");
+                            this._applyWithArgs("exactly", "LogicalNegation");
                             return this._applyWithArgs("CardinalityOptimisation2", v1);
-                        }.call(this);
+                        });
+                    });
 
-                      default:
-                        throw this._fail();
-                    }
-                }.call(this);
+                  case "UniversalQuantification":
+                    v1 = this._applyWithArgs("token", "Variable");
+                    return this._applyWithArgs("CardinalityOptimisation2", v1);
+
+                  default:
+                    throw this._fail();
+                }
             });
         },
         NecessityOptimisation: function() {
@@ -140,18 +136,16 @@
             var $elf = this, _fromIdx = this.input.idx;
             return this._or(function() {
                 this._form(function() {
-                    return function() {
-                        switch (this._apply("anything")) {
-                          case "NecessityFormulation":
-                            return this._apply("NecessityOptimisation");
+                    switch (this.anything()) {
+                      case "NecessityFormulation":
+                        return this._apply("NecessityOptimisation");
 
-                          case "ObligationFormulation":
-                            return this._apply("ObligationOptimisation");
+                      case "ObligationFormulation":
+                        return this._apply("ObligationOptimisation");
 
-                          default:
-                            throw this._fail();
-                        }
-                    }.call(this);
+                      default:
+                        throw this._fail();
+                    }
                 });
                 this._applyWithArgs("token", "StructuredEnglish");
                 return null;
@@ -182,7 +176,7 @@
                 this.SetHelped();
             }
             if (!attrsFound.hasOwnProperty("DatabaseTableName")) {
-                attrs.splice(1, 0, [ "DatabaseTableName", termOrFactType[1].replace(RegExp(" ", "g"), "_") ]);
+                attrs.splice(1, 0, [ "DatabaseTableName", termOrFactType[1].replace(new RegExp(" ", "g"), "_") ]);
                 this.SetHelped();
             }
             if (!attrsFound.hasOwnProperty("DatabasePrimitive")) {
@@ -199,7 +193,7 @@
                     this.SetHelped();
                 }
                 if (!attrsFound.hasOwnProperty("DatabaseTableName")) {
-                    for (var tableName = termOrFactType[1][1].replace(RegExp(" ", "g"), "_"), i = 2; termOrFactType.length > i; i++) tableName += "-" + termOrFactType[i][1].replace(RegExp(" ", "g"), "_");
+                    for (var tableName = termOrFactType[1][1].replace(new RegExp(" ", "g"), "_"), i = 2; i < termOrFactType.length; i++) tableName += "-" + termOrFactType[i][1].replace(new RegExp(" ", "g"), "_");
                     attrs.splice(1, 0, [ "DatabaseTableName", tableName ]);
                     this.SetHelped();
                 }
@@ -230,7 +224,7 @@
                 if (3 == termOrFactType.length) {
                     this.primitives.hasOwnProperty(termOrFactType[1]) && this.primitives[termOrFactType[1]] === !1 || this.SetHelped();
                     this.primitives[termOrFactType[1]] = !1;
-                } else if (termOrFactType.length > 4) for (var i = 1; termOrFactType.length > i; i += 2) {
+                } else if (termOrFactType.length > 4) for (var i = 1; i < termOrFactType.length; i += 2) {
                     this.attributes.hasOwnProperty(termOrFactType[i]) && this.attributes[termOrFactType[i]] === !1 || this.SetHelped();
                     this.attributes[termOrFactType[i]] = !1;
                 }

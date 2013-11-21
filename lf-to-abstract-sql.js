@@ -1,8 +1,8 @@
-(function(root, factory) {
+!function(root, factory) {
     "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "./sbvr-compiler-libs", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
         return root[moduleName];
     }, root, root.OMeta);
-})(this, function(require, exports, OMeta) {
+}(this, function(require, exports, OMeta) {
     var SBVRCompilerLibs = require("./sbvr-compiler-libs").SBVRCompilerLibs, _ = require("lodash"), LF2AbstractSQL = exports.LF2AbstractSQL = SBVRCompilerLibs._extend({
         Number: function() {
             var $elf = this, _fromIdx = this.input.idx, num;
@@ -35,7 +35,7 @@
             var $elf = this, _fromIdx = this.input.idx, text;
             this._form(function() {
                 this._applyWithArgs("exactly", "Text");
-                return text = this._apply("anything");
+                return text = this.anything();
             });
             return [ "Text", text ];
         },
@@ -54,7 +54,7 @@
             num = "";
             this._form(function() {
                 type = function() {
-                    switch (this._apply("anything")) {
+                    switch (this.anything()) {
                       case "Name":
                         return "Name";
 
@@ -65,8 +65,8 @@
                         throw this._fail();
                     }
                 }.call(this);
-                name = this._apply("anything");
-                vocab = this._apply("anything");
+                name = this.anything();
+                vocab = this.anything();
                 return this._opt(function() {
                     return this._or(function() {
                         return num = this._apply("Number");
@@ -84,7 +84,7 @@
         },
         IdentifierName: function() {
             var $elf = this, _fromIdx = this.input.idx, identifierName, resourceName;
-            identifierName = this._apply("anything");
+            identifierName = this.anything();
             resourceName = this._applyWithArgs("GetResourceName", identifierName);
             this._or(function() {
                 return this._pred(!this.tables.hasOwnProperty(resourceName));
@@ -111,7 +111,7 @@
                     this._applyWithArgs("exactly", "Attributes");
                     return this._many(function() {
                         return this._form(function() {
-                            attributeName = this._apply("anything");
+                            attributeName = this.anything();
                             return attributeValue = this._applyWithArgs("ApplyFirstExisting", [ "Attr" + attributeName, "DefaultAttr" ], [ termOrFactType ]);
                         });
                     });
@@ -120,15 +120,15 @@
         },
         DefaultAttr: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, anything;
-            anything = this._apply("anything");
+            anything = this.anything();
             return console.log("Default", termOrFactType, anything);
         },
         AttrConceptType: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptType, dataType, fieldID, identifierTable, primitive, term, vocab;
             term = this._form(function() {
                 this._applyWithArgs("exactly", "Term");
-                conceptType = this._apply("anything");
-                return vocab = this._apply("anything");
+                conceptType = this.anything();
+                return vocab = this.anything();
             });
             this.vocabularies[termOrFactType[2]].ConceptTypes[termOrFactType] = term;
             primitive = this._applyWithArgs("IsPrimitive", term);
@@ -151,7 +151,7 @@
         },
         AttrDatabaseIDField: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, fieldID, idField, table, tableID;
-            idField = this._apply("anything");
+            idField = this.anything();
             tableID = this._applyWithArgs("GetTableID", termOrFactType);
             table = this._applyWithArgs("GetTable", tableID);
             return this._or(function() {
@@ -167,7 +167,7 @@
         },
         AttrReferenceScheme: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, fieldID, referenceScheme, table, tableID;
-            referenceScheme = this._apply("anything");
+            referenceScheme = this.anything();
             referenceScheme = this._or(function() {
                 this._pred(_.isArray(referenceScheme));
                 return referenceScheme[1];
@@ -190,7 +190,7 @@
         },
         AttrDatabaseTableName: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, table, tableID, tableName;
-            tableName = this._apply("anything");
+            tableName = this.anything();
             tableID = this._applyWithArgs("GetTableID", termOrFactType);
             table = this._applyWithArgs("GetTable", tableID);
             return this._or(function() {
@@ -201,13 +201,13 @@
         },
         AttrDatabasePrimitive: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, attrVal, tableID;
-            attrVal = this._apply("anything");
+            attrVal = this.anything();
             tableID = this._applyWithArgs("GetTableID", termOrFactType);
             return this.GetTable(tableID).primitive = attrVal;
         },
         AttrDatabaseAttribute: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, attrVal, attributeName, attributeTable, baseTable, fieldID;
-            attrVal = this._apply("anything");
+            attrVal = this.anything();
             return this._opt(function() {
                 this._pred(attrVal);
                 this.attributes[factType] = attrVal;
@@ -221,7 +221,7 @@
         },
         AttrForeignKey: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, baseTable, fieldID, fkName, fkTable, required;
-            required = this._apply("anything");
+            required = this.anything();
             baseTable = this._applyWithArgs("GetTable", factType[0][1]);
             fkName = factType[2][1];
             fkTable = this._applyWithArgs("GetTable", fkName);
@@ -239,7 +239,7 @@
         },
         AttrUnique: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, baseTable, fieldID, required, uniqueField;
-            required = this._apply("anything");
+            required = this.anything();
             baseTable = this._applyWithArgs("GetTable", factType);
             this._opt(function() {
                 this._pred("Attribute" === baseTable || "ForeignKey" === baseTable);
@@ -252,16 +252,16 @@
         },
         AttrSynonymousForm: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, synForm;
-            synForm = this._apply("anything");
+            synForm = this.anything();
             return this._applyWithArgs("AddFactType", synForm, factType);
         },
         AttrTermForm: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, term;
-            term = this._apply("anything");
+            term = this.anything();
             return function() {
                 this.identifiers[term[1]] = factType;
                 this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
-                for (var i = 0; factType.length > i; i++) if ("Term" === factType[i][0]) {
+                for (var i = 0; i < factType.length; i++) if ("Term" === factType[i][0]) {
                     var extraFactType = [ term, [ "Verb", "has", !1 ], factType[i] ];
                     this.AddFactType(extraFactType, extraFactType);
                     this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? "Attribute" : "ForeignKey";
@@ -276,9 +276,9 @@
             var $elf = this, _fromIdx = this.input.idx, attributes, factType, factTypePart, fieldName, fkTable, identifier, identifierTable, linkTable, negated, resourceName, uniqueFields, verb;
             this._lookahead(function() {
                 return factType = this._many1(function() {
-                    factTypePart = this._apply("anything");
+                    factTypePart = this.anything();
                     this._lookahead(function() {
-                        return attributes = this._apply("anything");
+                        return attributes = this.anything();
                     });
                     return factTypePart;
                 });
@@ -287,9 +287,9 @@
             this._or(function() {
                 this._pred(this.IsPrimitive(factType[0]));
                 return this._many1(function() {
-                    factTypePart = this._apply("anything");
+                    factTypePart = this.anything();
                     return this._lookahead(function() {
-                        return attributes = this._apply("anything");
+                        return attributes = this.anything();
                     });
                 });
             }, function() {
@@ -297,9 +297,9 @@
                 return this._or(function() {
                     this._pred(2 == factType.length);
                     this._many1(function() {
-                        factTypePart = this._apply("anything");
+                        factTypePart = this.anything();
                         return this._lookahead(function() {
-                            return attributes = this._apply("anything");
+                            return attributes = this.anything();
                         });
                     });
                     identifierTable = this._applyWithArgs("GetTable", factType[0][1]);
@@ -332,8 +332,8 @@
                         }, function() {
                             return this._form(function() {
                                 this._applyWithArgs("exactly", "Verb");
-                                verb = this._apply("anything");
-                                return negated = this._apply("anything");
+                                verb = this.anything();
+                                return negated = this.anything();
                             });
                         });
                     });
@@ -349,7 +349,7 @@
             var $elf = this, _fromIdx = this.input.idx, cardinality;
             this._form(function() {
                 (function() {
-                    switch (this._apply("anything")) {
+                    switch (this.anything()) {
                       case "Cardinality":
                         return "Cardinality";
 
@@ -416,7 +416,7 @@
             var $elf = this, _fromIdx = this.input.idx, binds;
             binds = [];
             (function() {
-                for (var i = 0; actualFactType.length > i; i += 2) {
+                for (var i = 0; i < actualFactType.length; i += 2) {
                     var j = _.findIndex(actualFactType, {
                         3: i
                     });
@@ -487,7 +487,7 @@
             var $elf = this, _fromIdx = this.input.idx, bindNumbers, binding, factType, identifierName, identifierType, mapping, partAlias, verb, vocab;
             this._form(function() {
                 return bindNumbers = this._many1(function() {
-                    binding = this._apply("anything");
+                    binding = this.anything();
                     return binding.number;
                 });
             });
@@ -495,25 +495,21 @@
                 return factType = this._many(function() {
                     this._form(function() {
                         return partAlias = this._or(function() {
-                            return function() {
-                                switch (this._apply("anything")) {
-                                  case "Verb":
-                                    return function() {
-                                        verb = this._apply("anything");
-                                        this._apply("anything");
-                                        return verb;
-                                    }.call(this);
+                            switch (this.anything()) {
+                              case "Verb":
+                                verb = this.anything();
+                                this.anything();
+                                return verb;
 
-                                  default:
-                                    throw this._fail();
-                                }
-                            }.call(this);
+                              default:
+                                throw this._fail();
+                            }
                         }, function() {
-                            identifierType = this._apply("anything");
-                            identifierName = this._apply("anything");
-                            vocab = this._apply("anything");
+                            identifierType = this.anything();
+                            identifierName = this.anything();
+                            vocab = this.anything();
                             mapping = this._opt(function() {
-                                return this._apply("anything");
+                                return this.anything();
                             });
                             return identifierName + "." + bindNumbers.pop();
                         });
@@ -590,7 +586,7 @@
                 this._form(function() {
                     this._applyWithArgs("exactly", "FactType");
                     return factType = this._many1(function() {
-                        return this._apply("anything");
+                        return this.anything();
                     });
                 });
                 actualFactType = this._applyWithArgs("MappedFactType", factType);
@@ -741,7 +737,7 @@
                 }, function() {
                     return this._apply("Range");
                 }, function() {
-                    x = this._apply("anything");
+                    x = this.anything();
                     console.error("Hit unhandled operation:", x);
                     return this._pred(!1);
                 });
@@ -757,7 +753,7 @@
             var $elf = this, _fromIdx = this.input.idx, rule;
             this._form(function() {
                 (function() {
-                    switch (this._apply("anything")) {
+                    switch (this.anything()) {
                       case "NecessityFormulation":
                         return "NecessityFormulation";
 
@@ -804,31 +800,27 @@
                     this._pred(_.isArray(this.input.hd));
                     return this._form(function() {
                         return this._or(function() {
-                            return function() {
-                                switch (this._apply("anything")) {
-                                  case "AtomicFormulation":
-                                    return function() {
-                                        this._form(function() {
-                                            this._applyWithArgs("exactly", "FactType");
-                                            return factType = this._many1(function() {
-                                                return this._apply("anything");
-                                            });
-                                        });
-                                        unmappedFactType = this._applyWithArgs("UnmappedFactType", factType);
-                                        actualFactType = this._applyWithArgs("MappedFactType", factType);
-                                        return this._applyWithArgs(rule, depth, unmappedFactType, actualFactType);
-                                    }.call(this);
+                            switch (this.anything()) {
+                              case "AtomicFormulation":
+                                this._form(function() {
+                                    this._applyWithArgs("exactly", "FactType");
+                                    return factType = this._many1(function() {
+                                        return this.anything();
+                                    });
+                                });
+                                unmappedFactType = this._applyWithArgs("UnmappedFactType", factType);
+                                actualFactType = this._applyWithArgs("MappedFactType", factType);
+                                return this._applyWithArgs(rule, depth, unmappedFactType, actualFactType);
 
-                                  default:
-                                    throw this._fail();
-                                }
-                            }.call(this);
+                              default:
+                                throw this._fail();
+                            }
                         }, function() {
                             return this._applyWithArgs("ProcessAtomicFormulationsRecurse", depth + 1, rule);
                         });
                     });
                 }, function() {
-                    return this._apply("anything");
+                    return this.anything();
                 });
             });
         },
@@ -836,7 +828,7 @@
             var $elf = this, _fromIdx = this.input.idx, binds;
             binds = this._applyWithArgs("RoleBindings", actualFactType);
             return function() {
-                for (var i = 0; binds.length > i; i++) if (!this.IsPrimitive(this.ReconstructIdentifier(binds[i].identifier))) {
+                for (var i = 0; i < binds.length; i++) if (!this.IsPrimitive(this.ReconstructIdentifier(binds[i].identifier))) {
                     this.nonPrimitiveExists = !0;
                     break;
                 }
@@ -865,7 +857,7 @@
                 }));
                 tableAlias = this._applyWithArgs("LinkTableAlias", binds, actualFactType);
                 return function() {
-                    for (var i = 0; actualFactType.length > i; i += 2) {
+                    for (var i = 0; i < actualFactType.length; i += 2) {
                         var table = this.GetTable(actualFactType[i][1]), bindNumber = binds[i / 2].number;
                         if (table && table.primitive && (null == this.bindAttributeDepth[bindNumber] || this.bindAttributeDepth[bindNumber] > depth)) {
                             this.bindAttributeDepth[bindNumber] = depth;
@@ -907,11 +899,11 @@
                     this._pred(this.nonPrimitiveExists);
                     return this._apply("RuleBody");
                 }, function() {
-                    return this._apply("anything");
+                    return this.anything();
                 });
                 this._form(function() {
                     this._applyWithArgs("exactly", "StructuredEnglish");
-                    return ruleText = this._apply("anything");
+                    return ruleText = this.anything();
                 });
                 return this._or(function() {
                     this._pred(this.nonPrimitiveExists);
@@ -929,21 +921,17 @@
                     return this._or(function() {
                         return this._form(function() {
                             return this._or(function() {
-                                return function() {
-                                    switch (this._apply("anything")) {
-                                      case "Vocabulary":
-                                        return function() {
-                                            vocab = this._apply("anything");
-                                            return attributes = this._apply("anything");
-                                        }.call(this);
+                                switch (this.anything()) {
+                                  case "Vocabulary":
+                                    vocab = this.anything();
+                                    return attributes = this.anything();
 
-                                      default:
-                                        throw this._fail();
-                                    }
-                                }.call(this);
+                                  default:
+                                    throw this._fail();
+                                }
                             }, function() {
                                 type = function() {
-                                    switch (this._apply("anything")) {
+                                    switch (this.anything()) {
                                       case "Name":
                                         return "Name";
 
@@ -955,22 +943,18 @@
                                     }
                                 }.call(this);
                                 identifierName = this._apply("IdentifierName");
-                                vocab = this._apply("anything");
+                                vocab = this.anything();
                                 this._applyWithArgs("AddVocabulary", vocab);
                                 return this._applyWithArgs("Attributes", [ type, identifierName, vocab ]);
                             }, function() {
-                                return function() {
-                                    switch (this._apply("anything")) {
-                                      case "FactType":
-                                        return function() {
-                                            factType = this._apply("FactType");
-                                            return this._applyWithArgs("Attributes", factType);
-                                        }.call(this);
+                                switch (this.anything()) {
+                                  case "FactType":
+                                    factType = this._apply("FactType");
+                                    return this._applyWithArgs("Attributes", factType);
 
-                                      default:
-                                        throw this._fail();
-                                    }
-                                }.call(this);
+                                  default:
+                                    throw this._fail();
+                                }
                             });
                         });
                     }, function() {
@@ -999,15 +983,15 @@
     LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
         if (_.isEqual(whereBody, [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ])) return void 0;
         if ("Exists" != whereBody[0] || "SelectQuery" != whereBody[1][0] && "InsertQuery" != whereBody[1][0] && "UpdateQuery" != whereBody[1][0] && "UpsertQuery" != whereBody[1][0]) {
-            for (var i = 1; query.length > i; i++) if ("Where" == query[i][0]) {
+            for (var i = 1; i < query.length; i++) if ("Where" == query[i][0]) {
                 query[i][1] = [ "And", query[i][1], whereBody ];
                 return void 0;
             }
             query.push([ "Where", whereBody ]);
         } else {
             whereBody = whereBody[1].slice(1);
-            for (var i = 0; whereBody.length > i; i++) "From" == whereBody[i][0] && query.push(whereBody[i]);
-            for (var i = 0; whereBody.length > i; i++) "Where" == whereBody[i][0] && this.AddWhereClause(query, whereBody[i][1]);
+            for (var i = 0; i < whereBody.length; i++) "From" == whereBody[i][0] && query.push(whereBody[i]);
+            for (var i = 0; i < whereBody.length; i++) "Where" == whereBody[i][0] && this.AddWhereClause(query, whereBody[i][1]);
         }
     };
     LF2AbstractSQL.ResolveConceptTypes = function(query, identifier, varNum, untilConcept) {
