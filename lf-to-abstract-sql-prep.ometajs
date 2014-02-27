@@ -155,61 +155,64 @@ LF2AbstractSQLPrep.defaultAttributes = function(termOrFactType, attrsFound, attr
 			}
 		break;
 		case 'FactType':
+			// Use the actual fact type info for finding the relevant default attributes.
+			var actualFactType = this.UnmappedFactType(termOrFactType.slice(1));
+			actualFactType = ['FactType'].concat(actualFactType);
 			// We don't add extra attributes to a fact type starting with a primitive.
-			if(!this.IsPrimitive(termOrFactType[1])) {
+			if(!this.IsPrimitive(actualFactType[1])) {
 				if(!attrsFound.hasOwnProperty('DatabaseIDField')) {
 					attrs.splice(1, 0, ['DatabaseIDField', 'id']);
 					this.SetHelped();
 				}
 				if(!attrsFound.hasOwnProperty('DatabaseTableName')) {
-					var tableName = termOrFactType[1][1].replace(new RegExp(' ','g'),'_');
-					for(var i=2;i<termOrFactType.length;i++) {
-						tableName += '-' + termOrFactType[i][1].replace(new RegExp(' ','g'),'_');
+					var tableName = actualFactType[1][1].replace(new RegExp(' ','g'),'_');
+					for(var i=2;i<actualFactType.length;i++) {
+						tableName += '-' + actualFactType[i][1].replace(new RegExp(' ','g'),'_');
 					}
 					attrs.splice(1, 0, ['DatabaseTableName', tableName]);
 					this.SetHelped();
 				}
-				if(this.uniqueKeys.hasOwnProperty(termOrFactType)) {
+				if(this.uniqueKeys.hasOwnProperty(actualFactType)) {
 					if(!attrsFound.hasOwnProperty('Unique')) {
-						attrs.splice(1, 0, ['Unique', this.uniqueKeys[termOrFactType]]);
+						attrs.splice(1, 0, ['Unique', this.uniqueKeys[actualFactType]]);
 						this.SetHelped();
 					}
-					else if(attrsFound['Unique'] != this.uniqueKeys[termOrFactType]) {
-						console.error(attrsFound['Unique'], this.uniqueKeys[termOrFactType]);
+					else if(attrsFound['Unique'] != this.uniqueKeys[actualFactType]) {
+						console.error(attrsFound['Unique'], this.uniqueKeys[actualFactType]);
 						___MISMATCHED_UNIQUE_KEY___.die();
 					}
 				}
-				if(this.foreignKeys.hasOwnProperty(termOrFactType)) {
+				if(this.foreignKeys.hasOwnProperty(actualFactType)) {
 					if(!attrsFound.hasOwnProperty('DatabaseAttribute')) {
 						attrs.splice(1, 0, ['DatabaseAttribute', false]);
 						this.SetHelped();
 					}
 					if(!attrsFound.hasOwnProperty('ForeignKey')) {
-						// console.log('Adding FK attr', this.foreignKeys[termOrFactType], termOrFactType);
-						attrs.splice(1, 0, ['ForeignKey', this.foreignKeys[termOrFactType]]);
+						// console.log('Adding FK attr', this.foreignKeys[actualFactType], actualFactType);
+						attrs.splice(1, 0, ['ForeignKey', this.foreignKeys[actualFactType]]);
 						this.SetHelped();
 					}
-					else if(attrsFound['ForeignKey'] != this.foreignKeys[termOrFactType]) {
-						console.error(attrsFound['ForeignKey'], this.foreignKeys[termOrFactType]);
+					else if(attrsFound['ForeignKey'] != this.foreignKeys[actualFactType]) {
+						console.error(attrsFound['ForeignKey'], this.foreignKeys[actualFactType]);
 						___MISMATCHED_FOREIGN_KEY___.die();
 					}
 				}
 				
 				// Boolean fact type
-				if(termOrFactType.length == 3) {
-					if(!this.primitives.hasOwnProperty(termOrFactType[1]) || this.primitives[termOrFactType[1]] !== false) {
+				if(actualFactType.length == 3) {
+					if(!this.primitives.hasOwnProperty(actualFactType[1]) || this.primitives[actualFactType[1]] !== false) {
 						this.SetHelped();
 					}
 					// The term of a boolean fact type cannot be a primitive.
-					this.primitives[termOrFactType[1]] = false;
+					this.primitives[actualFactType[1]] = false;
 				} // Tertiary or higher fact type
-				else if(termOrFactType.length > 4) {
+				else if(actualFactType.length > 4) {
 					// The terms in a tertiary or higher fact type cannot become attributes.
-					for(var i = 1;i < termOrFactType.length; i+=2) {
-						if(!this.attributes.hasOwnProperty(termOrFactType[i]) || this.attributes[termOrFactType[i]] !== false) {
+					for(var i = 1;i < actualFactType.length; i+=2) {
+						if(!this.attributes.hasOwnProperty(actualFactType[i]) || this.attributes[actualFactType[i]] !== false) {
 							this.SetHelped();
 						}
-						this.attributes[termOrFactType[i]] = false;
+						this.attributes[actualFactType[i]] = false;
 					}
 				}
 			}
