@@ -187,46 +187,48 @@
             break;
 
           case "FactType":
-            if (!this.IsPrimitive(termOrFactType[1])) {
+            var actualFactType = this.UnmappedFactType(termOrFactType.slice(1));
+            actualFactType = [ "FactType" ].concat(actualFactType);
+            if (!this.IsPrimitive(actualFactType[1])) {
                 if (!attrsFound.hasOwnProperty("DatabaseIDField")) {
                     attrs.splice(1, 0, [ "DatabaseIDField", "id" ]);
                     this.SetHelped();
                 }
                 if (!attrsFound.hasOwnProperty("DatabaseTableName")) {
-                    for (var tableName = termOrFactType[1][1].replace(new RegExp(" ", "g"), "_"), i = 2; i < termOrFactType.length; i++) tableName += "-" + termOrFactType[i][1].replace(new RegExp(" ", "g"), "_");
+                    for (var tableName = actualFactType[1][1].replace(new RegExp(" ", "g"), "_"), i = 2; i < actualFactType.length; i++) tableName += "-" + actualFactType[i][1].replace(new RegExp(" ", "g"), "_");
                     attrs.splice(1, 0, [ "DatabaseTableName", tableName ]);
                     this.SetHelped();
                 }
-                if (this.uniqueKeys.hasOwnProperty(termOrFactType)) if (attrsFound.hasOwnProperty("Unique")) {
-                    if (attrsFound.Unique != this.uniqueKeys[termOrFactType]) {
-                        console.error(attrsFound.Unique, this.uniqueKeys[termOrFactType]);
+                if (this.uniqueKeys.hasOwnProperty(actualFactType)) if (attrsFound.hasOwnProperty("Unique")) {
+                    if (attrsFound.Unique != this.uniqueKeys[actualFactType]) {
+                        console.error(attrsFound.Unique, this.uniqueKeys[actualFactType]);
                         ___MISMATCHED_UNIQUE_KEY___.die();
                     }
                 } else {
-                    attrs.splice(1, 0, [ "Unique", this.uniqueKeys[termOrFactType] ]);
+                    attrs.splice(1, 0, [ "Unique", this.uniqueKeys[actualFactType] ]);
                     this.SetHelped();
                 }
-                if (this.foreignKeys.hasOwnProperty(termOrFactType)) {
+                if (this.foreignKeys.hasOwnProperty(actualFactType)) {
                     if (!attrsFound.hasOwnProperty("DatabaseAttribute")) {
                         attrs.splice(1, 0, [ "DatabaseAttribute", !1 ]);
                         this.SetHelped();
                     }
                     if (attrsFound.hasOwnProperty("ForeignKey")) {
-                        if (attrsFound.ForeignKey != this.foreignKeys[termOrFactType]) {
-                            console.error(attrsFound.ForeignKey, this.foreignKeys[termOrFactType]);
+                        if (attrsFound.ForeignKey != this.foreignKeys[actualFactType]) {
+                            console.error(attrsFound.ForeignKey, this.foreignKeys[actualFactType]);
                             ___MISMATCHED_FOREIGN_KEY___.die();
                         }
                     } else {
-                        attrs.splice(1, 0, [ "ForeignKey", this.foreignKeys[termOrFactType] ]);
+                        attrs.splice(1, 0, [ "ForeignKey", this.foreignKeys[actualFactType] ]);
                         this.SetHelped();
                     }
                 }
-                if (3 == termOrFactType.length) {
-                    this.primitives.hasOwnProperty(termOrFactType[1]) && this.primitives[termOrFactType[1]] === !1 || this.SetHelped();
-                    this.primitives[termOrFactType[1]] = !1;
-                } else if (termOrFactType.length > 4) for (var i = 1; i < termOrFactType.length; i += 2) {
-                    this.attributes.hasOwnProperty(termOrFactType[i]) && this.attributes[termOrFactType[i]] === !1 || this.SetHelped();
-                    this.attributes[termOrFactType[i]] = !1;
+                if (3 == actualFactType.length) {
+                    this.primitives.hasOwnProperty(actualFactType[1]) && this.primitives[actualFactType[1]] === !1 || this.SetHelped();
+                    this.primitives[actualFactType[1]] = !1;
+                } else if (actualFactType.length > 4) for (var i = 1; i < actualFactType.length; i += 2) {
+                    this.attributes.hasOwnProperty(actualFactType[i]) && this.attributes[actualFactType[i]] === !1 || this.SetHelped();
+                    this.attributes[actualFactType[i]] = !1;
                 }
             }
         }
