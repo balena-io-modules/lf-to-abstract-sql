@@ -14,6 +14,6 @@
   "dependencies": {
     "ometa-js": "~1.3.0",
     "lodash": "~2.4.1",
-    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.11"
+    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.14"
   }
 }
