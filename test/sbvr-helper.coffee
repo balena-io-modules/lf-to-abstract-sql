@@ -41,7 +41,10 @@ exports.TableSpace = ->
 						uniqueIndex =
 							type: 'UNIQUE'
 							fields: []
-						for factTypePart in lf[1...-1]
+						factType = lf[1...-1]
+						if factType.length is 2
+							booleanAttribute = true
+						for factTypePart in factType
 							fieldName = factTypePart[1]
 							referenceTableName = generateName(factTypePart[1])
 							tableName.push(referenceTableName)
@@ -82,6 +85,10 @@ exports.TableSpace = ->
 				if referenceScheme?
 					tableDefinition.referenceScheme = referenceScheme
 
+				# If we're a boolean attribute then we override the definition.
+				if booleanAttribute
+					tableDefinition = 'BooleanAttribute'
+
 				@se = getLineType(lf) + ': ' + toSE(lf)
 				@property = 'tables.' + tableName
 				@matches = tableDefinition
@@ -112,5 +119,20 @@ exports.TableSpace = ->
 					when 'ReferenceScheme'
 						term = lf[1]
 						@matches.referenceScheme = term[1]
+					when 'Necessity'
+						nest = (lf, sequence) ->
+							if lf[0] is sequence[0]
+								if sequence.length is 1
+									return lf
+								for part in lf[1...]
+									result = nest(part, sequence[1...])
+									if result
+										return result
+							return false
+						card = nest(lf, ['Necessity', 'Rule', 'NecessityFormulation', 'UniversalQuantification', 'ExactQuantification', 'Cardinality', 'Number'])
+						if card and card[1] is 1
+							@matches = 'Attribute'
+					else
+						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return @
 	}
