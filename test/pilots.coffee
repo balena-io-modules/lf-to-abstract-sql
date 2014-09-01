@@ -48,3 +48,5 @@ describe 'pilots', ->
 	test Table factType pilot, verb('is experienced')
 	# Term: veteran pilot
 	test Table veteranPilot
+	# 	Definition: pilot that can fly at least 2 planes
+	test attribute definition [pilot, verb('can fly'), ['at least', 2], plane]

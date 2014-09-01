@@ -97,7 +97,11 @@ exports.TableSpace = ->
 				tables[tableName] = @
 
 			attribute: (lf) ->
-				@se = getLineType(lf) + ': ' + toSE(lf)
+				if _.isArray(lf)
+					se = toSE(lf)
+				else if _.isObject(lf)
+					{lf, se} = lf
+				@se = getLineType(lf) + ': ' + se
 				@matches = _.cloneDeep(@matches)
 				switch lf[0]
 					when 'ConceptType'
@@ -132,6 +136,9 @@ exports.TableSpace = ->
 						card = nest(lf, ['Necessity', 'Rule', 'NecessityFormulation', 'UniversalQuantification', 'ExactQuantification', 'Cardinality', 'Number'])
 						if card and card[1] is 1
 							@matches = 'Attribute'
+					when 'Definition'
+						# Nulling the property just checks that there are no changes to the previous test result.
+						@property = null
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return @
