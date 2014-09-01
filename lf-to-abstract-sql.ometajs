@@ -662,6 +662,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references) {
+	if(references === undefined) {
+		references = null;
+	}
+	if(index === undefined) {
+		index = null;
+	}
 	var fieldID = this.GetTableFieldID(table, fieldName);
 	if(fieldID === false) {
 		table.fields.push({
