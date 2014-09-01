@@ -66,8 +66,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				)*
 			],
 	DefaultAttr :termOrFactType =
-		:anything
-		{console.log('Default', termOrFactType, anything)},
+		:anything,
+		// {console.log('Default', termOrFactType, anything)},
 	AttrConceptType :termOrFactType =
 		[	'Term'
 			:conceptType
