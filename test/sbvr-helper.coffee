@@ -220,9 +220,10 @@ exports.TableSpace = ->
 							tableName.push(generateName(termName))
 							tableAlias.push(binding.alias)
 						when 'Verb'
-							verb = part[1]
-							tableName.push(generateName(verb))
-							tableAlias.push(verb)
+							verb = part
+							verbName = part[1]
+							tableName.push(generateName(verbName))
+							tableAlias.push(verbName)
 				tableName = tableName.join('-')
 				tableAlias = tableAlias.join('-')
 				
@@ -230,8 +231,8 @@ exports.TableSpace = ->
 					return [
 						[	'Where'
 							[	'Equals'
-								['ReferencedField', bindings[0].alias, verb]
-								['Boolean', true]
+								['ReferencedField', bindings[0].alias, verb[1]]
+								['Boolean', !verb[2]]
 							]
 						]
 					]
@@ -252,18 +253,25 @@ exports.TableSpace = ->
 					]
 				]
 
+			atLeastN = (lf, minCard) ->
+				if minCard is 0
+					return ['Boolean', true]
+				query = variable(lf)
+				query = queryConcat(query, atomicFormulation(lf))
+				select = nest(query, ['Select'])
+				if select[1].length is 0
+					select[1].push(['Count', '*'])
+					return ['GreaterThanOrEqual', query, ['Number', minCard]]
+
 			quant = (lf) ->
 				switch lf[0]
+					when 'AtMostNQuantification'
+						maxCard = nest(lf, ['MaximumCardinality', 'Number'])[1]
+						minCard = maxCard + 1
+						return ['Not', atLeastN(lf, minCard)]
 					when 'AtLeastNQuantification'
 						minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
-						if minCard is 0
-							return ['Boolean', true]
-						query = variable(lf)
-						query = queryConcat(query, atomicFormulation(lf))
-						select = nest(query, ['Select'])
-						if select[1].length is 0
-							select[1].push(['Count', '*'])
-							return ['GreaterThanOrEqual', query, ['Number', minCard]]
+						return atLeastN(lf, minCard)
 					when 'ExistentialQuantification'
 						query = variable(lf)
 						query = queryConcat(query, atomicFormulation(lf))
@@ -278,13 +286,11 @@ exports.TableSpace = ->
 					when 'UniversalQuantification'
 						query = variable(lf)
 						whereBody = quant(lf[2])
-						query = queryConcat(query, [
-							[	'Where'
-								[	'Not'
-									whereBody
-								]
-							]
-						])
+						if whereBody[0] is 'Not'
+							whereBody = whereBody[1]
+						else
+							whereBody = ['Not', whereBody]
+						query = queryConcat(query, [['Where', whereBody]])
 						['Not', ['Exists', query]]
 					else
 						[lf[0], mapParts(lf[1...])...]
