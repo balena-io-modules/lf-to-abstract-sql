@@ -150,13 +150,6 @@ exports.TableSpace = ->
 
 		rule: do ->
 
-			mapParts = (parts) ->
-				parts.map (part) ->
-					if _.isArray(part)
-						transform(part)
-					else
-						part
-
 			queryConcat = (query, extra) ->
 				whereClause = nest(query, ['Where'])
 				extraWhereClause = nest(extra, ['Where'])
@@ -192,8 +185,13 @@ exports.TableSpace = ->
 						]
 					]
 				]
-				if nest(lf, ['AtomicFormulation'])
-					query = queryConcat(query, atomicFormulation(lf))
+				if lf.length is 4
+					extra =
+						if nest(lf, ['AtomicFormulation'])
+							atomicFormulation(lf)
+						else
+							[['Where', quant(lf[3])]]
+					query = queryConcat(query, extra)
 				return query
 
 			roleBindings = checkType 'RoleBinding', true, (lf) ->
@@ -276,30 +274,37 @@ exports.TableSpace = ->
 						query = variable(lf)
 						query = queryConcat(query, atomicFormulation(lf))
 						return ['Exists', query]
+					when 'UniversalQuantification'
+						query = variable(lf)
+						if nest(lf, ['AtomicFormulation'])
+							extra = atomicFormulation(lf)
+						else
+							extra = [['Where', quant(lf[2])]]
+
+						whereClause = nest(extra, ['Where'])
+						if whereClause[1][0] is 'Not'
+							whereClause[1] = whereClause[1][1]
+						else
+							whereClause[1] = ['Not', whereClause[1]]
+
+						query = queryConcat(query, extra)
+						['Not', ['Exists', query]]
 					else
 						throw new Error('Unknown quant: ' + lf[0])
 
-			transform = (lf) ->
+			formulation = (lf) ->
 				switch lf[0]
 					when 'NecessityFormulation'
-						['Body', mapParts(lf[1...])...]
-					when 'UniversalQuantification'
-						query = variable(lf)
-						whereBody = quant(lf[2])
-						if whereBody[0] is 'Not'
-							whereBody = whereBody[1]
-						else
-							whereBody = ['Not', whereBody]
-						query = queryConcat(query, [['Where', whereBody]])
-						['Not', ['Exists', query]]
+						['Body', quant(lf[1])]
 					else
-						[lf[0], mapParts(lf[1...])...]
+						throw new Error('Unknown formulation: ' + lf[0])
 
 			return (args...) ->
 				lf = rule(args...)
 				lf = LFOptimiser.match(lf, 'Process')
+				lf[1] = formulation(lf[1])
 				return {
 					se: getLineType(lf) + ': ' + toSE(lf)
-					ruleSQL: transform(lf)
+					ruleSQL: lf
 				}
 	}

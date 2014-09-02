@@ -56,3 +56,5 @@ describe 'pilots', ->
 	test rule 'Necessity', 'each', [pilot, verb('is experienced')], verb('can fly'), ['at least', 2], plane
 	# Rule:       It is necessary that each pilot that is not experienced, can fly at most 2 planes
 	test rule 'Necessity', 'each', [pilot, verb('is experienced', true)], verb('can fly'), ['at most', 2], plane
+	# Rule:       It is necessary that each pilot that can fly at most 2 planes, is not experienced
+	test rule 'Necessity', 'each', [pilot, verb('can fly'), ['at most', 2], plane], verb('is experienced', true)
