@@ -338,7 +338,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 						:identifierName
 						:vocab
 						anything?:mapping
-						-> (identifierName + '.' + bindNumbers.pop())
+						-> (identifierName + '.' + bindNumbers.shift())
 					):partAlias
 				]
 				-> partAlias
@@ -633,7 +633,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				:ruleText
 			]
 			(	?this.nonPrimitiveExists
-				{this.rules.push(['Rule', ['StructuredEnglish', ruleText], ['Body', ruleBody]])}
+				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
 			|	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
 			)
 		],

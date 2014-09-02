@@ -1,12 +1,26 @@
 _ = require 'lodash'
+LFOptimiser = require('sbvr-parser/lf-optimiser').LFOptimiser
 
 # Inherit from the sbvr-parser's sbvr-helper module.
 module.exports = exports = require('sbvr-parser/test/sbvr-helper.coffee')
-{toSE} = exports
+{toSE, rule} = exports
 
 # Gets the type of the line (eg Term/Rule) and adds spaces if necessary (eg "SynonymousForm" to "Synonymous Form")
 exports.getLineType = getLineType = (lf) -> lf[0].replace(/([A-Z])/g, ' $1').trim()
 
+nest = (lf, sequence, allMatches = false) ->
+	if sequence.length is 0
+		return lf
+	results = []
+	for part in lf[1...] when part[0] is sequence[0]
+		result = nest(part, sequence[1...])
+		if result
+			if !allMatches
+				return result
+			results.push(result)
+	if results.length > 0
+		return results
+	return false
 generateName = (namePart) ->
 	namePart.replace(/\ /g, '_')
 exports.TableSpace = ->
@@ -124,16 +138,7 @@ exports.TableSpace = ->
 						term = lf[1]
 						@matches.referenceScheme = term[1]
 					when 'Necessity'
-						nest = (lf, sequence) ->
-							if lf[0] is sequence[0]
-								if sequence.length is 1
-									return lf
-								for part in lf[1...]
-									result = nest(part, sequence[1...])
-									if result
-										return result
-							return false
-						card = nest(lf, ['Necessity', 'Rule', 'NecessityFormulation', 'UniversalQuantification', 'ExactQuantification', 'Cardinality', 'Number'])
+						card = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification', 'ExactQuantification', 'Cardinality', 'Number'])
 						if card and card[1] is 1
 							@matches = 'Attribute'
 					when 'Definition'
@@ -142,4 +147,123 @@ exports.TableSpace = ->
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return @
+
+		rule: do ->
+
+			mapParts = (parts) ->
+				parts.map (part) ->
+					if _.isArray(part)
+						transform(part)
+					else
+						part
+
+			checkType = (type, allMatches, fn) ->
+				if !fn?
+					fn = allMatches
+					allMatches = null
+				(lf) ->
+					subLF = nest(lf, [type], allMatches)
+					if !subLF
+						console.error(lf)
+						throw new Error('No entry for: ' + type)
+					fn(subLF)
+
+			variable = (lf) ->
+				varNum = nest(lf, ['Number'])[1]
+				termName = nest(lf, ['Term'])[1]
+				[	'SelectQuery'
+					['Select', []]
+					[	'From'
+						[	termName
+							termName + '.' + varNum
+						]
+					]
+				]
+
+			roleBindings = checkType 'RoleBinding', true, (lf) ->
+				lf.map (binding) ->
+					termName = nest(binding, ['Term'])[1]
+					return {
+						termName: termName
+						alias: termName + '.' + binding[2]
+					}
+
+			atomicFormulation = checkType 'AtomicFormulation', (lf) ->
+				factType = nest(lf, ['FactType'])
+				factType = factType[1...]
+				bindings = roleBindings(lf, ['RoleBinding'], true)
+				tableName = []
+				tableAlias = []
+				for part in factType
+					switch part[0]
+						when 'Term'
+							termName = part[1]
+							binding = _.find(bindings, {termName})
+							tableName.push(generateName(termName))
+							tableAlias.push(binding.alias)
+						when 'Verb'
+							verb = part[1]
+							tableName.push(generateName(verb))
+							tableAlias.push(verb)
+				tableName = tableName.join('-')
+				tableAlias = tableAlias.join('-')
+				[	[	'From'
+						[	tableName
+							tableAlias
+						]
+					]
+					[	'Where'
+						['And'].concat(
+							bindings.map (binding, i) ->
+								[	'Equals'
+									['ReferencedField', tableAlias, factType[i*2][1]]
+									['ReferencedField', binding.alias, 'id']
+								]
+						)
+					]
+				]
+
+			quant = (lf) ->
+				switch lf[0]
+					when 'AtLeastNQuantification'
+						minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
+						if minCard is 0
+							return ['Boolean', true]
+						query = variable(lf[2])
+						select = nest(query, ['Select'])
+						if select[1].length is 0
+							select[1].push(['Count', '*'])
+							return ['GreaterThanOrEqual', query, ['Number', minCard]]
+					when 'ExistentialQuantification'
+						query = variable(lf[1])
+						query = query.concat(atomicFormulation(lf))
+						return ['Exists', query]
+					else
+						throw new Error('Unknown quant: ' + lf[0])
+
+			transform = (lf) ->
+				switch lf[0]
+					when 'NecessityFormulation'
+						['Body', mapParts(lf[1...])...]
+					when 'UniversalQuantification'
+						query = variable(lf[1])
+						whereBody = quant(lf[2])
+						query.push(
+							[	'Where'
+								[	'Not'
+									whereBody
+								]
+							]
+						)
+						['Not', ['Exists', query]]
+					else
+						[lf[0], mapParts(lf[1...])...]
+
+			return (args...) ->
+				lf = rule(args...)
+				lf = LFOptimiser.match(lf, 'Process')
+				return {
+					se: getLineType(lf) + ': ' + toSE(lf)
+					ruleSQL: transform(lf)
+				}
 	}

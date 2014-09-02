@@ -22,7 +22,7 @@ module.exports = (builtInVocab = false) ->
 		if _.isArray(input)
 			input = getLineType(input) + ': ' + toSE(input)
 		else if _.isObject(input)
-			{matches, property, se: input} = input
+			{matches, property, ruleSQL, se: input} = input
 
 		it input, ->
 			try
@@ -33,6 +33,9 @@ module.exports = (builtInVocab = false) ->
 				seSoFar += input + '\n'
 				if property
 					expect(result).to.have.deep.property(property).to.deep.equal(matches)
+				else if ruleSQL
+					lastRule = result.rules[result.rules.length-1]
+					expect(lastRule).to.deep.equal(ruleSQL)
 				else
 					expect(result).to.deep.equal(previousResult)
 				previousResult = result

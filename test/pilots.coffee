@@ -1,7 +1,7 @@
 typeVocab = require('fs').readFileSync(__dirname + '/Type.sbvr')
 test = require('./test')(typeVocab)
-{TableSpace, term, verb, factType, conceptType, referenceScheme, necessity, rule, definition, _or, _and, _nestedOr, _nestedAnd} = require('./sbvr-helper')
-{Table, attribute} = TableSpace()
+{TableSpace, term, verb, factType, conceptType, referenceScheme, necessity, definition, _or, _and, _nestedOr, _nestedAnd} = require('./sbvr-helper')
+{Table, attribute, rule} = TableSpace()
 
 shortTextType = term 'Short Text', 'Type'
 integerType = term 'Integer', 'Type'
@@ -50,3 +50,5 @@ describe 'pilots', ->
 	test Table veteranPilot
 	# 	Definition: pilot that can fly at least 2 planes
 	test attribute definition [pilot, verb('can fly'), ['at least', 2], plane]
+	# Rule:       It is necessary that each pilot can fly at least 1 plane
+	test rule 'Necessity', 'each', pilot, verb('can fly'), ['at least', 1], plane
