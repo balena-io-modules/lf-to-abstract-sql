@@ -12,7 +12,7 @@ nest = (lf, sequence, allMatches = false) ->
 	if sequence.length is 0
 		return lf
 	results = []
-	for part in lf[1...] when part[0] is sequence[0]
+	for part in lf when part[0] is sequence[0]
 		result = nest(part, sequence[1...])
 		if result
 			if !allMatches
@@ -157,6 +157,18 @@ exports.TableSpace = ->
 					else
 						part
 
+			queryConcat = (query, extra) ->
+				whereClause = nest(query, ['Where'])
+				extraWhereClause = nest(extra, ['Where'])
+				if whereClause and extraWhereClause
+					whereClause[1] = [
+						'And'
+						whereClause[1]
+						extraWhereClause[1]
+					]
+					extra = _.reject(extra, 0: 'Where')
+				return query.concat(extra)
+
 			checkType = (type, allMatches, fn) ->
 				if !fn?
 					fn = allMatches
@@ -168,10 +180,11 @@ exports.TableSpace = ->
 						throw new Error('No entry for: ' + type)
 					fn(subLF)
 
-			variable = (lf) ->
+			variable = checkType 'Variable', (lf) ->
 				varNum = nest(lf, ['Number'])[1]
 				termName = nest(lf, ['Term'])[1]
-				[	'SelectQuery'
+				query = [
+					'SelectQuery'
 					['Select', []]
 					[	'From'
 						[	termName
@@ -179,6 +192,9 @@ exports.TableSpace = ->
 						]
 					]
 				]
+				if nest(lf, ['AtomicFormulation'])
+					query = queryConcat(query, atomicFormulation(lf))
+				return query
 
 			roleBindings = checkType 'RoleBinding', true, (lf) ->
 				lf.map (binding) ->
@@ -192,6 +208,8 @@ exports.TableSpace = ->
 				factType = nest(lf, ['FactType'])
 				factType = factType[1...]
 				bindings = roleBindings(lf, ['RoleBinding'], true)
+
+				booleanAttribute = factType.length is 2
 				tableName = []
 				tableAlias = []
 				for part in factType
@@ -207,7 +225,18 @@ exports.TableSpace = ->
 							tableAlias.push(verb)
 				tableName = tableName.join('-')
 				tableAlias = tableAlias.join('-')
-				[	[	'From'
+				
+				if booleanAttribute
+					return [
+						[	'Where'
+							[	'Equals'
+								['ReferencedField', bindings[0].alias, verb]
+								['Boolean', true]
+							]
+						]
+					]
+				return [
+					[	'From'
 						[	tableName
 							tableAlias
 						]
@@ -229,14 +258,15 @@ exports.TableSpace = ->
 						minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
 						if minCard is 0
 							return ['Boolean', true]
-						query = variable(lf[2])
+						query = variable(lf)
+						query = queryConcat(query, atomicFormulation(lf))
 						select = nest(query, ['Select'])
 						if select[1].length is 0
 							select[1].push(['Count', '*'])
 							return ['GreaterThanOrEqual', query, ['Number', minCard]]
 					when 'ExistentialQuantification'
-						query = variable(lf[1])
-						query = query.concat(atomicFormulation(lf))
+						query = variable(lf)
+						query = queryConcat(query, atomicFormulation(lf))
 						return ['Exists', query]
 					else
 						throw new Error('Unknown quant: ' + lf[0])
@@ -246,15 +276,15 @@ exports.TableSpace = ->
 					when 'NecessityFormulation'
 						['Body', mapParts(lf[1...])...]
 					when 'UniversalQuantification'
-						query = variable(lf[1])
+						query = variable(lf)
 						whereBody = quant(lf[2])
-						query.push(
+						query = queryConcat(query, [
 							[	'Where'
 								[	'Not'
 									whereBody
 								]
 							]
-						)
+						])
 						['Not', ['Exists', query]]
 					else
 						[lf[0], mapParts(lf[1...])...]
