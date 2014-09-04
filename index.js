@@ -20,14 +20,12 @@
 	return {
 		LF2AbstractSQLPrep: LF2AbstractSQLPrep,
 		LF2AbstractSQL: LF2AbstractSQL,
-		translate: (function() {
-			return function(lf, types) {
-				lf = LF2AbstractSQLPrep.match(lf, 'Process');
-				var translator = LF2AbstractSQL.createInstance();
-				translator.addTypes(types);
-				return translator.match(lf, 'Process');
-			};
-		})(),
+		translate: function(lf, types) {
+			lf = LF2AbstractSQLPrep.match(lf, 'Process');
+			var translator = LF2AbstractSQL.createInstance();
+			translator.addTypes(types);
+			return translator.match(lf, 'Process');
+		},
 		createTranslator: function(types) {
 			var translator = LF2AbstractSQL.createInstance();
 			translator.addTypes(types);
