@@ -120,8 +120,7 @@
         },
         DefaultAttr: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, anything;
-            anything = this.anything();
-            return console.log("Default", termOrFactType, anything);
+            return anything = this.anything();
         },
         AttrConceptType: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptType, dataType, fieldID, identifierTable, primitive, term, vocab;
@@ -511,7 +510,7 @@
                             mapping = this._opt(function() {
                                 return this.anything();
                             });
-                            return identifierName + "." + bindNumbers.pop();
+                            return identifierName + "." + bindNumbers.shift();
                         });
                     });
                     return partAlias;
@@ -699,6 +698,28 @@
                 return where;
             });
         },
+        Disjunction: function() {
+            var $elf = this, _fromIdx = this.input.idx, first, rest;
+            this._form(function() {
+                this._applyWithArgs("exactly", "Disjunction");
+                first = this._apply("RulePart");
+                return rest = this._many1(function() {
+                    return this._apply("RulePart");
+                });
+            });
+            return [ "Or", first ].concat(rest);
+        },
+        Conjunction: function() {
+            var $elf = this, _fromIdx = this.input.idx, first, rest;
+            this._form(function() {
+                this._applyWithArgs("exactly", "Conjunction");
+                first = this._apply("RulePart");
+                return rest = this._many1(function() {
+                    return this._apply("RulePart");
+                });
+            });
+            return [ "And", first ].concat(rest);
+        },
         Exists: function() {
             var $elf = this, _fromIdx = this.input.idx, variable, where;
             this._form(function() {
@@ -722,31 +743,27 @@
             return [ "Not", whereBody ];
         },
         RulePart: function() {
-            var $elf = this, _fromIdx = this.input.idx, whereBody, x;
-            whereBody = this._many1(function() {
-                return this._or(function() {
-                    return this._apply("AtomicFormulation");
-                }, function() {
-                    return this._apply("AtLeast");
-                }, function() {
-                    return this._apply("Exactly");
-                }, function() {
-                    return this._apply("Exists");
-                }, function() {
-                    return this._apply("Negation");
-                }, function() {
-                    return this._apply("Range");
-                }, function() {
-                    x = this.anything();
-                    console.error("Hit unhandled operation:", x);
-                    return this._pred(!1);
-                });
-            });
+            var $elf = this, _fromIdx = this.input.idx, x;
             return this._or(function() {
-                this._pred(1 == whereBody.length);
-                return whereBody[0];
+                return this._apply("AtomicFormulation");
             }, function() {
-                return [ "And" ].concat(whereBody);
+                return this._apply("AtLeast");
+            }, function() {
+                return this._apply("Exactly");
+            }, function() {
+                return this._apply("Exists");
+            }, function() {
+                return this._apply("Negation");
+            }, function() {
+                return this._apply("Range");
+            }, function() {
+                return this._apply("Disjunction");
+            }, function() {
+                return this._apply("Conjunction");
+            }, function() {
+                x = this.anything();
+                console.error("Hit unhandled operation:", x);
+                return this._pred(!1);
             });
         },
         RuleBody: function() {
@@ -905,11 +922,9 @@
                     this._applyWithArgs("exactly", "StructuredEnglish");
                     return ruleText = this.anything();
                 });
-                return this._or(function() {
+                return this._opt(function() {
                     this._pred(this.nonPrimitiveExists);
-                    return this.rules.push([ "Rule", [ "StructuredEnglish", ruleText ], [ "Body", ruleBody ] ]);
-                }, function() {
-                    return console.warn("Ignoring rule with only primitives: ", ruleText, ruleBody);
+                    return this.rules.push([ "Rule", [ "Body", ruleBody ], [ "StructuredEnglish", ruleText ] ]);
                 });
             });
         },
@@ -970,6 +985,8 @@
         }
     });
     LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references) {
+        void 0 === references && (references = null);
+        void 0 === index && (index = null);
         var fieldID = this.GetTableFieldID(table, fieldName);
         fieldID === !1 && table.fields.push({
             dataType: dataType,
