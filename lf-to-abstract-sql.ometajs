@@ -493,6 +493,18 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			-> ['And', variable.whereBody, where]
 		|	-> where
 		),
+	Disjunction =
+		[	'Disjunction'
+			RulePart:first
+			RulePart+:rest
+		]
+		-> ['Or', first].concat(rest),
+	Conjunction =
+		[	'Conjunction'
+			RulePart:first
+			RulePart+:rest
+		]
+		-> ['And', first].concat(rest),
 	Exists =
 		[	'ExistentialQuantification'
 			Variable:variable
@@ -516,13 +528,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	Exists
 		|	Negation
 		|	Range
+		|	Disjunction
+		|	Conjunction
 		|	:x
 			{console.error('Hit unhandled operation:', x)}
 			?(false)
-		)+:whereBody
-		(	?(whereBody.length == 1)
-			-> whereBody[0]
-		|	-> ['And'].concat(whereBody)
 		),
 	
 	RuleBody =

@@ -8,8 +8,10 @@ module.exports = exports = require('sbvr-parser/test/sbvr-helper.coffee')
 nest = (lf, sequence, allMatches = false) ->
 	if sequence.length is 0
 		return lf
+	if lf[0] is sequence[0]
+		return nest(lf, sequence[1...], allMatches)
 	results = []
-	for part in lf when part[0] is sequence[0]
+	for part in lf when part? and part[0] is sequence[0]
 		result = nest(part, sequence[1...], allMatches)
 		if result
 			if !allMatches
@@ -168,6 +170,8 @@ exports.TableSpace = ->
 			queryConcat = (query, extra) ->
 				whereClause = nest(query, ['Where'])
 				extraWhereClause = nest(extra, ['Where'])
+				if extra is extraWhereClause
+					extra = [extra]
 				if whereClause and extraWhereClause
 					whereClause[1] = [
 						'And'
@@ -188,30 +192,45 @@ exports.TableSpace = ->
 						throw new Error('No entry for: ' + type)
 					fn(subLF)
 
+			junction = (fn) ->
+				junctionFn = (lf) ->
+					if lf[0] is 'Disjunction'
+						type = 'Or'
+					else if lf[0] is 'Conjunction'
+						type = 'And'
+					else
+						return fn(lf)
+
+					results =
+						for part in lf[1...]
+							result = junctionFn(part)
+							whereClause = nest(result, ['Where'])
+							if whereClause
+								whereClause[1]
+							else
+								result
+					return ['Where', [type, results...]]
+				return junctionFn
+
 			variable = checkType 'Variable', (lf) ->
-				termName = nest(lf, ['Term'])[1]
-				tableName = generateName(termName)
+				term = nest(lf, ['Term'])
+				termName = term[1]
 				varNum = nest(lf, ['Number'])[1]
 				query = [
 					'SelectQuery'
 					['Select', []]
 					[	'From'
-						[	tableName
+						[	generateName(termName)
 							termName + '.' + varNum
 						]
 					]
 				]
 				extra = []
 				if lf.length is 4
-					extra =
-						if nest(lf, ['AtomicFormulation'])
-							atomicFormulation(lf)
-						else
-							[['Where', quant(lf[3])]]
-				if tables[tableName].matches.primitive
+					extra = quant(lf[3])
+				if isPrimitive(term)
 					return extra
-				query = queryConcat(query, extra)
-				return query
+				return queryConcat(query, extra)
 
 			roleBindings = checkType 'RoleBinding', true, (lf) ->
 				lf.map (binding) ->
@@ -224,7 +243,7 @@ exports.TableSpace = ->
 						embeddedData: attributeBindings[alias] ? term[3]
 					}
 
-			atomicFormulation = checkType 'AtomicFormulation', (lf) ->
+			atomicFormulation = junction checkType 'AtomicFormulation', (lf) ->
 				factType = nest(lf, ['FactType'])
 				factType = factType[1...]
 				bindings = roleBindings(lf, ['RoleBinding'], true)
@@ -252,11 +271,10 @@ exports.TableSpace = ->
 				
 				if booleanAttribute
 					return [
-						[	'Where'
-							[	'Equals'
-								['ReferencedField', bindings[0].alias, verb[1]]
-								['Boolean', !verb[2]]
-							]
+						'Where'
+						[	'Equals'
+							['ReferencedField', bindings[0].alias, verb[1]]
+							['Boolean', !verb[2]]
 						]
 					]
 
@@ -275,6 +293,14 @@ exports.TableSpace = ->
 								bindings[0].embeddedData
 								bindings[1].embeddedData
 							]
+						when 'has'
+							attributeBindings[bindings[1].alias] = [
+								'CharacterLength'
+								bindings[0].embeddedData
+							]
+							return attributeBindings[bindings[1].alias]
+						else
+							throw new Error('Unknown primitive fact type: ' + factType[1][1])
 
 				if tables[tableName].matches is 'Attribute'
 					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, factType[2][1]]
@@ -297,61 +323,70 @@ exports.TableSpace = ->
 					]
 				]
 
-			atLeastN = (lf, minCard) ->
-				if minCard is 0
-					return ['Boolean', true]
+			compareQuery = (lf) ->
 				query = variable(lf)
 				query = queryConcat(query, atomicFormulation(lf))
 				select = nest(query, ['Select'])
 				if select[1].length is 0
 					select[1].push(['Count', '*'])
-					return ['GreaterThanOrEqual', query, ['Number', minCard]]
+				return query
 
-			quant = (lf) ->
-				switch lf[0]
-					when 'AtMostNQuantification'
-						maxCard = nest(lf, ['MaximumCardinality', 'Number'])[1]
-						minCard = maxCard + 1
-						return ['Not', atLeastN(lf, minCard)]
-					when 'AtLeastNQuantification'
-						minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
-						return atLeastN(lf, minCard)
-					when 'ExistentialQuantification'
-						extra = atomicFormulation(lf)
-						query = variable(lf)
-						if nest(extra, ['Where'])
+			atLeastN = (lf, minCard) ->
+				if minCard is 0
+					return ['Boolean', true]
+				return ['GreaterThanOrEqual', compareQuery(lf) , ['Number', minCard]]
+
+			quant = junction (lf) ->
+				if lf[0] is 'AtomicFormulation'
+					return atomicFormulation(lf)
+				whereBody = do ->
+					switch lf[0]
+						when 'AtMostNQuantification'
+							maxCard = nest(lf, ['MaximumCardinality', 'Number'])[1]
+							minCard = maxCard + 1
+							return ['Not', atLeastN(lf, minCard)]
+						when 'AtLeastNQuantification'
+							minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
+							return atLeastN(lf, minCard)
+						when 'ExactQuantification'
+							card = nest(lf, ['Cardinality', 'Number'])
+							return ['Equals', compareQuery(lf), card]
+						when 'ExistentialQuantification'
+							extra = quant(lf[2])
+							query = variable(lf)
+							if nest(extra, ['Where'])
+								query = queryConcat(query, extra)
+								return ['Exists', query]
+							extra = ['Exists', extra]
+							if query.length is 0
+								return extra
+							if query[0] is 'Where'
+								query = query[1]
+							return [
+								'And'
+								query
+								extra
+							]
+						when 'UniversalQuantification'
+							query = variable(lf)
+							extra = quant(lf[2])
+
+							whereClause = nest(extra, ['Where'])
+							if whereClause[1][0] is 'Not'
+								whereClause[1] = whereClause[1][1]
+							else
+								whereClause[1] = ['Not', whereClause[1]]
+
 							query = queryConcat(query, extra)
-							return ['Exists', query]
-						extra = ['Exists', extra]
-						if query.length is 0
-							return extra
-						return [
-							'And'
-							query
-							extra
-						]
-					when 'UniversalQuantification'
-						query = variable(lf)
-						if nest(lf, ['AtomicFormulation'])
-							extra = atomicFormulation(lf)
+							return ['Not', ['Exists', query]]
 						else
-							extra = [['Where', quant(lf[2])]]
-
-						whereClause = nest(extra, ['Where'])
-						if whereClause[1][0] is 'Not'
-							whereClause[1] = whereClause[1][1]
-						else
-							whereClause[1] = ['Not', whereClause[1]]
-
-						query = queryConcat(query, extra)
-						['Not', ['Exists', query]]
-					else
-						throw new Error('Unknown quant: ' + lf[0])
+							throw new Error('Unknown quant: ' + lf[0])
+				return ['Where', whereBody]
 
 			formulation = (lf) ->
 				switch lf[0]
 					when 'NecessityFormulation'
-						['Body', quant(lf[1])]
+						['Body', quant(lf[1])[1]]
 					else
 						throw new Error('Unknown formulation: ' + lf[0])
 
