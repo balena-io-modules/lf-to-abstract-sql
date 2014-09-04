@@ -4,6 +4,12 @@ sbvrTypes = require 'sbvr-types'
 expect = require('chai').expect
 {toSE, getLineType} = require './sbvr-helper'
 
+# This allows us to ignore the "whereBody" property at every level of the result
+deleteWhereBodies = (value) ->
+	delete value.whereBody
+	if _.isArray(value)
+		_.forEach(value, deleteWhereBodies)
+
 module.exports = (builtInVocab = false) ->
 	SBVRParser = require('sbvr-parser').SBVRParser.createInstance()
 	SBVRParser.enableReusingMemoizations(SBVRParser._sideEffectingRules)
@@ -36,6 +42,7 @@ module.exports = (builtInVocab = false) ->
 					expect(result).to.have.deep.property(property).to.deep.equal(matches)
 				else if ruleSQL
 					lastRule = result.rules[result.rules.length-1]
+					deleteWhereBodies(lastRule)
 					expect(lastRule).to.deep.equal(ruleSQL)
 				else
 					expect(result).to.deep.equal(previousResult)
