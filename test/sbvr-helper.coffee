@@ -3,10 +3,7 @@ LFOptimiser = require('sbvr-parser/lf-optimiser').LFOptimiser
 
 # Inherit from the sbvr-parser's sbvr-helper module.
 module.exports = exports = require('sbvr-parser/test/sbvr-helper.coffee')
-{toSE, rule} = exports
-
-# Gets the type of the line (eg Term/Rule) and adds spaces if necessary (eg "SynonymousForm" to "Synonymous Form")
-exports.getLineType = getLineType = (lf) -> lf[0].replace(/([A-Z])/g, ' $1').trim()
+{toSE, rule, getLineType} = exports
 
 nest = (lf, sequence, allMatches = false) ->
 	if sequence.length is 0
