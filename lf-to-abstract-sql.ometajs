@@ -634,8 +634,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			]
 			(	?this.nonPrimitiveExists
 				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
-			|	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
-			)
+			// |	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
+			)?
 		],
 	
 	Process =
