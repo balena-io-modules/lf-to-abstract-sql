@@ -66,8 +66,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				)*
 			],
 	DefaultAttr :termOrFactType =
-		:anything
-		{console.log('Default', termOrFactType, anything)},
+		:anything,
+		// {console.log('Default', termOrFactType, anything)},
 	AttrConceptType :termOrFactType =
 		[	'Term'
 			:conceptType
@@ -338,7 +338,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 						:identifierName
 						:vocab
 						anything?:mapping
-						-> (identifierName + '.' + bindNumbers.pop())
+						-> (identifierName + '.' + bindNumbers.shift())
 					):partAlias
 				]
 				-> partAlias
@@ -633,9 +633,9 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				:ruleText
 			]
 			(	?this.nonPrimitiveExists
-				{this.rules.push(['Rule', ['StructuredEnglish', ruleText], ['Body', ruleBody]])}
-			|	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
-			)
+				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
+			// |	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
+			)?
 		],
 	
 	Process =
@@ -662,6 +662,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references) {
+	if(references === undefined) {
+		references = null;
+	}
+	if(index === undefined) {
+		index = null;
+	}
 	var fieldID = this.GetTableFieldID(table, fieldName);
 	if(fieldID === false) {
 		table.fields.push({
