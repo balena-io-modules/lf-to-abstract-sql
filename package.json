@@ -19,6 +19,7 @@
     "chai": "~1.8.1",
     "coffee-script": "~1.7.1",
     "mocha": "~1.21.3",
-    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.14"
+    "sbvr-parser": "git+ssh://git@bitbucket.org:rulemotion/sbvr-parser.git#v0.0.14",
+    "sbvr-types": "git+ssh://git@bitbucket.org:rulemotion/sbvr-types.git#v0.0.1"
   }
 }
