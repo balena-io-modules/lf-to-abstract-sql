@@ -163,6 +163,7 @@ exports.TableSpace = ->
 				return @
 
 		rule: do ->
+			attributeBindings = {}
 
 			queryConcat = (query, extra) ->
 				whereClause = nest(query, ['Where'])
@@ -190,8 +191,6 @@ exports.TableSpace = ->
 			variable = checkType 'Variable', (lf) ->
 				termName = nest(lf, ['Term'])[1]
 				tableName = generateName(termName)
-				if tables[tableName].matches.primitive
-					return []
 				varNum = nest(lf, ['Number'])[1]
 				query = [
 					'SelectQuery'
@@ -202,21 +201,27 @@ exports.TableSpace = ->
 						]
 					]
 				]
+				extra = []
 				if lf.length is 4
 					extra =
 						if nest(lf, ['AtomicFormulation'])
 							atomicFormulation(lf)
 						else
 							[['Where', quant(lf[3])]]
-					query = queryConcat(query, extra)
+				if tables[tableName].matches.primitive
+					return extra
+				query = queryConcat(query, extra)
 				return query
 
 			roleBindings = checkType 'RoleBinding', true, (lf) ->
 				lf.map (binding) ->
-					termName = nest(binding, ['Term'])[1]
+					term = nest(binding, ['Term'])
+					termName = term[1]
+					alias = termName + '.' + binding[2]
 					return {
 						termName: termName
-						alias: termName + '.' + binding[2]
+						alias: alias
+						embeddedData: attributeBindings[alias] ? term[3]
 					}
 
 			atomicFormulation = checkType 'AtomicFormulation', (lf) ->
@@ -225,6 +230,7 @@ exports.TableSpace = ->
 				bindings = roleBindings(lf, ['RoleBinding'], true)
 
 				booleanAttribute = factType.length is 2
+				primitiveFactType = true
 				tableName = []
 				tableAlias = []
 				for part in factType
@@ -234,6 +240,8 @@ exports.TableSpace = ->
 							binding = _.find(bindings, {termName})
 							tableName.push(generateName(termName))
 							tableAlias.push(binding.alias)
+							if !isPrimitive(part)
+								primitiveFactType = false
 						when 'Verb'
 							verb = part
 							verbName = part[1]
@@ -252,8 +260,25 @@ exports.TableSpace = ->
 						]
 					]
 
+				if primitiveFactType
+					switch factType[1][1]
+						when 'is greater than'
+							# Greater than gets reversed into a less than
+							return [
+								'LessThan'
+								bindings[1].embeddedData
+								bindings[0].embeddedData
+							]
+						when 'is less than'
+							return [
+								'LessThan'
+								bindings[0].embeddedData
+								bindings[1].embeddedData
+							]
+
 				if tables[tableName].matches is 'Attribute'
-					return ['ReferencedField', bindings[0].alias, factType[2][1]]
+					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, factType[2][1]]
+					return attributeBindings[binding.alias]
 
 				return [
 					[	'From'
@@ -292,9 +317,19 @@ exports.TableSpace = ->
 						minCard = nest(lf, ['MinimumCardinality', 'Number'])[1]
 						return atLeastN(lf, minCard)
 					when 'ExistentialQuantification'
+						extra = atomicFormulation(lf)
 						query = variable(lf)
-						query = queryConcat(query, atomicFormulation(lf))
-						return ['Exists', query]
+						if nest(extra, ['Where'])
+							query = queryConcat(query, extra)
+							return ['Exists', query]
+						extra = ['Exists', extra]
+						if query.length is 0
+							return extra
+						return [
+							'And'
+							query
+							extra
+						]
 					when 'UniversalQuantification'
 						query = variable(lf)
 						if nest(lf, ['AtomicFormulation'])
@@ -321,6 +356,7 @@ exports.TableSpace = ->
 						throw new Error('Unknown formulation: ' + lf[0])
 
 			return (args...) ->
+				attributeBindings = {}
 				lf = rule(args...)
 				lf = LFOptimiser.match(lf, 'Process')
 				lf[1] = formulation(lf[1])

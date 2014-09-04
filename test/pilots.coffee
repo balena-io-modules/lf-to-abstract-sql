@@ -65,3 +65,6 @@ describe 'pilots', ->
 	test rule 'Necessity', 'each', [plane, ['at least', 3], [pilot, verb('is experienced')], verb('can fly')], verb('has'), 'a', name
 	# Rule:       It is necessary that each plane that at least 3 pilots that a name is of can fly, has a name
 	test rule 'Necessity', 'each', [plane, ['at least', 3], [pilot, verb('is experienced')], verb('can fly')], verb('has'), 'a', name
+
+	# Rule:       It is necessary that each pilot has a years of experience that is greater than 0
+	test rule 'Necessity', 'each', pilot, verb('has'), 'a', [yearsOfExperience, verb('is greater than'), 0]
