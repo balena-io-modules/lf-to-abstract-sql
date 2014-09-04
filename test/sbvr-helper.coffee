@@ -10,7 +10,7 @@ nest = (lf, sequence, allMatches = false) ->
 		return lf
 	results = []
 	for part in lf when part[0] is sequence[0]
-		result = nest(part, sequence[1...])
+		result = nest(part, sequence[1...], allMatches)
 		if result
 			if !allMatches
 				return result
@@ -59,6 +59,9 @@ exports.TableSpace = ->
 							fieldName = factTypePart[1]
 							referenceTableName = generateName(factTypePart[1])
 							tableName.push(referenceTableName)
+							if tables[referenceTableName]?
+								# Update to the table's true name, for instance in the case of term form.
+								referenceTableName = tables[referenceTableName].tableName
 							if factTypePart[0] is 'Term'
 								uniqueIndex.fields.push(fieldName)
 								primitive = isPrimitive(factTypePart)
@@ -135,12 +138,26 @@ exports.TableSpace = ->
 						term = lf[1]
 						@matches.referenceScheme = term[1]
 					when 'Necessity'
-						card = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification', 'ExactQuantification', 'Cardinality', 'Number'])
+						lf = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification'])
+						quant = nest(lf, ['ExactQuantification'])
+						if quant
+							card = nest(quant, ['Cardinality', 'Number'])
+						else
+							quant = nest(lf, ['AtMostNQuantification'])
+							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
-							@matches = 'Attribute'
+							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
+							if _.any(bindings, (binding) -> tables[generateName(binding[1][1])].matches.primitive)
+								@matches = 'Attribute'
+							else
+								@matches = 'ForeignKey'
 					when 'Definition'
 						# Nulling the property just checks that there are no changes to the previous test result.
 						@property = null
+					when 'TermForm'
+						tableName = generateName(lf[1][1])
+						tables[tableName] = @
+						@property = 'tables.' + tableName
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return @
