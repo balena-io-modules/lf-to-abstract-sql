@@ -171,13 +171,16 @@ exports.TableSpace = ->
 					fn(subLF)
 
 			variable = checkType 'Variable', (lf) ->
-				varNum = nest(lf, ['Number'])[1]
 				termName = nest(lf, ['Term'])[1]
+				tableName = generateName(termName)
+				if tables[tableName].matches.primitive
+					return []
+				varNum = nest(lf, ['Number'])[1]
 				query = [
 					'SelectQuery'
 					['Select', []]
 					[	'From'
-						[	termName
+						[	tableName
 							termName + '.' + varNum
 						]
 					]
@@ -231,6 +234,10 @@ exports.TableSpace = ->
 							]
 						]
 					]
+
+				if tables[tableName].matches is 'Attribute'
+					return ['ReferencedField', bindings[0].alias, factType[2][1]]
+
 				return [
 					[	'From'
 						[	tableName

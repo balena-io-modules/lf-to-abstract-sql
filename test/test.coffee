@@ -1,14 +1,15 @@
-_ = require('lodash')
+_ = require 'lodash'
+sbvrTypes = require 'sbvr-types'
 
 expect = require('chai').expect
-{toSE, getLineType} = require('./sbvr-helper')
+{toSE, getLineType} = require './sbvr-helper'
 
 module.exports = (builtInVocab = false) ->
 	SBVRParser = require('sbvr-parser').SBVRParser.createInstance()
 	SBVRParser.enableReusingMemoizations(SBVRParser._sideEffectingRules)
 
 	LF2AbstractSQL = require '../index'
-	LF2AbstractSQLTranslator = LF2AbstractSQL.createTranslator()
+	LF2AbstractSQLTranslator = LF2AbstractSQL.createTranslator(sbvrTypes)
 
 	if builtInVocab
 		SBVRParser.AddBuiltInVocab(builtInVocab)
