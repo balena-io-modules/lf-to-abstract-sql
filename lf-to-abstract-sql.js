@@ -230,9 +230,13 @@
                 this._pred(fieldID !== !1);
                 return baseTable.fields.splice(fieldID, 1);
             });
-            this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, null, {
+            fieldID = this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, null, {
                 tableName: fkTable.name,
                 fieldName: fkTable.idField
+            });
+            this._opt(function() {
+                this._pred(fieldID);
+                return baseTable.fields[fieldID].required = required;
             });
             return this.tables[this.GetResourceName(factType)] = "ForeignKey";
         },
