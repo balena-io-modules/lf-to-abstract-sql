@@ -153,7 +153,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			?(fieldID !== false)
 			{baseTable.fields.splice(fieldID, 1)}
 		)?
-		AddTableField(baseTable, fkName, 'ForeignKey', required, null, {tableName: fkTable.name, fieldName: fkTable.idField})
+		AddTableField(baseTable, fkName, 'ForeignKey', required, null, {tableName: fkTable.name, fieldName: fkTable.idField}):fieldID
+		(	?fieldID
+			// Field already exists, so we manually set the required attr
+			{baseTable.fields[fieldID].required = required}
+		)?
 		{this.tables[this.GetResourceName(factType)] = 'ForeignKey'},
 	AttrUnique :factType =
 		// TODO: This needs to have the dependency of coming after ForeignKey/Attribute attrs removed.
