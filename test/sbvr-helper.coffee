@@ -1,8 +1,8 @@
 _ = require 'lodash'
-LFOptimiser = require('sbvr-parser/lf-optimiser').LFOptimiser
+LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser
 
 # Inherit from the sbvr-parser's sbvr-helper module.
-module.exports = exports = require('sbvr-parser/test/sbvr-helper.coffee')
+module.exports = exports = require('@resin/sbvr-parser/test/sbvr-helper.coffee')
 {toSE, rule, getLineType} = exports
 
 nest = (lf, sequence, allMatches = false) ->

@@ -1,5 +1,5 @@
 var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
-	LFOptimiser = require('sbvr-parser/lf-optimiser').LFOptimiser,
+	LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser,
 	_ = require('lodash');
 export ometa LF2AbstractSQLPrep <: LFOptimiser {
 	AttrConceptType :termName =

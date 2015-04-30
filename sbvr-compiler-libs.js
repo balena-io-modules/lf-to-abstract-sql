@@ -1,9 +1,9 @@
 !function(root, factory) {
-    "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "sbvr-parser/sbvr-libs", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
+    "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "@resin/sbvr-parser/sbvr-libs", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
         return root[moduleName];
     }, root, root.OMeta);
 }(this, function(require, exports, OMeta) {
-    var SBVRLibs = require("sbvr-parser/sbvr-libs").SBVRLibs, _ = require("lodash"), SBVRCompilerLibs = exports.SBVRCompilerLibs = SBVRLibs._extend({});
+    var SBVRLibs = require("@resin/sbvr-parser/sbvr-libs").SBVRLibs, _ = require("lodash"), SBVRCompilerLibs = exports.SBVRCompilerLibs = SBVRLibs._extend({});
     SBVRCompilerLibs.initialize = function() {
         SBVRLibs.initialize.call(this);
     };
