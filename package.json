@@ -1,6 +1,6 @@
 {
   "name": "@resin/lf-to-abstract-sql",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {

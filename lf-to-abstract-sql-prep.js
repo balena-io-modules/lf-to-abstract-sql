@@ -1,9 +1,9 @@
 !function(root, factory) {
-    "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "./sbvr-compiler-libs", "sbvr-parser/lf-optimiser", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
+    "function" == typeof define && define.amd ? define([ "require", "exports", "ometa-core", "./sbvr-compiler-libs", "@resin/sbvr-parser/lf-optimiser", "lodash" ], factory) : "object" == typeof exports ? factory(require, exports, require("ometa-js").core) : factory(function(moduleName) {
         return root[moduleName];
     }, root, root.OMeta);
 }(this, function(require, exports, OMeta) {
-    var SBVRCompilerLibs = require("./sbvr-compiler-libs").SBVRCompilerLibs, LFOptimiser = require("sbvr-parser/lf-optimiser").LFOptimiser, _ = require("lodash"), LF2AbstractSQLPrep = exports.LF2AbstractSQLPrep = LFOptimiser._extend({
+    var SBVRCompilerLibs = require("./sbvr-compiler-libs").SBVRCompilerLibs, LFOptimiser = require("@resin/sbvr-parser/lf-optimiser").LFOptimiser, _ = require("lodash"), LF2AbstractSQLPrep = exports.LF2AbstractSQLPrep = LFOptimiser._extend({
         AttrConceptType: function(termName) {
             var $elf = this, _fromIdx = this.input.idx, conceptType;
             conceptType = LFOptimiser._superApplyWithArgs(this, "AttrConceptType", termName);

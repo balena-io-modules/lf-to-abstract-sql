@@ -1,4 +1,4 @@
-var SBVRLibs = require('sbvr-parser/sbvr-libs').SBVRLibs,
+var SBVRLibs = require('@resin/sbvr-parser/sbvr-libs').SBVRLibs,
 	_ = require('lodash');
 
 export ometa SBVRCompilerLibs <: SBVRLibs {}
