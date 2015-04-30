@@ -1,5 +1,5 @@
 _ = require 'lodash'
-sbvrTypes = require 'sbvr-types'
+sbvrTypes = require '@resin/sbvr-types'
 
 expect = require('chai').expect
 {toSE, getLineType} = require './sbvr-helper'
@@ -11,7 +11,7 @@ deleteWhereBodies = (value) ->
 		_.forEach(value, deleteWhereBodies)
 
 module.exports = (builtInVocab = false) ->
-	SBVRParser = require('sbvr-parser').SBVRParser.createInstance()
+	SBVRParser = require('@resin/sbvr-parser').SBVRParser.createInstance()
 	SBVRParser.enableReusingMemoizations(SBVRParser._sideEffectingRules)
 
 	LF2AbstractSQL = require '../index'
