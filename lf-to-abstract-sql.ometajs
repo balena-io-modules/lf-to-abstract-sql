@@ -56,7 +56,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	{console.error('We already have an identifier with a name of: ' + identifierName)} ?(false)
 		)
 		{this.identifiers[identifierName] = identifierName}
-		{this.tables[resourceName] = {fields: [], primitive: false, name: null, indexes: [], idField: null}}
+		{this.tables[resourceName] = this.CreateTable()}
 		-> identifierName,
 	Attributes :termOrFactType =
 			end
@@ -204,7 +204,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				GetTable(factType[0][1]):identifierTable
 				AddTableField(identifierTable, factType[1][1], 'Boolean', true)
 				{this.tables[resourceName] = 'BooleanAttribute'}
-			|	{this.tables[resourceName] = {fields: [], primitive: false, name: null, indexes: [], idField: null}}:linkTable
+			|	{this.tables[resourceName] = this.CreateTable()}:linkTable
 				{[]}:uniqueFields
 				(	Identifier:identifier
 					{identifier.name + identifier.num}:fieldName
@@ -673,14 +673,23 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		]
 		{{}}:tables
 		-> {tables:this.tables, rules:this.rules}
+	,
+
+	CreateTable =
+		{{fields: [], primitive: false, name: null, indexes: [], idField: null}}:table
+		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
+		-> table
 }
 
-LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references) {
+LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
 	if(references === undefined) {
 		references = null;
 	}
 	if(index === undefined) {
 		index = null;
+	}
+	if(defaultValue === undefined) {
+		defaultValue = null;
 	}
 	var fieldID = this.GetTableFieldID(table, fieldName);
 	if(fieldID === false) {
@@ -689,7 +698,8 @@ LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, in
 			fieldName: fieldName,
 			required: required,
 			index: index,
-			references: references
+			references: references,
+			defaultValue: defaultValue
 		});
 	}
 	return fieldID;

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "npm run-script prepublish",
-    "test": "node node_modules/mocha/bin/mocha",
+    "test": "mocha",
     "prepublish": "node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && node node_modules/ometa-js/bin/ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
   "repository": "git@bitbucket.org:rulemotion/lf-to-abstract-sql.git",
@@ -16,7 +16,7 @@
     "lodash": "^3.0.0"
   },
   "devDependencies": {
-    "chai": "^2.0.0",
+    "chai": "^3.0.0",
     "coffee-script": "~1.9.0",
     "mocha": "^2.1.0",
     "@resin/sbvr-parser": "~0.0.18",

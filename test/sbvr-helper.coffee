@@ -22,6 +22,13 @@ nest = (lf, sequence, allMatches = false) ->
 	return false
 generateName = (namePart) ->
 	namePart.replace(/\ /g, '_')
+createdAtField = 
+	dataType: 'Date Time'
+	fieldName: 'created at'
+	required: true
+	index: null
+	references: null
+	defaultValue: 'CURRENT_TIMESTAMP'
 exports.TableSpace = ->
 	tables = {}
 
@@ -43,7 +50,7 @@ exports.TableSpace = ->
 				currentTable = @
 
 				idField = 'id'
-				fields = []
+				fields = [createdAtField]
 				indexes = []
 				switch lf[0]
 					when 'Term'
@@ -78,18 +85,20 @@ exports.TableSpace = ->
 								fields.push(
 									dataType: dataType
 									fieldName: fieldName
-									required: true,
+									required: true
 									index: null
 									references: references
+									defaultValue: null
 								)
 						indexes.push(uniqueIndex)
 						tableName = tableName.join('-')
 				fields.push(
-					dataType: 'Serial',
-					fieldName: idField,
-					required: true,
+					dataType: 'Serial'
+					fieldName: idField
+					required: true
 					index: 'PRIMARY KEY'
 					references: null
+					defaultValue: null
 				)
 				tableDefinition = {
 					name: tableName
@@ -125,16 +134,20 @@ exports.TableSpace = ->
 						primitive = isPrimitive(term)
 						if primitive
 							typeName = term[1]
+							primitiveField =
+								dataType: primitive
+								fieldName: typeName
+								required: true
+								index: null
+								references: null
+								defaultValue: null
 							_.assign @matches,
 								idField: null
 								primitive: primitive
 								referenceScheme: typeName
 								fields: [
-									dataType: primitive,
-									fieldName: typeName,
-									required: true,
-									index: null
-									references: null
+									createdAtField
+									primitiveField
 								]
 					when 'ReferenceScheme'
 						term = lf[1]
