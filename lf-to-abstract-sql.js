@@ -93,13 +93,7 @@
                 return this._pred(!1);
             });
             this.identifiers[identifierName] = identifierName;
-            this.tables[resourceName] = {
-                fields: [],
-                primitive: !1,
-                name: null,
-                indexes: [],
-                idField: null
-            };
+            this.tables[resourceName] = this.CreateTable();
             return identifierName;
         },
         Attributes: function(termOrFactType) {
@@ -309,13 +303,7 @@
                     this._applyWithArgs("AddTableField", identifierTable, factType[1][1], "Boolean", !0);
                     return this.tables[resourceName] = "BooleanAttribute";
                 }, function() {
-                    linkTable = this.tables[resourceName] = {
-                        fields: [],
-                        primitive: !1,
-                        name: null,
-                        indexes: [],
-                        idField: null
-                    };
+                    linkTable = this.tables[resourceName] = this.CreateTable();
                     uniqueFields = [];
                     this._many1(function() {
                         return this._or(function() {
@@ -986,18 +974,32 @@
                 tables: this.tables,
                 rules: this.rules
             };
+        },
+        CreateTable: function() {
+            var $elf = this, _fromIdx = this.input.idx, table;
+            table = {
+                fields: [],
+                primitive: !1,
+                name: null,
+                indexes: [],
+                idField: null
+            };
+            this._applyWithArgs("AddTableField", table, "created at", "Date Time", !0, null, null, "CURRENT_TIMESTAMP");
+            return table;
         }
     });
-    LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references) {
+    LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
         void 0 === references && (references = null);
         void 0 === index && (index = null);
+        void 0 === defaultValue && (defaultValue = null);
         var fieldID = this.GetTableFieldID(table, fieldName);
         fieldID === !1 && table.fields.push({
             dataType: dataType,
             fieldName: fieldName,
             required: required,
             index: index,
-            references: references
+            references: references,
+            defaultValue: defaultValue
         });
         return fieldID;
     };
