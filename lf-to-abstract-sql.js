@@ -1004,11 +1004,10 @@
         return fieldID;
     };
     LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
-        if (_.isEqual(whereBody, [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ])) return void 0;
-        if ("Exists" != whereBody[0] || "SelectQuery" != whereBody[1][0] && "InsertQuery" != whereBody[1][0] && "UpdateQuery" != whereBody[1][0] && "UpsertQuery" != whereBody[1][0]) {
+        if (!_.isEqual(whereBody, [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ])) if ("Exists" != whereBody[0] || "SelectQuery" != whereBody[1][0] && "InsertQuery" != whereBody[1][0] && "UpdateQuery" != whereBody[1][0] && "UpsertQuery" != whereBody[1][0]) {
             for (var i = 1; i < query.length; i++) if ("Where" == query[i][0]) {
                 query[i][1] = [ "And", query[i][1], whereBody ];
-                return void 0;
+                return;
             }
             query.push([ "Where", whereBody ]);
         } else {
