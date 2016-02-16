@@ -1,3 +1,5 @@
+* Updated lodash to ^4.0.0
+
 v0.0.15
 
 * Updated ometa-js

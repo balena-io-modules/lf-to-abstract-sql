@@ -162,7 +162,7 @@ exports.TableSpace = ->
 							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
 							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
-							if _.any(bindings, (binding) -> tables[generateName(binding[1][1])].matches.primitive)
+							if _.some(bindings, (binding) -> tables[generateName(binding[1][1])].matches.primitive)
 								@matches = 'Attribute'
 							else
 								@matches = 'ForeignKey'
