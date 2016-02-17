@@ -254,7 +254,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		(	RulePart:whereBody2
 			AddWhereClause(query, whereBody2)
 		)?
-		(	?(!_.any(query, {0: 'From'}))
+		(	?(!_.some(query, {0: 'From'}))
 			(	{_.find(query, {0: 'Where'})}:whereBody
 				?whereBody
 				{selectBody.whereBody = whereBody[1]}
@@ -355,11 +355,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{['SelectQuery', ['Select', []], ['From', [this.GetTable(actualFactType).name, tableAlias]]]}:query
 		{	_.each(binds, function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
-					table = this.GetTable(baseIdentifierName);
+					table = $elf.GetTable(baseIdentifierName);
 				if(!table.primitive) {
-					this.AddWhereClause(query, ['Equals', ['ReferencedField', tableAlias, baseIdentifierName], ['ReferencedField', bind.binding[1], table.idField]]);
+					$elf.AddWhereClause(query, ['Equals', ['ReferencedField', tableAlias, baseIdentifierName], ['ReferencedField', bind.binding[1], table.idField]]);
 				}
-			}, this)
+			})
 		}
 		-> ['Exists', query],
 	
@@ -599,7 +599,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrBinding.identifier.name]};
 			}
 		|	// Ignore primitive only fact types.
-			?_.any(binds, function(bind) {
+			?_.some(binds, function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 			})
 			LinkTableAlias(binds, actualFactType):tableAlias
@@ -620,7 +620,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		),
 	ProcessAtomicFormulationsNativeProperties :depth :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
-		?_.all(binds, function(bind) {
+		?_.every(binds, function(bind) {
 			return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 		})
 		?(binds.length == 2)
@@ -772,5 +772,5 @@ LF2AbstractSQL.reset = function() {
 };
 
 LF2AbstractSQL.addTypes = function(types) {
-	_.extend(this.sbvrTypes, types);
+	_.assign(this.sbvrTypes, types);
 };
