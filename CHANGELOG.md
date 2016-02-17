@@ -1,3 +1,5 @@
+v0.0.16
+
 * Updated lodash to ^4.0.0
 
 v0.0.15

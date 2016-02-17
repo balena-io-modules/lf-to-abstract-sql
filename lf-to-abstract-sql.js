@@ -388,7 +388,7 @@
                 return this._applyWithArgs("AddWhereClause", query, whereBody2);
             });
             return this._or(function() {
-                this._pred(!_.any(query, {
+                this._pred(!_.some(query, {
                     0: "From"
                 }));
                 this._opt(function() {
@@ -516,9 +516,9 @@
             tableAlias = this._applyWithArgs("LinkTableAlias", binds, actualFactType);
             query = [ "SelectQuery", [ "Select", [] ], [ "From", [ this.GetTable(actualFactType).name, tableAlias ] ] ];
             _.each(binds, function(bind, i) {
-                var baseIdentifierName = actualFactType[2 * i][1], table = this.GetTable(baseIdentifierName);
-                table.primitive || this.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, baseIdentifierName ], [ "ReferencedField", bind.binding[1], table.idField ] ]);
-            }, this);
+                var baseIdentifierName = actualFactType[2 * i][1], table = $elf.GetTable(baseIdentifierName);
+                table.primitive || $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, baseIdentifierName ], [ "ReferencedField", bind.binding[1], table.idField ] ]);
+            });
             return [ "Exists", query ];
         },
         ForeignKey: function(actualFactType) {
@@ -861,7 +861,7 @@
                     };
                 }.call(this);
             }, function() {
-                this._pred(_.any(binds, function(bind) {
+                this._pred(_.some(binds, function(bind) {
                     return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
                 }));
                 tableAlias = this._applyWithArgs("LinkTableAlias", binds, actualFactType);
@@ -881,7 +881,7 @@
         ProcessAtomicFormulationsNativeProperties: function(depth, unmappedFactType, actualFactType) {
             var $elf = this, _fromIdx = this.input.idx, binding, binds, primitive, property, verb;
             binds = this._applyWithArgs("RoleBindings", actualFactType);
-            this._pred(_.all(binds, function(bind) {
+            this._pred(_.every(binds, function(bind) {
                 return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
             }));
             this._pred(2 == binds.length);
@@ -1040,6 +1040,6 @@
         this.bindAttributeDepth = [];
     };
     LF2AbstractSQL.addTypes = function(types) {
-        _.extend(this.sbvrTypes, types);
+        _.assign(this.sbvrTypes, types);
     };
 });

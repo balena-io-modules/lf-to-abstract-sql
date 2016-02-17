@@ -155,7 +155,7 @@
         }
     });
     LF2AbstractSQLPrep.initialize = function() {
-        _.extend(this, SBVRCompilerLibs);
+        _.assign(this, SBVRCompilerLibs);
         LFOptimiser.initialize.call(this);
         this.foreignKeys = {};
         this.uniqueKeys = {};
