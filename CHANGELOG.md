@@ -13,3 +13,7 @@ v0.0.14
 v0.0.10
 
 * Updated lodash to ^3.0.0
+
+v0.0.9
+
+* Added support for making unique fields of a term form nullable.
