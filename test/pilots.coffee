@@ -1,7 +1,7 @@
 typeVocab = require('fs').readFileSync(require.resolve('@resin/sbvr-types/Type.sbvr'))
 test = require('./test')(typeVocab)
-{TableSpace, term, verb, factType, conceptType, referenceScheme, necessity, definition, _or, _and, _nestedOr, _nestedAnd} = require('./sbvr-helper')
-{Table, attribute, rule} = TableSpace()
+{ TableSpace, term, verb, factType, conceptType, referenceScheme, necessity, definition, _or, _and, _nestedOr, _nestedAnd } = require './sbvr-helper'
+{ Table, attribute, rule } = TableSpace()
 
 shortTextType = term 'Short Text', 'Type'
 integerType = term 'Integer', 'Type'
@@ -96,7 +96,7 @@ describe 'pilots', ->
 		], verb('has'), 'a', [yearsOfExperience, verb('is greater than'), 5]
 
 	# Rule:       It is necessary that each pilot that is experienced, can fly at least 3 planes or exactly one plane
-	test rule 'Necessity', 'each', [pilot, verb('is experienced')], verb('can fly'), 
+	test rule 'Necessity', 'each', [pilot, verb('is experienced')], verb('can fly'),
 		_or(
 			[['at least', 3], plane]
 			[['exactly', 'one'], plane]
@@ -116,7 +116,7 @@ describe 'pilots', ->
 		['a', pilot, verb('can fly'), ['at least', 10], plane]
 	)
 	# Rule:       It is necessary that each plane that at least 3 pilots can fly or exactly one pilot can fly, has a name
-	test rule 'Necessity', 'each', [plane, 
+	test rule 'Necessity', 'each', [plane,
 		_or(
 			[['at least', 3], pilot, verb('can fly')]
 			[['exactly', 'one'], pilot, verb('can fly')]
@@ -149,7 +149,7 @@ describe 'pilots', ->
 		], verb('has'), 'a', [yearsOfExperience, verb('is greater than'), 5]
 
 	# Rule:       It is necessary that each pilot that is experienced, can fly at least 3 planes and exactly one plane
-	test rule 'Necessity', 'each', [pilot, verb('is experienced')], verb('can fly'), 
+	test rule 'Necessity', 'each', [pilot, verb('is experienced')], verb('can fly'),
 		_and(
 			[['at least', 2], plane]
 			[['exactly', 'one'], plane]
@@ -169,7 +169,7 @@ describe 'pilots', ->
 		['a', pilot, verb('can fly'), ['at least', 10], plane]
 	)
 	# Rule:       It is necessary that each plane that at least 3 pilots can fly and exactly one pilot can fly, has a name
-	test rule 'Necessity', 'each', [plane, 
+	test rule 'Necessity', 'each', [plane,
 		_and(
 			[['at least', 3], pilot, verb('can fly')]
 			[['exactly', 'one'], pilot, verb('can fly')]

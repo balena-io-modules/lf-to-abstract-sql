@@ -4,9 +4,10 @@
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
-    "pretest": "npm run-script prepublish",
+    "lint": "resin-lint test",
+    "pretest": "npm run prepublish",
     "test": "mocha",
-    "prepublish": "node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && node node_modules/ometa-js/bin/ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && node node_modules/ometa-js/bin/ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
+    "prepublish": "ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
   "repository": "git@bitbucket.org:rulemotion/lf-to-abstract-sql.git",
   "author": "",
@@ -16,10 +17,11 @@
     "lodash": "^4.0.0"
   },
   "devDependencies": {
+    "@resin/sbvr-parser": "~0.0.18",
+    "@resin/sbvr-types": "^1.0.1",
     "chai": "^3.0.0",
     "coffee-script": "~1.10.0",
     "mocha": "^2.1.0",
-    "@resin/sbvr-parser": "~0.0.18",
-    "@resin/sbvr-types": "^1.0.1"
+    "resin-lint": "^1.2.2"
   }
 }

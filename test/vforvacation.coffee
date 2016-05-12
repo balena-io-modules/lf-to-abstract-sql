@@ -1,7 +1,7 @@
 typeVocab = require('fs').readFileSync(require.resolve('@resin/sbvr-types/Type.sbvr'))
 test = require('./test')(typeVocab)
-{TableSpace, term, verb, factType, conceptType, termForm, referenceScheme, necessity, rule, conceptType, note, definitionEnum} = require('./sbvr-helper')
-{Table, attribute, rule} = TableSpace()
+{ TableSpace, term, verb, factType, conceptType, termForm, referenceScheme, necessity, rule, conceptType, note, definitionEnum } = require './sbvr-helper'
+{ Table, attribute, rule } = TableSpace()
 
 shortTextType = term 'Short Text', 'Type'
 textType = term 'Text', 'Type'

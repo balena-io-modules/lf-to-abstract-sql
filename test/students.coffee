@@ -1,7 +1,7 @@
 test = require('./test')()
 expect = require('chai').expect
-{TableSpace, term, verb, factType, conceptType, termForm, referenceScheme, necessity, rule, conceptType, note, definitionEnum, synonym} = require('./sbvr-helper')
-{Table, attribute} = TableSpace()
+{ TableSpace, term, verb, factType, conceptType, termForm, referenceScheme, necessity, rule, conceptType, note, definitionEnum, synonym } = require './sbvr-helper'
+{ Table, attribute } = TableSpace()
 has = verb 'has'
 
 person = term 'person'
