@@ -24,10 +24,14 @@ module.exports = (builtInVocab = false) ->
 	previousResult = do ->
 		lf = SBVRParser.matchAll(seSoFar, 'Process')
 		LF2AbstractSQLTranslator(lf, 'Process')
+	currentVocab = 'Default'
 
 	runExpectation = (describe, input, expectation) ->
 		if _.isArray(input)
-			input = getLineType(input) + ': ' + toSE(input)
+			type = getLineType(input)
+			input = type + ': ' + toSE(input, currentVocab)
+			if type is 'Vocabulary'
+				currentVocab = input[1]
 		else if _.isObject(input)
 			{ matches, property, ruleSQL, se: input } = input
 

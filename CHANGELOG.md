@@ -1,3 +1,5 @@
+* Fixed non-primitive concept types.
+
 v0.0.16
 
 * Updated lodash to ^4.0.0
