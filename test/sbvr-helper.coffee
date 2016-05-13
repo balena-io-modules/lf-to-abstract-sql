@@ -2,8 +2,8 @@ _ = require 'lodash'
 LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser
 
 # Inherit from the sbvr-parser's sbvr-helper module.
-module.exports = exports = require('@resin/sbvr-parser/test/sbvr-helper.coffee')
-{toSE, rule, getLineType} = exports
+module.exports = exports = require '@resin/sbvr-parser/test/sbvr-helper.coffee'
+{ toSE, rule, getLineType } = exports
 
 nest = (lf, sequence, allMatches = false) ->
 	if sequence.length is 0
@@ -22,7 +22,7 @@ nest = (lf, sequence, allMatches = false) ->
 	return false
 generateName = (namePart) ->
 	namePart.replace(/\ /g, '_')
-createdAtField = 
+createdAtField =
 	dataType: 'Date Time'
 	fieldName: 'created at'
 	required: true
@@ -45,9 +45,9 @@ exports.TableSpace = ->
 			currentTable.attribute(args...)
 		Table: class Table
 			constructor: (lf) ->
-				if !(@ instanceof Table)
+				if !(this instanceof Table)
 					return new Table(lf)
-				currentTable = @
+				currentTable = this
 
 				idField = 'id'
 				fields = [createdAtField]
@@ -119,13 +119,13 @@ exports.TableSpace = ->
 				@matches = tableDefinition
 				@tableName = tableName
 
-				tables[tableName] = @
+				tables[tableName] = this
 
 			attribute: (lf) ->
 				if _.isArray(lf)
 					se = toSE(lf)
 				else if _.isObject(lf)
-					{lf, se} = lf
+					{ lf, se } = lf
 				@se = getLineType(lf) + ': ' + se
 				@matches = _.cloneDeep(@matches)
 				switch lf[0]
@@ -171,11 +171,11 @@ exports.TableSpace = ->
 						@property = null
 					when 'TermForm'
 						tableName = generateName(lf[1][1])
-						tables[tableName] = @
+						tables[tableName] = this
 						@property = 'tables.' + tableName
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
-				return @
+				return this
 
 		rule: do ->
 			attributeBindings = {}
@@ -269,7 +269,7 @@ exports.TableSpace = ->
 					switch part[0]
 						when 'Term'
 							termName = part[1]
-							binding = _.find(bindings, {termName})
+							binding = _.find(bindings, { termName })
 							tableName.push(generateName(termName))
 							tableAlias.push(binding.alias)
 							if !isPrimitive(part)
@@ -281,7 +281,7 @@ exports.TableSpace = ->
 							tableAlias.push(verbName)
 				tableName = tableName.join('-')
 				tableAlias = tableAlias.join('-')
-				
+
 				if booleanAttribute
 					return [
 						'Where'
@@ -329,7 +329,7 @@ exports.TableSpace = ->
 						['And'].concat(
 							bindings.map (binding, i) ->
 								[	'Equals'
-									['ReferencedField', tableAlias, factType[i*2][1]]
+									['ReferencedField', tableAlias, factType[i * 2][1]]
 									['ReferencedField', binding.alias, 'id']
 								]
 						)
