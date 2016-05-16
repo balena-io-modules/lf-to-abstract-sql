@@ -88,8 +88,9 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			)?
 			{identifierTable.referenceScheme = conceptType}
 		|	{'ConceptType'}:dataType
+			{{tableName: conceptTable.name, fieldName: conceptTable.idField}}:references
 		)
-		AddTableField(identifierTable, conceptType, dataType, true, null, conceptTable.idField),
+		AddTableField(identifierTable, conceptType, dataType, true, null, references),
 	AttrDatabaseIDField :termOrFactType =
 		:idField
 		GetTableID(termOrFactType):tableID

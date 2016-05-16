@@ -44,9 +44,9 @@ exports.TableSpace = ->
 		attribute: (args...) ->
 			currentTable.attribute(args...)
 		Table: class Table
-			constructor: (lf) ->
+			constructor: (lf, currentVocab = 'Default') ->
 				if !(this instanceof Table)
-					return new Table(lf)
+					return new Table(lf, currentVocab)
 				currentTable = this
 
 				idField = 'id'
@@ -114,16 +114,16 @@ exports.TableSpace = ->
 				if booleanAttribute
 					tableDefinition = 'BooleanAttribute'
 
-				@se = getLineType(lf) + ': ' + toSE(lf)
+				@se = getLineType(lf) + ': ' + toSE(lf, currentVocab)
 				@property = 'tables.' + tableName
 				@matches = tableDefinition
 				@tableName = tableName
 
 				tables[tableName] = this
 
-			attribute: (lf) ->
+			attribute: (lf, currentVocab = 'Default') ->
 				if _.isArray(lf)
-					se = toSE(lf)
+					se = toSE(lf, currentVocab)
 				else if _.isObject(lf)
 					{ lf, se } = lf
 				@se = getLineType(lf) + ': ' + se
@@ -149,6 +149,17 @@ exports.TableSpace = ->
 									createdAtField
 									primitiveField
 								]
+						else
+							typeName = term[1]
+							@matches.fields.push
+								dataType: 'ConceptType'
+								fieldName: typeName
+								required: true
+								index: null
+								references:
+									fieldName: 'id'
+									tableName: generateName(typeName)
+								defaultValue: null
 					when 'ReferenceScheme'
 						term = lf[1]
 						@matches.referenceScheme = term[1]
