@@ -1,3 +1,5 @@
+v0.0.17
+
 * Fixed non-primitive concept types.
 
 v0.0.16

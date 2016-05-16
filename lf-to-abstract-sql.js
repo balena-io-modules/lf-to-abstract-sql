@@ -117,7 +117,7 @@
             return anything = this.anything();
         },
         AttrConceptType: function(termOrFactType) {
-            var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptType, dataType, fieldID, identifierTable, primitive, term, vocab;
+            var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptType, dataType, fieldID, identifierTable, primitive, references, term, vocab;
             term = this._form(function() {
                 this._applyWithArgs("exactly", "Term");
                 conceptType = this.anything();
@@ -138,9 +138,13 @@
                 });
                 return identifierTable.referenceScheme = conceptType;
             }, function() {
-                return dataType = "ConceptType";
+                dataType = "ConceptType";
+                return references = {
+                    tableName: conceptTable.name,
+                    fieldName: conceptTable.idField
+                };
             });
-            return this._applyWithArgs("AddTableField", identifierTable, conceptType, dataType, !0, null, conceptTable.idField);
+            return this._applyWithArgs("AddTableField", identifierTable, conceptType, dataType, !0, null, references);
         },
         AttrDatabaseIDField: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, fieldID, idField, table, tableID;
