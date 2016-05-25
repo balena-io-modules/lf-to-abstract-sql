@@ -1,6 +1,6 @@
 typeVocab = require('fs').readFileSync(require.resolve('@resin/sbvr-types/Type.sbvr'))
 test = require('./test')(typeVocab)
-{ TableSpace, term, verb, factType, conceptType, referenceScheme, necessity, definition, _or, _and, _nestedOr, _nestedAnd } = require './sbvr-helper'
+{ TableSpace, term, verb, factType, conceptType, referenceScheme, synonymousForm, necessity, definition, _or, _and, _nestedOr, _nestedAnd } = require './sbvr-helper'
 { Table, attribute, rule } = TableSpace()
 
 shortTextType = term 'Short Text', 'Type'
@@ -44,6 +44,8 @@ describe 'pilots', ->
 	test attribute necessity 'each', plane, verb('has'), ['exactly', 'one'], name
 	# Fact type: pilot can fly plane
 	test Table factType pilot, verb('can fly'), plane
+	# 	Synonymous Form: plane can be flown by pilot
+	test attribute synonymousForm plane, verb('can be flown by'), pilot
 	# Fact type: pilot is experienced
 	test Table factType pilot, verb('is experienced')
 	# Term: veteran pilot

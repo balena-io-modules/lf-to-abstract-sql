@@ -37,6 +37,32 @@ exports.TableSpace = ->
 			return term[1]
 		table = tables[generateName(term[1])]
 		return table.matches.primitive
+	parseFactType = (factType, bindings) ->
+		primitiveFactType = true
+		tableName = []
+		tableAlias = []
+		for part in factType
+			switch part[0]
+				when 'Term'
+					termName = part[1]
+					binding = _.find(bindings, { termName })
+					tableName.push(generateName(termName))
+					tableAlias.push(binding?.alias)
+					if !isPrimitive(part)
+						primitiveFactType = false
+				when 'Verb'
+					verb = part
+					verbName = part[1]
+					tableName.push(generateName(verbName))
+					tableAlias.push(verbName)
+		return {
+			tableName: tableName.join('-')
+			tableAlias: tableAlias.join('-')
+			verb
+			primitiveFactType
+			booleanAttribute: factType.length is 2
+			binding
+		}
 
 	currentTable = null
 
@@ -180,6 +206,9 @@ exports.TableSpace = ->
 					when 'Definition'
 						# Nulling the property just checks that there are no changes to the previous test result.
 						@property = null
+					when 'SynonymousForm'
+						tableName = parseFactType(lf[1]).tableName
+						tables[tableName] = this
 					when 'TermForm'
 						tableName = generateName(lf[1][1])
 						tables[tableName] = this
@@ -272,26 +301,7 @@ exports.TableSpace = ->
 				factType = factType[1...]
 				bindings = roleBindings(lf, ['RoleBinding'], true)
 
-				booleanAttribute = factType.length is 2
-				primitiveFactType = true
-				tableName = []
-				tableAlias = []
-				for part in factType
-					switch part[0]
-						when 'Term'
-							termName = part[1]
-							binding = _.find(bindings, { termName })
-							tableName.push(generateName(termName))
-							tableAlias.push(binding.alias)
-							if !isPrimitive(part)
-								primitiveFactType = false
-						when 'Verb'
-							verb = part
-							verbName = part[1]
-							tableName.push(generateName(verbName))
-							tableAlias.push(verbName)
-				tableName = tableName.join('-')
-				tableAlias = tableAlias.join('-')
+				{ tableName, tableAlias, verb, primitiveFactType, booleanAttribute, binding } = parseFactType(factType, bindings)
 
 				if booleanAttribute
 					return [
