@@ -1,3 +1,5 @@
+* Added a synonymous form test.
+
 v0.0.17
 
 * Fixed non-primitive concept types.
