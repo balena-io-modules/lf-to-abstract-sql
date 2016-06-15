@@ -1,14 +1,11 @@
 test = require('./test')()
-expect = require('chai').expect
-{ TableSpace, term, verb, factType, conceptType, termForm, referenceScheme, necessity, rule, conceptType, note, definitionEnum, synonym } = require './sbvr-helper'
+{ TableSpace, term, verb, factType, termForm, necessity, definitionEnum, synonym } = require './sbvr-helper'
 { Table, attribute } = TableSpace()
-has = verb 'has'
 
 person = term 'person'
 homoSapiens = term 'homo sapiens'
 educationalInstitution = term 'educational institution'
 age = term 'age'
-student = term 'student'
 schoolYearEnrollment = term 'school year enrollment'
 
 describe 'students', ->
