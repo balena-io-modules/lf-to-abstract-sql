@@ -73,6 +73,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			:conceptType
 			:vocab
 		]:term
+		{	if (this.termForms[termOrFactType]) {
+				termOrFactType = this.termForms[termOrFactType];
+			}
+		}
 		{this.vocabularies[termOrFactType[2]]['ConceptTypes'][termOrFactType] = term}
 
 		IsPrimitive(term):primitive
@@ -178,7 +182,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		AddFactType(synForm, factType),
 	AttrTermForm :factType =
 		:term
-		{	this.identifiers[term[1]] = factType;
+		{	this.termForms[factType] = term;
+			this.identifiers[term[1]] = factType;
 			this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
@@ -760,6 +765,7 @@ LF2AbstractSQL.ResolveConceptTypes = function(query, identifier, varNum, untilCo
 LF2AbstractSQL.initialize = function() {
 	this.reset();
 	this.sbvrTypes = {};
+	this.termForms = {};
 };
 
 LF2AbstractSQL.reset = function() {

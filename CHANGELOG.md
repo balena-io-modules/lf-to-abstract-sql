@@ -1,3 +1,4 @@
+* Added support for concept type on term form fact types.
 * Added a synonymous form test.
 
 v0.0.17
