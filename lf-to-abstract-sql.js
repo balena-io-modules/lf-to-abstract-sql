@@ -123,6 +123,9 @@
                 conceptType = this.anything();
                 return vocab = this.anything();
             });
+            (function() {
+                this.termForms[termOrFactType] && (termOrFactType = this.termForms[termOrFactType]);
+            }).call(this);
             this.vocabularies[termOrFactType[2]].ConceptTypes[termOrFactType] = term;
             primitive = this._applyWithArgs("IsPrimitive", term);
             conceptTable = this._applyWithArgs("GetTable", conceptType);
@@ -260,6 +263,7 @@
             var $elf = this, _fromIdx = this.input.idx, term;
             term = this.anything();
             return function() {
+                this.termForms[factType] = term;
                 this.identifiers[term[1]] = factType;
                 this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
                 for (var i = 0; i < factType.length; i++) if ("Term" === factType[i][0]) {
@@ -1033,6 +1037,7 @@
     LF2AbstractSQL.initialize = function() {
         this.reset();
         this.sbvrTypes = {};
+        this.termForms = {};
     };
     LF2AbstractSQL.reset = function() {
         SBVRCompilerLibs.initialize.call(this);
