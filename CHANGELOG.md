@@ -1,3 +1,5 @@
+* Added a test for a self-referential fact type and synonymous form.
+
 v0.0.18
 
 * Added support for concept type on term form fact types.
