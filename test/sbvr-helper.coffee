@@ -91,7 +91,7 @@ exports.TableSpace = ->
 						if factType.length is 2
 							booleanAttribute = true
 						for factTypePart in factType
-							fieldName = factTypePart[1]
+							fieldName = factTypePart[1] + (factTypePart[3]?[1] ? '')
 							referenceTableName = generateName(factTypePart[1])
 							tableName.push(referenceTableName)
 							if tables[referenceTableName]?
