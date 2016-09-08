@@ -684,6 +684,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	CreateTable =
 		{{fields: [], primitive: false, name: null, indexes: [], idField: null}}:table
 		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
+		AddTableField(table, 'sys period', 'Date Time Range', true, null, null, 'tstzrange(CURRENT_TIMESTAMP, null)')
 		-> table
 }
 
