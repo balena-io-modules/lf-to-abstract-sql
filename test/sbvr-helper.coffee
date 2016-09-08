@@ -29,6 +29,13 @@ createdAtField =
 	index: null
 	references: null
 	defaultValue: 'CURRENT_TIMESTAMP'
+sysPeriodField =
+	dataType: 'Date Time Range'
+	fieldName: 'sys period'
+	required: true
+	index: null
+	references: null
+	defaultValue: 'tstzrange(CURRENT_TIMESTAMP, null)'
 exports.TableSpace = ->
 	tables = {}
 
@@ -76,7 +83,7 @@ exports.TableSpace = ->
 				currentTable = this
 
 				idField = 'id'
-				fields = [createdAtField]
+				fields = [createdAtField, sysPeriodField]
 				indexes = []
 				switch lf[0]
 					when 'Term'
@@ -173,6 +180,7 @@ exports.TableSpace = ->
 								referenceScheme: typeName
 								fields: [
 									createdAtField
+									sysPeriodField
 									primitiveField
 								]
 						else

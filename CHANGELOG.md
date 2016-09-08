@@ -1,3 +1,4 @@
+* Added a `sys period` field by default that is a `Date Time Range` with `DEFAULT [CURRENT_TIMESTAMP, )`.
 * Added a test for a self-referential fact type and synonymous form.
 
 v0.0.18
