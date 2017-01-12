@@ -27,12 +27,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			anything:text
 		]
 		-> ['Text', text],
-		
+
 	Value =
 			Real
 		|	Integer
 		|	Text,
-	
+
 	/** Terms **/
 	Identifier =
 		{''}:num
@@ -48,7 +48,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			)?
 		]
 		-> {type: type, name: name, num: num, vocab: vocab},
-	
+
 	IdentifierName =
 		:identifierName
 		GetResourceName(identifierName):resourceName
@@ -195,7 +195,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		},
 	AttrNecessity :tableID =
 		Rule,
-	
+
 	/** Fact Types **/
 	FactType =
 		&((:factTypePart &(:attributes) -> factTypePart)+:factType)
@@ -226,7 +226,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			)
 		)
 		-> factType,
-	
+
 	Cardinality =
 		[
 			(	'MinimumCardinality'
@@ -248,7 +248,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				-> ['SelectQuery', ['Select', [selectBody]]]
 			|	{'.' + num}:varNum
 				{['SelectQuery', ['Select', []], ['From', [this.GetTable(identifier.name).name, identifier.name + varNum]]]}:query
-				ResolveConceptTypes(query, identifier, varNum)
+				CreateConceptTypesResolver(query, identifier, varNum)
 				-> query
 			):query
 			(	RulePart:whereBody
@@ -294,7 +294,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			-> data
 		|	?baseBind
 			-> baseBind.binding
-		|	-> ['ReferencedField', baseTermName + '.' + number, identifier.name]
+		|	{this.conceptTypeResolvers[identifier.name + '.' + number]}:conceptTypeResolver
+			(	?(!conceptTypeResolver)
+			|	{conceptTypeResolver(baseTermName)}
+			)
+			-> ['ReferencedField', baseTermName + '.' + number, identifier.name]
 		):binding
 		-> {
 			identifier: identifier,
@@ -368,7 +372,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			})
 		}
 		-> ['Exists', query],
-	
+
 	ForeignKey :actualFactType =
 		?(this.GetTable(actualFactType) == 'ForeignKey')
 		(	RoleBindings(actualFactType):binds
@@ -408,7 +412,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	// Otherwise return true = true, just so things work.
 			-> ['Equals', ['Boolean', true], ['Boolean', true]]
 		),
-	
+
 	AtomicFormulation =
 		[	'AtomicFormulation'
 			[	'FactType'
@@ -529,8 +533,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			RulePart:whereBody
 		]
 		-> ['Not', whereBody],
-		
-	
+
+
 	RulePart =
 		(	AtomicFormulation
 		|	AtLeast
@@ -544,7 +548,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{console.error('Hit unhandled operation:', x)}
 			?(false)
 		),
-	
+
 	RuleBody =
 		[
 			(	'ObligationFormulation'
@@ -641,8 +645,9 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{	this.bindAttributeDepth[binds[1].number] = depth;
 			this.bindAttributes[binds[1].number] = {binding: binding};
 		},
-	
+
 	Rule =
+		ResetRuleState
 		[	'Rule'
 			&ProcessAtomicFormulations
 			(	?this.nonPrimitiveExists
@@ -657,7 +662,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			// |	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
 			)?
 		],
-	
+
 	Process =
 		[	'Model'
 			(	[	'Vocabulary'
@@ -744,22 +749,49 @@ LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
 	}
 };
 
-LF2AbstractSQL.ResolveConceptTypes = function(query, identifier, varNum, untilConcept) {
-	var conceptAlias,
-		parentAlias = identifier.name + varNum,
+LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) {
+	var parentAlias = identifier.name + varNum,
 		concept = this.ReconstructIdentifier(identifier),
-		conceptTable;
-	while((untilConcept == null || !this.IdentifiersEqual(concept, untilConcept))
-			&& (concept = this.FollowConceptType(concept)) !== false) {
-		conceptAlias = concept[1] + varNum;
-		conceptTable = this.GetTable(concept[1]);
-		if(conceptTable.primitive !== false) {
-			break;
-		}
-		query.push(['From', [conceptTable.name, conceptAlias]]);
-		this.AddWhereClause(query, ['Equals', ['ReferencedField', parentAlias, concept[1]], ['ReferencedField', conceptAlias, conceptTable.idField]]);
-		parentAlias = conceptAlias;
+		conceptTypeResolutions,
+		$elf = this;
+
+	if(this.conceptTypeResolvers[parentAlias]) {
+		throw new Error('Concept type resolver already added for "' + parentAlias + '"!')
 	}
+
+	// We start off with the first level already having been resolved
+	conceptTypeResolutions = [ identifier.name ];
+
+	this.conceptTypeResolvers[parentAlias] = (function(untilConcept) {
+		var conceptTable,
+			conceptAlias;
+
+		// Pick up where we left off with previous concept type resolutions
+		parentAlias = _.last(conceptTypeResolutions);
+		if(parentAlias === true || _.includes(conceptTypeResolutions, untilConcept)) {
+			// We already either resolved the entire chain, or at least as far as we need to, so we can just return :)
+			return;
+		}
+		while((concept = this.FollowConceptType(concept)) !== false) {
+			conceptAlias = concept[1] + varNum;
+			conceptTable = this.GetTable(concept[1]);
+			if(conceptTable.primitive !== false) {
+				break;
+			}
+			query.push(['From', [conceptTable.name, conceptAlias]]);
+			this.AddWhereClause(query, ['Equals', ['ReferencedField', parentAlias, concept[1]], ['ReferencedField', conceptAlias, conceptTable.idField]]);
+			parentAlias = conceptAlias;
+			conceptTypeResolutions.push(parentAlias);
+			if (untilConcept != null && !this.IdentifiersEqual(concept, untilConcept)) {
+				// We've added the concept that was needed, we can exit now
+				break;
+			}
+		}
+		if(concept === false) {
+			// We finished resolving the entire chain, so we can avoid attempting it in future
+			conceptTypeResolutions.push(true);
+		}
+	}).bind(this);
 };
 
 LF2AbstractSQL.initialize = function() {
@@ -776,6 +808,11 @@ LF2AbstractSQL.reset = function() {
 	this.attributes = {};
 	this.bindAttributes = [];
 	this.bindAttributeDepth = [];
+	this.ResetRuleState();
+};
+
+LF2AbstractSQL.ResetRuleState = function() {
+	this.conceptTypeResolvers = {};
 };
 
 LF2AbstractSQL.addTypes = function(types) {
