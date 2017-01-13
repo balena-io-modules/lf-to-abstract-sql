@@ -1,3 +1,4 @@
+* Switched to only adding concept type joins if they're actually needed.
 * Added a test for a self-referential fact type and synonymous form.
 
 v0.0.18
