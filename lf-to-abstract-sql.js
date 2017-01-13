@@ -380,7 +380,7 @@
                 }, function() {
                     varNum = "." + num;
                     query = [ "SelectQuery", [ "Select", [] ], [ "From", [ this.GetTable(identifier.name).name, identifier.name + varNum ] ] ];
-                    this._applyWithArgs("ResolveConceptTypes", query, identifier, varNum);
+                    this._applyWithArgs("CreateConceptTypesResolver", query, identifier, varNum);
                     return query;
                 });
                 return this._opt(function() {
@@ -426,7 +426,7 @@
             return binds;
         },
         RoleBinding: function(baseTermName) {
-            var $elf = this, _fromIdx = this.input.idx, baseBind, binding, data, identifier, number;
+            var $elf = this, _fromIdx = this.input.idx, baseBind, binding, conceptTypeResolver, data, identifier, number;
             this._form(function() {
                 this._applyWithArgs("exactly", "RoleBinding");
                 identifier = this._apply("Identifier");
@@ -444,6 +444,12 @@
                 this._pred(baseBind);
                 return baseBind.binding;
             }, function() {
+                conceptTypeResolver = this.conceptTypeResolvers[identifier.name + "." + number];
+                this._or(function() {
+                    return this._pred(!conceptTypeResolver);
+                }, function() {
+                    return conceptTypeResolver(baseTermName);
+                });
                 return [ "ReferencedField", baseTermName + "." + number, identifier.name ];
             });
             return {
@@ -907,6 +913,7 @@
         },
         Rule: function() {
             var $elf = this, _fromIdx = this.input.idx, ruleBody, ruleText;
+            this._apply("ResetRuleState");
             return this._form(function() {
                 this._applyWithArgs("exactly", "Rule");
                 this._lookahead(function() {
@@ -1024,15 +1031,27 @@
             for (var i = 0; i < whereBody.length; i++) "Where" == whereBody[i][0] && this.AddWhereClause(query, whereBody[i][1]);
         }
     };
-    LF2AbstractSQL.ResolveConceptTypes = function(query, identifier, varNum, untilConcept) {
-        for (var conceptAlias, parentAlias = identifier.name + varNum, concept = this.ReconstructIdentifier(identifier), conceptTable; (null == untilConcept || !this.IdentifiersEqual(concept, untilConcept)) && (concept = this.FollowConceptType(concept)) !== !1; ) {
-            conceptAlias = concept[1] + varNum;
-            conceptTable = this.GetTable(concept[1]);
-            if (conceptTable.primitive !== !1) break;
-            query.push([ "From", [ conceptTable.name, conceptAlias ] ]);
-            this.AddWhereClause(query, [ "Equals", [ "ReferencedField", parentAlias, concept[1] ], [ "ReferencedField", conceptAlias, conceptTable.idField ] ]);
-            parentAlias = conceptAlias;
-        }
+    LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) {
+        var parentAlias = identifier.name + varNum, concept = this.ReconstructIdentifier(identifier), conceptTypeResolutions, $elf = this;
+        if (this.conceptTypeResolvers[parentAlias]) throw new Error('Concept type resolver already added for "' + parentAlias + '"!');
+        conceptTypeResolutions = [ identifier.name ];
+        this.conceptTypeResolvers[parentAlias] = function(untilConcept) {
+            var conceptTable, conceptAlias;
+            parentAlias = _.last(conceptTypeResolutions);
+            if (parentAlias !== !0 && !_.includes(conceptTypeResolutions, untilConcept)) {
+                for (;(concept = this.FollowConceptType(concept)) !== !1; ) {
+                    conceptAlias = concept[1] + varNum;
+                    conceptTable = this.GetTable(concept[1]);
+                    if (conceptTable.primitive !== !1) break;
+                    query.push([ "From", [ conceptTable.name, conceptAlias ] ]);
+                    this.AddWhereClause(query, [ "Equals", [ "ReferencedField", parentAlias, concept[1] ], [ "ReferencedField", conceptAlias, conceptTable.idField ] ]);
+                    parentAlias = conceptAlias;
+                    conceptTypeResolutions.push(parentAlias);
+                    if (null != untilConcept && !this.IdentifiersEqual(concept, untilConcept)) break;
+                }
+                concept === !1 && conceptTypeResolutions.push(!0);
+            }
+        }.bind(this);
     };
     LF2AbstractSQL.initialize = function() {
         this.reset();
@@ -1047,6 +1066,10 @@
         this.attributes = {};
         this.bindAttributes = [];
         this.bindAttributeDepth = [];
+        this.ResetRuleState();
+    };
+    LF2AbstractSQL.ResetRuleState = function() {
+        this.conceptTypeResolvers = {};
     };
     LF2AbstractSQL.addTypes = function(types) {
         _.assign(this.sbvrTypes, types);
