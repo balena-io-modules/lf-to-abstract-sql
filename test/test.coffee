@@ -43,7 +43,10 @@ module.exports = (builtInVocab = false) ->
 
 				seSoFar += input + '\n'
 				if property
-					expect(result).to.have.deep.property(property).to.deep.equal(matches)
+					if matches is undefined
+						expect(result).to.not.have.deep.property(property)
+					else
+						expect(result).to.have.deep.property(property).to.deep.equal(matches)
 				else if ruleSQL
 					lastRule = result.rules[result.rules.length - 1]
 					deleteWhereBodies(lastRule)

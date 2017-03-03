@@ -1,3 +1,5 @@
+* Removed tables that should not exist from the output.
+
 v0.0.19
 
 * Switched to only adding concept type joins if they're actually needed.

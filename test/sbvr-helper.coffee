@@ -36,7 +36,7 @@ exports.TableSpace = ->
 		if term[2] is 'Type'
 			return term[1]
 		table = tables[generateName(term[1])]
-		return table.matches.primitive
+		return table.table.primitive
 	parseFactType = (factType, bindings) ->
 		primitiveFactType = true
 		tableName = []
@@ -142,7 +142,8 @@ exports.TableSpace = ->
 
 				@se = getLineType(lf) + ': ' + toSE(lf, currentVocab)
 				@property = 'tables.' + tableName
-				@matches = tableDefinition
+				@table = tableDefinition
+				@matches = _.cloneDeep(@table)
 				@tableName = tableName
 
 				tables[tableName] = this
@@ -167,7 +168,7 @@ exports.TableSpace = ->
 								index: null
 								references: null
 								defaultValue: null
-							_.assign @matches,
+							_.assign @table,
 								idField: null
 								primitive: primitive
 								referenceScheme: typeName
@@ -175,6 +176,7 @@ exports.TableSpace = ->
 									createdAtField
 									primitiveField
 								]
+							@matches = undefined
 						else
 							typeName = term[1]
 							@matches.fields.push
@@ -199,10 +201,11 @@ exports.TableSpace = ->
 							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
 							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
-							if _.some(bindings, (binding) -> tables[generateName(binding[1][1])].matches.primitive)
-								@matches = 'Attribute'
+							if _.some(bindings, (binding) -> tables[generateName(binding[1][1])].table.primitive)
+								@table = 'Attribute'
 							else
-								@matches = 'ForeignKey'
+								@table = 'ForeignKey'
+							@matches = @table
 					when 'Definition'
 						# Nulling the property just checks that there are no changes to the previous test result.
 						@property = null
@@ -336,7 +339,7 @@ exports.TableSpace = ->
 						else
 							throw new Error('Unknown primitive fact type: ' + factType[1][1])
 
-				if tables[tableName].matches is 'Attribute'
+				if tables[tableName].table is 'Attribute'
 					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, factType[2][1]]
 					return attributeBindings[binding.alias]
 
