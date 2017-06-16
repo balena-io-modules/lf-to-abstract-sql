@@ -61,11 +61,11 @@ SBVRCompilerLibs.UnmappedFactType = function(factType) {
 SBVRCompilerLibs.GetResourceName = function(termOrFactType) {
 	var i = 0, resource = [];
 	if(_.isString(termOrFactType)) {
-		return termOrFactType.replace(new RegExp(' ', 'g'), '_');
+		return termOrFactType;
 	}
 	else {
 		for(;i < termOrFactType.length; i++) {
-			resource.push(termOrFactType[i][1].replace(new RegExp(' ', 'g'), '_'));
+			resource.push(termOrFactType[i][1]);
 		}
 		return resource.join('-');
 	}

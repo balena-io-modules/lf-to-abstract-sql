@@ -21,7 +21,8 @@ nest = (lf, sequence, allMatches = false) ->
 		return results
 	return false
 generateName = (namePart) ->
-	namePart.replace(/\ /g, '_')
+	namePart
+
 createdAtField =
 	dataType: 'Date Time'
 	fieldName: 'created at'
@@ -80,7 +81,7 @@ exports.TableSpace = ->
 				indexes = []
 				switch lf[0]
 					when 'Term'
-						tableName = lf[1].replace(/\ /g, '_')
+						tableName = generateName(lf[1])
 						referenceScheme = idField
 					when 'FactType'
 						tableName = []

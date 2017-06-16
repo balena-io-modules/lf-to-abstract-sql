@@ -1,3 +1,4 @@
+* Changed table names to keep spaces in terms and verbs, but `-` between them, matching fields, eg 'pilot-can fly-plane'
 * Removed tables that should not exist from the output.
 
 v0.0.19
