@@ -89,9 +89,11 @@ exports.TableSpace = ->
 				indexes = []
 				switch lf[0]
 					when 'Term'
+						modelName = lf[1]
 						tableName = generateName(lf[1])
 						referenceScheme = idField
 					when 'FactType'
+						modelName = _(lf).without('FactType').reject(0: 'Attributes').map(1).join(' ')
 						tableName = []
 						uniqueIndex =
 							type: 'UNIQUE'
@@ -141,6 +143,7 @@ exports.TableSpace = ->
 				)
 				tableDefinition = {
 					name: tableName
+					modelName
 					primitive: false
 					idField
 					fields

@@ -56,7 +56,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	{console.error('We already have an identifier with a name of: ' + identifierName)} ?(false)
 		)
 		{this.identifiers[identifierName] = identifierName}
-		{this.tables[resourceName] = this.CreateTable()}
+		{this.tables[resourceName] = this.CreateTable(identifierName)}
 		-> identifierName,
 	Attributes :termOrFactType =
 			end
@@ -214,7 +214,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				FactTypeFieldName(factType):fieldName
 				AddTableField(identifierTable, fieldName, 'Boolean', true)
 				{this.tables[resourceName] = 'BooleanAttribute'}
-			|	{this.tables[resourceName] = this.CreateTable()}:linkTable
+			|	{this.tables[resourceName] = this.CreateTable(_(factType).map(1).join(' '))}:linkTable
 				{[]}:uniqueFields
 				(	Identifier:identifier
 					{[ ['Term', resourceName], ['Verb', 'has'], ['Term', identifier.name] ]}:linkHasFactType
@@ -715,8 +715,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		}
 	,
 
-	CreateTable =
-		{{fields: [], primitive: false, name: null, indexes: [], idField: null}}:table
+	CreateTable :modelName =
+		{{fields: [], primitive: false, name: null, indexes: [], idField: null, modelName: modelName}}:table
 		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
 		-> table
 }
