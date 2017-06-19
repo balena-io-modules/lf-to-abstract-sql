@@ -143,6 +143,7 @@ exports.TableSpace = ->
 				)
 				tableDefinition = {
 					name: tableName
+					resourceName: tableName
 					modelName
 					primitive: false
 					idField
