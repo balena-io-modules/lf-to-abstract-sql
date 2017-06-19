@@ -92,7 +92,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			)?
 			{identifierTable.referenceScheme = conceptType}
 		|	{'ConceptType'}:dataType
-			{{tableName: conceptTable.name, fieldName: conceptTable.idField}}:references
+			GetReference(conceptTable):references
 		)
 		AddTableField(identifierTable, conceptType, dataType, true, null, references),
 	AttrDatabaseIDField :termOrFactType =
@@ -160,7 +160,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			?(fieldID !== false)
 			{baseTable.fields.splice(fieldID, 1)}
 		)?
-		{{ tableName: fkTable.name, fieldName: fkTable.idField }}:references
+		GetReference(fkTable):references
 		AddTableField(baseTable, fkName, 'ForeignKey', required, null, references):fieldID
 		(	?fieldID
 			// Field already exists, so we manually set the required attr
@@ -228,7 +228,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 					GetTable(identifier.name):fkTable
 					(	?fkTable.primitive
 						AddTableField(linkTable, fieldName, fkTable.primitive, true)
-					|	{{ tableName: fkTable.name, fieldName: fkTable.idField }}:references
+					|	GetReference(fkTable):references
 						AddTableField(linkTable, fieldName, 'ForeignKey', true, null, references)
 					)
 				|	['Verb' :verb :negated]
@@ -719,6 +719,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{{fields: [], primitive: false, name: null, indexes: [], idField: null, resourceName: resourceName, modelName: modelName}}:table
 		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
 		-> (this.tables[resourceName] = table)
+	,
+
+	GetReference :table =
+		-> { tableName: table.name, fieldName: table.idField }
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
