@@ -229,6 +229,10 @@ exports.TableSpace = ->
 					when 'SynonymousForm'
 						tableName = parseFactType(lf[1]).tableName
 						tables[tableName] = this
+					when 'Synonym'
+						synonym = lf[1]
+						@property = 'synonyms.' + synonym
+						@matches = this.modelName
 					when 'TermForm'
 						tableName = generateName(lf[1][1])
 						tables[tableName] = this

@@ -12,7 +12,7 @@ describe 'students', ->
 	# T: person
 	test Table person
 	# 	Synonym: homo sapiens
-	test synonym homoSapiens
+	test attribute synonym homoSapiens
 	# T: educational institution
 	test Table educationalInstitution
 	#	Definition: "UniS" or "UWE"

@@ -55,7 +55,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		(	?(!this.tables.hasOwnProperty(resourceName))
 		|	{console.error('We already have an identifier with a name of: ' + identifierName)} ?(false)
 		)
-		{this.identifiers[identifierName] = identifierName}
 		CreateTable(resourceName, identifierName)
 		-> identifierName,
 	Attributes :termOrFactType =
@@ -184,15 +183,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		GetTableFieldID(baseTable, uniqueField):fieldID
 		?(fieldID !== false)
 		{baseTable.fields[fieldID].index = 'UNIQUE'},
-	// AttrSynonym :term =
-		// :synonym {this.identifiers[synonym[1]] = term[1]},
+	AttrSynonym :term =
+		:synonym
+		{this.synonyms[synonym[1]] = term[1]}
+	,
 	AttrSynonymousForm :factType =
 		:synForm
 		AddFactType(synForm, factType),
 	AttrTermForm :factType =
 		:term
 		{	this.termForms[factType] = term;
-			this.identifiers[term[1]] = factType;
+			this.synonyms[term[1]] = this.GetResourceName(factType);
 			this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
@@ -726,7 +727,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				return table.primitive && !hasDependants[tableName];
 			}),
 			relationships: this.relationships,
-			rules: this.rules
+			rules: this.rules,
+			synonyms: this.synonyms
 		}
 	,
 
@@ -899,7 +901,7 @@ LF2AbstractSQL.reset = function() {
 	SBVRCompilerLibs.initialize.call(this);
 	this.tables = {};
 	this.relationships = {};
-	this.identifiers = {}; // TODO: Is this needed?
+	this.synonyms = {};
 	this.rules = [];
 	this.attributes = {};
 	this.bindAttributes = [];
