@@ -60,10 +60,37 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	Attributes :termOrFactType =
 			end
 		|	[	'Attributes'
-				(	[	:attributeName ApplyFirstExisting(['Attr' + attributeName, 'DefaultAttr'], [termOrFactType]):attributeValue
+				{{}}:attributes
+				(	[	:attributeName
+						(anything)*:attributeVals
 					]
+					{attributes[attributeName] = attributeVals}
 				)*
-			],
+			]
+			{[
+				'DatabaseTableName',
+				'DatabaseIDField',
+				'DatabasePrimitive',
+				'TermForm',
+				'ConceptType',
+				'SynonymousForm',
+				'Synonym',
+				'ReferenceScheme',
+				'ForeignKey',
+				'Attribute',
+				'Unique'
+			]}:attrOrder
+			{
+				_.each(attrOrder, function(attributeName) {
+					if(attributes.hasOwnProperty(attributeName)) {
+						$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributes[attributeName]));
+					}
+				});
+				_(attributes).omit(attrOrder).each(function(attributeVals, attributeName) {
+					$elf._applyWithArgs.apply($elf, ['ApplyFirstExisting', ['Attr' + attributeName, 'DefaultAttr'], [termOrFactType].concat(attributeVals)]);
+				});
+			}
+	,
 	DefaultAttr :termOrFactType =
 		:anything,
 		// {console.log('Default', termOrFactType, anything)},
@@ -173,7 +200,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{delete this.relationships[linkResourceName]}
 		{this.tables[linkResourceName] = 'ForeignKey'},
 	AttrUnique :factType =
-		// TODO: This needs to have the dependency of coming after ForeignKey/Attribute attrs removed.
 		:required
 		GetTable(factType):baseTable
 		(	?(baseTable === 'Attribute' || baseTable === 'ForeignKey')
