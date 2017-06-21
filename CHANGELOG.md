@@ -1,3 +1,4 @@
+* Removed 'BooleanAttribute'/'Attribute'/'ForeignKey' placeholder tables from the output.
 * Added relationship info for synonymous form relationships
 * Added a list of synonyms to the result
 * Added relationship info for attributes, foreign keys, boolean attributes, and from link tables (fact types) to its component terms.

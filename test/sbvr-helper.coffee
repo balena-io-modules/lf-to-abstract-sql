@@ -156,11 +156,13 @@ exports.TableSpace = ->
 				# If we're a boolean attribute then we override the definition.
 				if booleanAttribute
 					tableDefinition = 'BooleanAttribute'
+					@matches = undefined
+				else
+					@matches = _.cloneDeep(tableDefinition)
 
 				@se = getLineType(lf) + ': ' + toSE(lf, currentVocab)
 				@property = 'tables.' + tableName
 				@table = tableDefinition
-				@matches = _.cloneDeep(@table)
 				@tableName = tableName
 
 				tables[tableName] = this
@@ -222,7 +224,7 @@ exports.TableSpace = ->
 								@table = 'Attribute'
 							else
 								@table = 'ForeignKey'
-							@matches = @table
+							@matches = undefined
 					when 'Definition'
 						# Nulling the property just checks that there are no changes to the previous test result.
 						@property = null

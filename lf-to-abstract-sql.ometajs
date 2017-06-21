@@ -785,7 +785,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		}
 		-> { // We omit any tables that are primitives and not depended upon.
 			tables: _.omitBy(this.tables, function(table, tableName) {
-				return table.primitive && !hasDependants[tableName];
+				return _.isString(table) || (table.primitive && !hasDependants[tableName]);
 			}),
 			relationships: this.relationships,
 			rules: this.rules,
