@@ -20,8 +20,15 @@ nest = (lf, sequence, allMatches = false) ->
 	if results.length > 0
 		return results
 	return false
+
 generateName = (namePart) ->
 	namePart
+
+generateFieldName = (factType) ->
+	if factType[1][1] is 'has'
+		# If it's a has we just use the term
+		return factType[2][1]
+	return factType[1][1] + '-' + factType[2][1]
 
 createdAtField =
 	dataType: 'Date Time'
@@ -30,6 +37,7 @@ createdAtField =
 	index: null
 	references: null
 	defaultValue: 'CURRENT_TIMESTAMP'
+
 exports.TableSpace = ->
 	tables = {}
 
@@ -91,14 +99,18 @@ exports.TableSpace = ->
 						factType = lf[1...-1]
 						if factType.length is 2
 							booleanAttribute = true
-						for factTypePart in factType
-							fieldName = factTypePart[1] + (factTypePart[3]?[1] ? '')
+						for factTypePart, i in factType
 							referenceTableName = generateName(factTypePart[1])
 							tableName.push(referenceTableName)
 							if tables[referenceTableName]?
 								# Update to the table's true name, for instance in the case of term form.
 								referenceTableName = tables[referenceTableName].tableName
 							if factTypePart[0] is 'Term'
+								fieldName =
+									if i is 0
+										generateName(factTypePart[1])
+									else
+										generateFieldName(factType[i - 2..i])
 								uniqueIndex.fields.push(fieldName)
 								primitive = isPrimitive(factTypePart)
 								if primitive
@@ -341,7 +353,7 @@ exports.TableSpace = ->
 							throw new Error('Unknown primitive fact type: ' + factType[1][1])
 
 				if tables[tableName].table is 'Attribute'
-					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, factType[2][1]]
+					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, generateFieldName(factType)]
 					return attributeBindings[binding.alias]
 
 				return [

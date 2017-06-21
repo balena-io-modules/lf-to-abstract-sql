@@ -1,3 +1,4 @@
+* Switched to generating field names as "verb-term" (except when the verb is 'has') so that it is possible to differentiate relationships between terms. eg 'pilot copilots for pilot' and 'pilot trained pilot'
 * Changed table names to keep spaces in terms and verbs, but `-` between them, matching fields, eg 'pilot-can fly-plane'
 * Removed tables that should not exist from the output.
 

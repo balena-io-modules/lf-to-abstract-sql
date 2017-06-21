@@ -26,10 +26,11 @@ describe 'students', ->
 	test Table factType person, verb('is enrolled in'), educationalInstitution, verb('for'), age
 	# 	Term Form: school year enrollment
 	test attribute termForm schoolYearEnrollment
-	# Fact type: school year enrollment is for age
-	test Table factType schoolYearEnrollment, verb('is for'), age
+	# -- We use 'for' (the verb used in the initial fact type) as a workaround to allow modifying the initial fact type exactly/at most one cardinality
+	# Fact type: school year enrollment has age
+	test Table factType schoolYearEnrollment, verb('for'), age
 	#     Necessity: each school year enrollment is for exactly one age.
-	test attribute necessity 'each', schoolYearEnrollment, verb('is for'), ['at most', 'one'], age
+	test attribute necessity 'each', schoolYearEnrollment, verb('for'), ['at most', 'one'], age
 	test {
 		property: 'tables.school year enrollment.fields[3].required'
 		matches: false

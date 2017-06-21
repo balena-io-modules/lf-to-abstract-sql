@@ -143,15 +143,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{this.tables[this.GetResourceName(factType)] = 'Attribute'}
 			GetTable(factType[0][1]):baseTable
 			{factType[2][1]}:attributeName
+			FactTypeFieldName(factType):fieldName
 			GetTable(attributeName):attributeTable
-			GetTableFieldID(baseTable, attributeName):fieldID
+			GetTableFieldID(baseTable, fieldName):fieldID
 			{baseTable.fields[fieldID].dataType = attributeTable.primitive}
 		)?,
 	AttrForeignKey :factType =
 		:required
 		GetTable(factType[0][1]):baseTable
-		{factType[2][1]}:fkName
-		GetTable(fkName):fkTable
+		{factType[2][1]}:foreignTerm
+		FactTypeFieldName(factType):fkName
+		GetTable(foreignTerm):fkTable
 		(	?(baseTable.idField == fkName)
 			// If the foreign key matches the id field then delete the current field before adding the new.
 			GetTableFieldID(baseTable, fkName):fieldID
@@ -172,7 +174,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		(	?(baseTable === 'Attribute' || baseTable === 'ForeignKey')
 			GetTable(factType[0][1]):baseTable
 		)?
-		{factType[2][1]}:uniqueField
+		FactTypeFieldName(factType):uniqueField
 		GetTableFieldID(baseTable, uniqueField):fieldID
 		?(fieldID !== false)
 		{baseTable.fields[fieldID].index = 'UNIQUE'},
@@ -209,12 +211,19 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				// Eat input
 				(:factTypePart &(:attributes))+
 				GetTable(factType[0][1]):identifierTable
-				AddTableField(identifierTable, factType[1][1], 'Boolean', true)
+				FactTypeFieldName(factType):fieldName
+				AddTableField(identifierTable, fieldName, 'Boolean', true)
 				{this.tables[resourceName] = 'BooleanAttribute'}
 			|	{this.tables[resourceName] = this.CreateTable()}:linkTable
 				{[]}:uniqueFields
 				(	Identifier:identifier
-					{identifier.name + identifier.num}:fieldName
+					{[ ['Term', resourceName], ['Verb', 'has'], ['Term', identifier.name] ]}:linkHasFactType
+					{[ ['Term', resourceName], linkVerb, ['Term', identifier.name] ]}:linkVerbFactType
+					(	?linkVerb
+						// If we've seen a verb then we can use it in the name, indicating the direction (particularly important for self-referential many-many)
+						FactTypeFieldName(linkVerbFactType)
+					|	FactTypeFieldName(linkHasFactType)
+					):fieldName
 					{uniqueFields.push(fieldName)}
 					GetTable(identifier.name):fkTable
 					(	?fkTable.primitive
@@ -223,6 +232,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 						AddTableField(linkTable, fieldName, 'ForeignKey', true, null, references)
 					)
 				|	['Verb' :verb :negated]
+					{['Verb', verb]}:linkVerb
 				)+
 				{linkTable.indexes.push({type: 'UNIQUE', fields: uniqueFields})}
 			)
@@ -381,17 +391,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			?(binds.length == 2)
 			{binds[0]}:bindFrom
 			{binds[1]}:bindTo
-			{actualFactType[2]}:baseToIdentifier
-			GetTable(baseToIdentifier[1]):tableTo
+			FactTypeFieldName(actualFactType):fieldName
+			GetTable(actualFactType[2][1]):tableTo
 		|	___ForeignKeyMatchingFailed___.die
 		)
-		-> ['Equals', ['ReferencedField', bindFrom.binding[1], baseToIdentifier[1]], ['ReferencedField', bindTo.binding[1], tableTo.idField]],
+		-> ['Equals', ['ReferencedField', bindFrom.binding[1], fieldName], ['ReferencedField', bindTo.binding[1], tableTo.idField]],
 
 	BooleanAttribute :actualFactType =
 		?(this.GetTable(actualFactType) == 'BooleanAttribute')
 		(	RoleBindings(actualFactType):binds
 			?(binds.length == 1)
-			{actualFactType[1][1]}:attributeName
+			FactTypeFieldName(actualFactType):attributeName
 			{actualFactType[1][2]}:negated
 		|	{console.error(this.input)}
 			___BooleanAttributeMatchingFailed___.die
@@ -607,8 +617,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier))
 						&& ($elf.bindAttributeDepth[bind.number] == null || $elf.bindAttributeDepth[bind.number] > depth);
 			})}:attrBinding
+			{_.cloneDeep(unmappedFactType)}:baseAttrFactType
+			{baseAttrFactType[2][1] = attrBinding.identifier.name}
+			FactTypeFieldName(baseAttrFactType):attrFieldName
 			{	this.bindAttributeDepth[attrBinding.number] = depth;
-				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrBinding.identifier.name]};
+				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]};
 			}
 		|	// Ignore primitive only fact types.
 			?_.some(binds, function(bind) {
@@ -730,7 +743,24 @@ LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, in
 		});
 	}
 	return fieldID;
-}
+};
+
+LF2AbstractSQL.FactTypeFieldName = function(factType) {
+	if (factType.length > 3) {
+		// We don't currently handle multiple term fact types
+		throw new Error('Multiple term fact types are unsupported')
+	}
+	if (factType.length === 2) {
+		// Boolean fact type is just the verb
+		return factType[1][1];
+	}
+	if (factType[1][1] === 'has') {
+		// Otherwise if it's a has we just use the term
+		return factType[2][1];
+	}
+	// Otherwise we use verb-term
+	return factType[1][1] + '-' + factType[2][1];
+};
 
 LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
 	// TODO: Move these to optimisation passes?
