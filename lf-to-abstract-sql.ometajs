@@ -192,6 +192,19 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		GetReference(fkTable):references
 		AddTableField(baseTable, fkName, 'ForeignKey', required, null, references):fieldID
 		AddRelationship(baseTable, factType.slice(1), fkName, references)
+		GetResourceName(factType):factTypeResourceName
+		{
+			_.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
+				var actualFactType = $elf.MappedFactType(synForm);
+				if (actualFactType[0][3] === 0) {
+					$elf.AddRelationship(baseTable, synForm.slice(1), fkName, references);
+				} else {
+					var synResourceName = $elf.GetResourceName(synForm[0][1]);
+					var reverseReferences = $elf.GetReference(baseTable, fkName);
+					$elf.AddRelationship(synResourceName, synForm.slice(1), references.fieldName, reverseReferences);
+				}
+			})
+		}
 		(	?fieldID
 			// Field already exists, so we manually set the required attr
 			{baseTable.fields[fieldID].required = required}
@@ -215,7 +228,29 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	,
 	AttrSynonymousForm :factType =
 		:synForm
-		AddFactType(synForm, factType),
+		AddFactType(synForm, factType)
+		GetResourceName(factType):resourceName
+		{
+			if(this.synonymousForms[resourceName] == null) {
+				this.synonymousForms[resourceName] = [];
+			}
+			this.synonymousForms[resourceName].push(synForm)
+		}
+		(	?(this.IsPrimitive(factType[0]))
+			// If we're on a primitive fact type we do nothing
+		|	?(factType.length == 2)
+			FactTypeFieldName(factType):fieldName
+			GetResourceName(factType[0][1]):resourceName
+			AddRelationship(resourceName, synForm.slice(1), fieldName)
+		|	MappedFactType(synForm):actualFactType
+			GetResourceName(factType):resourceName
+			GetTable(synForm[2][1]):fkTable
+			(	?(!fkTable.primitive)
+				GetReference(fkTable)
+			)?:references
+			AddRelationship(resourceName, synForm.slice(1), synForm[2][1], references)
+		)
+	,
 	AttrTermForm :factType =
 		:term
 		{	this.termForms[factType] = term;
@@ -764,8 +799,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		-> (this.tables[resourceName] = table)
 	,
 
-	GetReference :table =
-		-> { tableName: table.name, fieldName: table.idField }
+	GetReference :table :field =
+		-> { tableName: table.name, fieldName: field || table.idField }
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -928,6 +963,7 @@ LF2AbstractSQL.reset = function() {
 	this.tables = {};
 	this.relationships = {};
 	this.synonyms = {};
+	this.synonymousForms = {};
 	this.rules = [];
 	this.attributes = {};
 	this.bindAttributes = [];
