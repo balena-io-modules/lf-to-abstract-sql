@@ -237,26 +237,31 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	AttrSynonymousForm :factType =
 		:synForm
 		AddFactType(synForm, factType)
-		GetResourceName(factType):resourceName
-		{
-			if(this.synonymousForms[resourceName] == null) {
-				this.synonymousForms[resourceName] = [];
-			}
-			this.synonymousForms[resourceName].push(synForm)
-		}
-		(	?(this.IsPrimitive(factType[0]))
+		(	?(this.IsPrimitive(factType[0]) || this.IsPrimitive(synForm[0]))
 			// If we're on a primitive fact type we do nothing
-		|	?(factType.length == 2)
+		|	GetResourceName(factType):resourceName
+			{	if(this.synonymousForms[resourceName] == null) {
+					this.synonymousForms[resourceName] = [];
+				}
+				this.synonymousForms[resourceName].push(synForm)
+			}
 			FactTypeFieldName(factType):fieldName
-			GetResourceName(factType[0][1]):resourceName
-			AddRelationship(resourceName, synForm.slice(1), fieldName)
-		|	MappedFactType(synForm):actualFactType
-			GetResourceName(factType):resourceName
-			GetTable(synForm[2][1]):fkTable
-			(	?(!fkTable.primitive)
-				GetReference(fkTable)
-			)?:references
-			AddRelationship(resourceName, synForm.slice(1), synForm[2][1], references)
+			(	?(factType.length == 2)
+				GetResourceName(factType[0][1]):resourceName
+				AddRelationship(resourceName, synForm.slice(1), fieldName)
+			|	GetTable(synForm[2][1]):fkTable
+				(	?(!fkTable.primitive)
+					GetReference(fkTable)
+				)?:references
+				AddRelationship(resourceName, synForm.slice(1), synForm[2][1], references)
+				(	?references
+					GetTable(factType):linkTable
+					GetTable(synForm[0][1]):fromTable
+					// If we're on the first identifier we add a link from it to the link table
+					GetReference(linkTable, fieldName):linkRef
+					AddRelationship(fromTable, synForm.slice(1), references.fieldName, linkRef)
+				)?
+			)
 		)
 	,
 	AttrTermForm :factType =
