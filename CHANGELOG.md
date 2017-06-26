@@ -1,3 +1,4 @@
+* Updated to sbvr-parser ^0.1.0 so we can rely on the `has`/`is of` synonymous forms being in the LF.
 * Added relationship info from the term form of a fact type to it's component terms
 * Added relationship info from the first term of a synonymous form to the fact type table
 * Added relationship info from the first term of a fact type to the fact type table
