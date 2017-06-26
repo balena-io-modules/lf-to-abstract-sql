@@ -265,15 +265,28 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		)
 	,
 	AttrTermForm :factType =
-		:term
-		{	this.termForms[factType] = term;
-			this.synonyms[term[1]] = this.GetResourceName(factType);
-			this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+		:termForm
+		GetResourceName(factType):linkResourceName
+		GetTable(factType):linkTable
+		{	var linkVerb;
+			this.termForms[factType] = termForm;
+			this.synonyms[termForm[1]] = linkResourceName;
+			this.tables[this.GetResourceName(termForm[1])] = linkTable;
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
-					var extraFactType = [term, ['Verb', 'has', false], factType[i]];
+					var extraFactType = [termForm, ['Verb', 'has', false], factType[i]];
 					this.AddFactType(extraFactType, extraFactType);
-					this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? 'Attribute' : 'ForeignKey';
+					var termTable = this.GetTable(factType[i][1]);
+					if (termTable.primitive) {
+						this.tables[this.GetResourceName(extraFactType)] = 'Attribute';
+					} else {
+						this.tables[this.GetResourceName(extraFactType)] = 'ForeignKey';
+						var fieldName = this.FactTypeFieldName([ ['Term', linkResourceName], linkVerb || ['Verb', 'has'], factType[i] ]);
+						var references = this.GetReference(linkTable, fieldName);
+						this.AddRelationship(termTable, [['Verb', 'has'], termForm], termTable.idField, references);
+					}
+				} else if (factType[i][0] === 'Verb') {
+					linkVerb = factType[i]
 				}
 			}
 		},
