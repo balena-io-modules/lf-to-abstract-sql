@@ -157,7 +157,15 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		GetTable(tableID):table
 		(	?_.isString(table)
 		|	{table.name = tableName}
-		),
+		)
+		(	?(_.isArray(termOrFactType[0]) && termOrFactType.length > 2)
+			GetResourceName(termOrFactType):linkResourceName
+			GetTable(termOrFactType[0][1]):baseTable
+			// When we add the table name to the link table we have to add the relationship to it from the base table
+			FactTypeFieldName([ ['Term', linkResourceName], ['Verb', 'has'], termOrFactType[0] ]):fieldName
+			GetReference(table, fieldName):references
+			AddRelationship(baseTable, termOrFactType.slice(1), baseTable.idField, references, true)
+		)?,
 	AttrDatabasePrimitive :termOrFactType =
 		:attrVal
 		GetTableID(termOrFactType):tableID
@@ -827,8 +835,8 @@ LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, in
 	return fieldID;
 };
 
-LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references) {
-	if (factType[0][1] === 'has') {
+LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references, forceHas) {
+	if (forceHas !== true && factType[0][1] === 'has') {
 		// If this is an `x has y` fact type then also add an entry for the relationship without the 'has'
 		var strippedFactType = _.clone(factType);
 		strippedFactType.shift();

@@ -1,3 +1,4 @@
+* Added relationship info from the first term of a fact type to the fact type table
 * Removed 'BooleanAttribute'/'Attribute'/'ForeignKey' placeholder tables from the output.
 * Added relationship info for synonymous form relationships
 * Added a list of synonyms to the result
