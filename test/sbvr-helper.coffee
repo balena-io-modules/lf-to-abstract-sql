@@ -71,7 +71,7 @@ exports.TableSpace = ->
 					tableName.push(generateName(verbName))
 					tableAlias.push(verbName)
 		return {
-			tableName: tableName.join('-')
+			tableName: tableName.map(resolveSynonym).join('-')
 			tableAlias: tableAlias.join('-')
 			verb
 			primitiveFactType
@@ -101,6 +101,7 @@ exports.TableSpace = ->
 					when 'FactType'
 						modelName = _(lf).without('FactType').reject(0: 'Attributes').map(1).join(' ')
 						tableName = []
+						resourceName = []
 						uniqueIndex =
 							type: 'UNIQUE'
 							fields: []
@@ -108,8 +109,10 @@ exports.TableSpace = ->
 						if factType.length is 2
 							booleanAttribute = true
 						for factTypePart, i in factType
-							referenceTableName = generateName(factTypePart[1])
-							tableName.push(referenceTableName)
+							name = generateName(factTypePart[1])
+							tableName.push(name)
+							referenceTableName = resolveSynonym(name)
+							resourceName.push(referenceTableName)
 							if getTable(referenceTableName)?
 								# Update to the table's true name, for instance in the case of term form.
 								referenceTableName = getTable(referenceTableName).tableName
@@ -139,6 +142,7 @@ exports.TableSpace = ->
 								)
 						indexes.push(uniqueIndex)
 						tableName = tableName.join('-')
+						resourceName = resourceName.join('-')
 				fields.push(
 					dataType: 'Serial'
 					fieldName: idField
@@ -149,7 +153,7 @@ exports.TableSpace = ->
 				)
 				tableDefinition = {
 					name: tableName
-					resourceName: tableName
+					resourceName: resourceName ? tableName
 					modelName
 					primitive: false
 					idField
@@ -167,7 +171,7 @@ exports.TableSpace = ->
 					@matches = _.cloneDeep(tableDefinition)
 
 				@se = getLineType(lf) + ': ' + toSE(lf, currentVocab)
-				@property = 'tables.' + tableName
+				@property = 'tables.' + tableDefinition.resourceName
 				@table = tableDefinition
 				@tableName = tableName
 
@@ -212,12 +216,12 @@ exports.TableSpace = ->
 									fieldName: 'id'
 									tableName: generateName(typeName)
 								defaultValue: null
-							@property = 'tables.' + @tableName
+							@property = 'tables.' + @table.resourceName
 							@matches = _.cloneDeep(@table)
 					when 'ReferenceScheme'
 						term = lf[1]
 						@table.referenceScheme = term[1]
-						@property = 'tables.' + @tableName
+						@property = 'tables.' + @table.resourceName
 						@matches = _.cloneDeep(@table)
 					when 'Necessity'
 						lf = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification'])

@@ -32,7 +32,7 @@ describe 'students', ->
 	#     Necessity: each school year enrollment is for exactly one age.
 	test attribute necessity 'each', schoolYearEnrollment, verb('for'), ['at most', 'one'], age
 	test {
-		property: 'tables.school year enrollment.fields[3].required'
+		property: 'tables.person-is enrolled in-educational institution-for-age.fields[3].required'
 		matches: false
 		se: '-- should have set the age to not required'
 	}

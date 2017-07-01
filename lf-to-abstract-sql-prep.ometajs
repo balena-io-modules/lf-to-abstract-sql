@@ -119,6 +119,7 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 
 LF2AbstractSQLPrep.initialize = function() {
 	_.assign(this, SBVRCompilerLibs);
+	SBVRCompilerLibs.initialize.call(this);
 	LFOptimiser.initialize.call(this);
 	this.foreignKeys = {};
 	this.uniqueKeys = {};

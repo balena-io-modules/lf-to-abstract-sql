@@ -271,7 +271,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{	var linkVerb;
 			this.termForms[factType] = termForm;
 			this.synonyms[termForm[1]] = linkResourceName;
-			this.tables[this.GetResourceName(termForm[1])] = linkTable;
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
 					var extraFactType = [termForm, ['Verb', 'has', false], factType[i]];
@@ -827,12 +826,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 
 	GetReference :table :field =
 		-> { tableName: table.name, fieldName: field || table.idField }
-	,
-
-	ResolveSynonym :name =
-			?this.synonyms[name]
-			-> this.synonyms[name]
-		|	-> name
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -994,7 +987,6 @@ LF2AbstractSQL.reset = function() {
 	SBVRCompilerLibs.initialize.call(this);
 	this.tables = {};
 	this.relationships = {};
-	this.synonyms = {};
 	this.synonymousForms = {};
 	this.rules = [];
 	this.attributes = {};
