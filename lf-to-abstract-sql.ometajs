@@ -827,6 +827,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 
 	GetReference :table :field =
 		-> { tableName: table.name, fieldName: field || table.idField }
+	,
+
+	ResolveSynonym :name =
+			?this.synonyms[name]
+			-> this.synonyms[name]
+		|	-> name
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -870,7 +876,7 @@ LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, ref
 	}
 	var relationships = this.relationships[resourceName];
 	for (var i = 0; i < factType.length - 1; i++) {
-		var partName = factType[i][1];
+		var partName = this.ResolveSynonym(factType[i][1]);
 		if (relationships[partName] == null) {
 			relationships[partName] = {};
 		}
@@ -880,7 +886,7 @@ LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, ref
 	if (references != null) {
 		relationReference.push([ references.tableName, references.fieldName ])
 	}
-	relationships[factType[i][1]] = relationReference;
+	relationships[this.ResolveSynonym(factType[i][1])] = relationReference;
 };
 
 LF2AbstractSQL.FactTypeFieldName = function(factType) {

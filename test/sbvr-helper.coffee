@@ -40,11 +40,17 @@ createdAtField =
 
 exports.TableSpace = ->
 	tables = {}
+	synonyms = {}
+
+	resolveSynonym = (name) ->
+		return synonyms[name] ? name
+	getTable = (name) ->
+		return tables[resolveSynonym(generateName(name))]
 
 	isPrimitive = (term) ->
 		if term[2] is 'Type'
 			return term[1]
-		table = tables[generateName(term[1])]
+		table = getTable(term[1])
 		return table.table.primitive
 	parseFactType = (factType, bindings) ->
 		primitiveFactType = true
@@ -104,9 +110,9 @@ exports.TableSpace = ->
 						for factTypePart, i in factType
 							referenceTableName = generateName(factTypePart[1])
 							tableName.push(referenceTableName)
-							if tables[referenceTableName]?
+							if getTable(referenceTableName)?
 								# Update to the table's true name, for instance in the case of term form.
-								referenceTableName = tables[referenceTableName].tableName
+								referenceTableName = getTable(referenceTableName).tableName
 							if factTypePart[0] is 'Term'
 								fieldName =
 									if i is 0
@@ -173,7 +179,6 @@ exports.TableSpace = ->
 				else if _.isObject(lf)
 					{ lf, se } = lf
 				@se = getLineType(lf) + ': ' + se
-				@matches = _.cloneDeep(@matches)
 				switch lf[0]
 					when 'ConceptType'
 						term = lf[1]
@@ -198,7 +203,7 @@ exports.TableSpace = ->
 							@matches = undefined
 						else
 							typeName = term[1]
-							@matches.fields.push
+							@table.fields.push
 								dataType: 'ConceptType'
 								fieldName: typeName
 								required: true
@@ -207,9 +212,13 @@ exports.TableSpace = ->
 									fieldName: 'id'
 									tableName: generateName(typeName)
 								defaultValue: null
+							@property = 'tables.' + @tableName
+							@matches = _.cloneDeep(@table)
 					when 'ReferenceScheme'
 						term = lf[1]
-						@matches.referenceScheme = term[1]
+						@table.referenceScheme = term[1]
+						@property = 'tables.' + @tableName
+						@matches = _.cloneDeep(@table)
 					when 'Necessity'
 						lf = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification'])
 						quant = nest(lf, ['ExactQuantification'])
@@ -220,7 +229,7 @@ exports.TableSpace = ->
 							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
 							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
-							if _.some(bindings, (binding) -> tables[generateName(binding[1][1])].table.primitive)
+							if _.some(bindings, (binding) -> getTable(binding[1][1]).table.primitive)
 								@table = 'Attribute'
 							else
 								@table = 'ForeignKey'
@@ -232,13 +241,15 @@ exports.TableSpace = ->
 						tableName = parseFactType(lf[1]).tableName
 						tables[tableName] = this
 					when 'Synonym'
-						synonym = lf[1]
-						@property = 'synonyms.' + synonym
-						@matches = this.modelName
+						synonym = generateName(lf[1][1])
+						synonyms[synonym] = @tableName
+						@property = 'synonyms'
+						@matches = _.clone(synonyms)
 					when 'TermForm'
-						tableName = generateName(lf[1][1])
-						tables[tableName] = this
-						@property = 'tables.' + tableName
+						termFormSynonym = generateName(lf[1][1])
+						synonyms[termFormSynonym] = @tableName
+						@property = 'synonyms'
+						@matches = _.clone(synonyms)
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return this
@@ -362,7 +373,7 @@ exports.TableSpace = ->
 						else
 							throw new Error('Unknown primitive fact type: ' + factType[1][1])
 
-				if tables[tableName].table is 'Attribute'
+				if getTable(tableName).table is 'Attribute'
 					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, generateFieldName(factType)]
 					return attributeBindings[binding.alias]
 
