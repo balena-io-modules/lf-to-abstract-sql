@@ -1,3 +1,4 @@
+* Switched relationships info to terminate with a $ property, this fixes cases where one relationship is a subset of another
 * Stopped adding a alias for the term form of a fact type to the returned tables list and instead consistently use the original resource name via synonym resolution - this also fixes an issue where relationships info for foreign keys of term form tables was incorrect
 * Updated to sbvr-parser ^0.1.0 so we can rely on the `has`/`is of` synonymous forms being in the LF.
 * Added relationship info from the term form of a fact type to it's component terms

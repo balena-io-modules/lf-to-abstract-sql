@@ -853,6 +853,8 @@ LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, in
 };
 
 LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references, forceHas) {
+	var $elf = this;
+
 	if (forceHas !== true && factType[0][1] === 'has') {
 		// If this is an `x has y` fact type then also add an entry for the relationship without the 'has'
 		var strippedFactType = _.clone(factType);
@@ -867,19 +869,23 @@ LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, ref
 	if (this.relationships[resourceName] == null) {
 		this.relationships[resourceName] = {};
 	}
+
 	var relationships = this.relationships[resourceName];
-	for (var i = 0; i < factType.length - 1; i++) {
-		var partName = this.ResolveSynonym(factType[i][1]);
+	_(factType).flatMap(function(factTypePart) {
+		return $elf.ResolveSynonym(factTypePart[1]).split('-');
+	}).each(function(partName) {
 		if (relationships[partName] == null) {
 			relationships[partName] = {};
 		}
 		relationships = relationships[partName];
-	}
+	})
+
 	var relationReference = [ fieldName ];
 	if (references != null) {
-		relationReference.push([ references.tableName, references.fieldName ])
+		relationReference.push([ references.tableName, references.fieldName ]);
 	}
-	relationships[this.ResolveSynonym(factType[i][1])] = relationReference;
+
+	relationships.$ = relationReference;
 };
 
 LF2AbstractSQL.FactTypeFieldName = function(factType) {
