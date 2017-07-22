@@ -1,3 +1,16 @@
+* Switched relationships info to terminate with a $ property, this fixes cases where one relationship is a subset of another
+* Stopped adding a alias for the term form of a fact type to the returned tables list and instead consistently use the original resource name via synonym resolution - this also fixes an issue where relationships info for foreign keys of term form tables was incorrect
+* Updated to sbvr-parser ^0.1.0 so we can rely on the `has`/`is of` synonymous forms being in the LF.
+* Added relationship info from the term form of a fact type to it's component terms
+* Added relationship info from the first term of a synonymous form to the fact type table
+* Added relationship info from the first term of a fact type to the fact type table
+* Removed 'BooleanAttribute'/'Attribute'/'ForeignKey' placeholder tables from the output.
+* Added relationship info for synonymous form relationships
+* Added a list of synonyms to the result
+* Added relationship info for attributes, foreign keys, boolean attributes, and from link tables (fact types) to its component terms.
+* Added `modelName` to the table info
+* Switched to generating field names as "verb-term" (except when the verb is 'has') so that it is possible to differentiate relationships between terms. eg 'pilot copilots for pilot' and 'pilot trained pilot'
+* Changed table names to keep spaces in terms and verbs, but `-` between them, matching fields, eg 'pilot-can fly-plane'
 * Removed tables that should not exist from the output.
 
 v0.0.19

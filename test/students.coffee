@@ -12,7 +12,7 @@ describe 'students', ->
 	# T: person
 	test Table person
 	# 	Synonym: homo sapiens
-	test synonym homoSapiens
+	test attribute synonym homoSapiens
 	# T: educational institution
 	test Table educationalInstitution
 	#	Definition: "UniS" or "UWE"
@@ -26,12 +26,13 @@ describe 'students', ->
 	test Table factType person, verb('is enrolled in'), educationalInstitution, verb('for'), age
 	# 	Term Form: school year enrollment
 	test attribute termForm schoolYearEnrollment
-	# Fact type: school year enrollment is for age
-	test Table factType schoolYearEnrollment, verb('is for'), age
+	# -- We use 'for' (the verb used in the initial fact type) as a workaround to allow modifying the initial fact type exactly/at most one cardinality
+	# Fact type: school year enrollment has age
+	test Table factType schoolYearEnrollment, verb('for'), age
 	#     Necessity: each school year enrollment is for exactly one age.
-	test attribute necessity 'each', schoolYearEnrollment, verb('is for'), ['at most', 'one'], age
+	test attribute necessity 'each', schoolYearEnrollment, verb('for'), ['at most', 'one'], age
 	test {
-		property: 'tables.school_year_enrollment.fields[3].required'
+		property: 'tables.person-is enrolled in-educational institution-for-age.fields[3].required'
 		matches: false
 		se: '-- should have set the age to not required'
 	}

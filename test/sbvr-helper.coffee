@@ -20,8 +20,16 @@ nest = (lf, sequence, allMatches = false) ->
 	if results.length > 0
 		return results
 	return false
+
 generateName = (namePart) ->
-	namePart.replace(/\ /g, '_')
+	namePart
+
+generateFieldName = (factType) ->
+	if factType[1][1] is 'has'
+		# If it's a has we just use the term
+		return factType[2][1]
+	return factType[1][1] + '-' + factType[2][1]
+
 createdAtField =
 	dataType: 'Date Time'
 	fieldName: 'created at'
@@ -29,13 +37,20 @@ createdAtField =
 	index: null
 	references: null
 	defaultValue: 'CURRENT_TIMESTAMP'
+
 exports.TableSpace = ->
 	tables = {}
+	synonyms = {}
+
+	resolveSynonym = (name) ->
+		return synonyms[name] ? name
+	getTable = (name) ->
+		return tables[resolveSynonym(generateName(name))]
 
 	isPrimitive = (term) ->
 		if term[2] is 'Type'
 			return term[1]
-		table = tables[generateName(term[1])]
+		table = getTable(term[1])
 		return table.table.primitive
 	parseFactType = (factType, bindings) ->
 		primitiveFactType = true
@@ -56,7 +71,7 @@ exports.TableSpace = ->
 					tableName.push(generateName(verbName))
 					tableAlias.push(verbName)
 		return {
-			tableName: tableName.join('-')
+			tableName: tableName.map(resolveSynonym).join('-')
 			tableAlias: tableAlias.join('-')
 			verb
 			primitiveFactType
@@ -80,24 +95,33 @@ exports.TableSpace = ->
 				indexes = []
 				switch lf[0]
 					when 'Term'
-						tableName = lf[1].replace(/\ /g, '_')
+						modelName = lf[1]
+						tableName = generateName(lf[1])
 						referenceScheme = idField
 					when 'FactType'
+						modelName = _(lf).without('FactType').reject(0: 'Attributes').map(1).join(' ')
 						tableName = []
+						resourceName = []
 						uniqueIndex =
 							type: 'UNIQUE'
 							fields: []
 						factType = lf[1...-1]
 						if factType.length is 2
 							booleanAttribute = true
-						for factTypePart in factType
-							fieldName = factTypePart[1] + (factTypePart[3]?[1] ? '')
-							referenceTableName = generateName(factTypePart[1])
-							tableName.push(referenceTableName)
-							if tables[referenceTableName]?
+						for factTypePart, i in factType
+							name = generateName(factTypePart[1])
+							tableName.push(name)
+							referenceTableName = resolveSynonym(name)
+							resourceName.push(referenceTableName)
+							if getTable(referenceTableName)?
 								# Update to the table's true name, for instance in the case of term form.
-								referenceTableName = tables[referenceTableName].tableName
+								referenceTableName = getTable(referenceTableName).tableName
 							if factTypePart[0] is 'Term'
+								fieldName =
+									if i is 0
+										generateName(factTypePart[1])
+									else
+										generateFieldName(factType[i - 2..i])
 								uniqueIndex.fields.push(fieldName)
 								primitive = isPrimitive(factTypePart)
 								if primitive
@@ -118,6 +142,7 @@ exports.TableSpace = ->
 								)
 						indexes.push(uniqueIndex)
 						tableName = tableName.join('-')
+						resourceName = resourceName.join('-')
 				fields.push(
 					dataType: 'Serial'
 					fieldName: idField
@@ -128,6 +153,8 @@ exports.TableSpace = ->
 				)
 				tableDefinition = {
 					name: tableName
+					resourceName: resourceName ? tableName
+					modelName
 					primitive: false
 					idField
 					fields
@@ -139,11 +166,13 @@ exports.TableSpace = ->
 				# If we're a boolean attribute then we override the definition.
 				if booleanAttribute
 					tableDefinition = 'BooleanAttribute'
+					@matches = undefined
+				else
+					@matches = _.cloneDeep(tableDefinition)
 
 				@se = getLineType(lf) + ': ' + toSE(lf, currentVocab)
-				@property = 'tables.' + tableName
+				@property = 'tables.' + tableDefinition.resourceName
 				@table = tableDefinition
-				@matches = _.cloneDeep(@table)
 				@tableName = tableName
 
 				tables[tableName] = this
@@ -154,7 +183,6 @@ exports.TableSpace = ->
 				else if _.isObject(lf)
 					{ lf, se } = lf
 				@se = getLineType(lf) + ': ' + se
-				@matches = _.cloneDeep(@matches)
 				switch lf[0]
 					when 'ConceptType'
 						term = lf[1]
@@ -179,7 +207,7 @@ exports.TableSpace = ->
 							@matches = undefined
 						else
 							typeName = term[1]
-							@matches.fields.push
+							@table.fields.push
 								dataType: 'ConceptType'
 								fieldName: typeName
 								required: true
@@ -188,9 +216,13 @@ exports.TableSpace = ->
 									fieldName: 'id'
 									tableName: generateName(typeName)
 								defaultValue: null
+							@property = 'tables.' + @table.resourceName
+							@matches = _.cloneDeep(@table)
 					when 'ReferenceScheme'
 						term = lf[1]
-						@matches.referenceScheme = term[1]
+						@table.referenceScheme = term[1]
+						@property = 'tables.' + @table.resourceName
+						@matches = _.cloneDeep(@table)
 					when 'Necessity'
 						lf = nest(lf, ['Rule', 'NecessityFormulation', 'UniversalQuantification'])
 						quant = nest(lf, ['ExactQuantification'])
@@ -201,21 +233,27 @@ exports.TableSpace = ->
 							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
 							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
-							if _.some(bindings, (binding) -> tables[generateName(binding[1][1])].table.primitive)
+							if _.some(bindings, (binding) -> getTable(binding[1][1]).table.primitive)
 								@table = 'Attribute'
 							else
 								@table = 'ForeignKey'
-							@matches = @table
+							@matches = undefined
 					when 'Definition'
 						# Nulling the property just checks that there are no changes to the previous test result.
 						@property = null
 					when 'SynonymousForm'
 						tableName = parseFactType(lf[1]).tableName
 						tables[tableName] = this
+					when 'Synonym'
+						synonym = generateName(lf[1][1])
+						synonyms[synonym] = @tableName
+						@property = 'synonyms'
+						@matches = _.clone(synonyms)
 					when 'TermForm'
-						tableName = generateName(lf[1][1])
-						tables[tableName] = this
-						@property = 'tables.' + tableName
+						termFormSynonym = generateName(lf[1][1])
+						synonyms[termFormSynonym] = @tableName
+						@property = 'synonyms'
+						@matches = _.clone(synonyms)
 					else
 						console.log 'Unknown attribute', require('util').inspect(lf, depth: null)
 				return this
@@ -339,8 +377,8 @@ exports.TableSpace = ->
 						else
 							throw new Error('Unknown primitive fact type: ' + factType[1][1])
 
-				if tables[tableName].table is 'Attribute'
-					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, factType[2][1]]
+				if getTable(tableName).table is 'Attribute'
+					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, generateFieldName(factType)]
 					return attributeBindings[binding.alias]
 
 				return [

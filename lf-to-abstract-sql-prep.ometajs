@@ -41,12 +41,12 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 	UniversalQuantification
 		"Variable":v trans*:xs SetHelped
 		-> ['LogicalNegation', ['ExistentialQuantification', v, ['LogicalNegation'].concat(xs)]],
-	
+
 	AtMostNQuantification
 		"MaximumCardinality":maxCard "Variable":v trans*:xs SetHelped
 		{maxCard[1][1]++}
 		-> ['LogicalNegation', ['AtLeastNQuantification', ['MinimumCardinality', maxCard[1]], v].concat(xs)],
-	
+
 	CardinalityOptimisation2 :v1 =
 		// Just a basic first var, no ClosedProjection.
 		?(v1.length == 3)
@@ -85,7 +85,7 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 		)
 		// We have matched a foreign key or unique, so call SetHelped.
 		SetHelped,
-	
+
 	CardinalityOptimisation
 		[	'UniversalQuantification'
 			"Variable":v1
@@ -98,12 +98,12 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 				]
 			]
 		],
-	
+
 	NecessityOptimisation =
 		CardinalityOptimisation,
 	ObligationOptimisation =
 		CardinalityOptimisation,
-	
+
 	Rule
 		(	[	'ObligationFormulation'
 				ObligationOptimisation
@@ -119,6 +119,7 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 
 LF2AbstractSQLPrep.initialize = function() {
 	_.assign(this, SBVRCompilerLibs);
+	SBVRCompilerLibs.initialize.call(this);
 	LFOptimiser.initialize.call(this);
 	this.foreignKeys = {};
 	this.uniqueKeys = {};
@@ -142,7 +143,8 @@ LF2AbstractSQLPrep.defaultAttributes = function(termOrFactType, attrsFound, attr
 				this.SetHelped();
 			}
 			if(!attrsFound.hasOwnProperty('DatabaseTableName')) {
-				attrs.splice(1, 0, ['DatabaseTableName', termOrFactType[1].replace(new RegExp(' ','g'),'_')]);
+				var tableName = this.GetResourceName(termOrFactType[1]);
+				attrs.splice(1, 0, ['DatabaseTableName', tableName]);
 				this.SetHelped();
 			}
 			if(!attrsFound.hasOwnProperty('DatabasePrimitive')) {
@@ -165,10 +167,7 @@ LF2AbstractSQLPrep.defaultAttributes = function(termOrFactType, attrsFound, attr
 					this.SetHelped();
 				}
 				if(!attrsFound.hasOwnProperty('DatabaseTableName')) {
-					var tableName = actualFactType[1][1].replace(new RegExp(' ','g'),'_');
-					for(var i=2;i<actualFactType.length;i++) {
-						tableName += '-' + actualFactType[i][1].replace(new RegExp(' ','g'),'_');
-					}
+					var tableName = this.GetResourceName(actualFactType.slice(1));
 					attrs.splice(1, 0, ['DatabaseTableName', tableName]);
 					this.SetHelped();
 				}
@@ -197,7 +196,7 @@ LF2AbstractSQLPrep.defaultAttributes = function(termOrFactType, attrsFound, attr
 						___MISMATCHED_FOREIGN_KEY___.die();
 					}
 				}
-				
+
 				// Boolean fact type
 				if(actualFactType.length == 3) {
 					if(!this.primitives.hasOwnProperty(actualFactType[1]) || this.primitives[actualFactType[1]] !== false) {

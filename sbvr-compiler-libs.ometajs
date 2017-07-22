@@ -1,10 +1,16 @@
 var SBVRLibs = require('@resin/sbvr-parser/sbvr-libs').SBVRLibs,
 	_ = require('lodash');
 
-export ometa SBVRCompilerLibs <: SBVRLibs {}
+export ometa SBVRCompilerLibs <: SBVRLibs {
+	ResolveSynonym :name =
+			?this.synonyms[name]
+			-> this.synonyms[name]
+		|	-> name
+}
 
 SBVRCompilerLibs.initialize = function() {
 	SBVRLibs.initialize.call(this);
+	this.synonyms = {};
 };
 
 SBVRCompilerLibs.TYPE_VOCAB = 'Type';
@@ -61,11 +67,11 @@ SBVRCompilerLibs.UnmappedFactType = function(factType) {
 SBVRCompilerLibs.GetResourceName = function(termOrFactType) {
 	var i = 0, resource = [];
 	if(_.isString(termOrFactType)) {
-		return termOrFactType.replace(new RegExp(' ', 'g'), '_');
+		return this.ResolveSynonym(termOrFactType);
 	}
 	else {
 		for(;i < termOrFactType.length; i++) {
-			resource.push(termOrFactType[i][1].replace(new RegExp(' ', 'g'), '_'));
+			resource.push(this.ResolveSynonym(termOrFactType[i][1]));
 		}
 		return resource.join('-');
 	}

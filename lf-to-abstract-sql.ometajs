@@ -55,16 +55,42 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		(	?(!this.tables.hasOwnProperty(resourceName))
 		|	{console.error('We already have an identifier with a name of: ' + identifierName)} ?(false)
 		)
-		{this.identifiers[identifierName] = identifierName}
-		{this.tables[resourceName] = this.CreateTable()}
+		CreateTable(resourceName, identifierName)
 		-> identifierName,
 	Attributes :termOrFactType =
 			end
 		|	[	'Attributes'
-				(	[	:attributeName ApplyFirstExisting(['Attr' + attributeName, 'DefaultAttr'], [termOrFactType]):attributeValue
+				{{}}:attributes
+				(	[	:attributeName
+						(anything)*:attributeVals
 					]
+					{attributes[attributeName] = attributeVals}
 				)*
-			],
+			]
+			{[
+				'DatabaseTableName',
+				'DatabaseIDField',
+				'DatabasePrimitive',
+				'TermForm',
+				'ConceptType',
+				'SynonymousForm',
+				'Synonym',
+				'ReferenceScheme',
+				'ForeignKey',
+				'Attribute',
+				'Unique'
+			]}:attrOrder
+			{
+				_.each(attrOrder, function(attributeName) {
+					if(attributes.hasOwnProperty(attributeName)) {
+						$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributes[attributeName]));
+					}
+				});
+				_(attributes).omit(attrOrder).each(function(attributeVals, attributeName) {
+					$elf._applyWithArgs.apply($elf, ['ApplyFirstExisting', ['Attr' + attributeName, 'DefaultAttr'], [termOrFactType].concat(attributeVals)]);
+				});
+			}
+	,
 	DefaultAttr :termOrFactType =
 		:anything,
 		// {console.log('Default', termOrFactType, anything)},
@@ -92,7 +118,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			)?
 			{identifierTable.referenceScheme = conceptType}
 		|	{'ConceptType'}:dataType
-			{{tableName: conceptTable.name, fieldName: conceptTable.idField}}:references
+			GetReference(conceptTable):references
 		)
 		AddTableField(identifierTable, conceptType, dataType, true, null, references),
 	AttrDatabaseIDField :termOrFactType =
@@ -131,7 +157,15 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		GetTable(tableID):table
 		(	?_.isString(table)
 		|	{table.name = tableName}
-		),
+		)
+		(	?(_.isArray(termOrFactType[0]) && termOrFactType.length > 2)
+			GetResourceName(termOrFactType):linkResourceName
+			GetTable(termOrFactType[0][1]):baseTable
+			// When we add the table name to the link table we have to add the relationship to it from the base table
+			FactTypeFieldName([ ['Term', linkResourceName], ['Verb', 'has'], termOrFactType[0] ]):fieldName
+			GetReference(table, fieldName):references
+			AddRelationship(baseTable, termOrFactType.slice(1), baseTable.idField, references, true)
+		)?,
 	AttrDatabasePrimitive :termOrFactType =
 		:attrVal
 		GetTableID(termOrFactType):tableID
@@ -140,57 +174,118 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		:attrVal
 		(	?attrVal
 			{this.attributes[factType] = attrVal}
-			{this.tables[this.GetResourceName(factType)] = 'Attribute'}
+			GetResourceName(factType):linkResourceName
+			{delete this.relationships[linkResourceName]}
+			{this.tables[linkResourceName] = 'Attribute'}
 			GetTable(factType[0][1]):baseTable
-			{factType[2][1]}:attributeName
-			GetTable(attributeName):attributeTable
-			GetTableFieldID(baseTable, attributeName):fieldID
+			FactTypeFieldName(factType):fieldName
+			GetTable(factType[2][1]):attributeTable
+			GetTableFieldID(baseTable, fieldName):fieldID
 			{baseTable.fields[fieldID].dataType = attributeTable.primitive}
+			// Overwrite the foreign key relationship with an attribute one
+			AddRelationship(baseTable, factType.slice(1), fieldName)
 		)?,
 	AttrForeignKey :factType =
 		:required
 		GetTable(factType[0][1]):baseTable
-		{factType[2][1]}:fkName
-		GetTable(fkName):fkTable
+		{factType[2][1]}:foreignTerm
+		FactTypeFieldName(factType):fkName
+		GetTable(foreignTerm):fkTable
 		(	?(baseTable.idField == fkName)
 			// If the foreign key matches the id field then delete the current field before adding the new.
 			GetTableFieldID(baseTable, fkName):fieldID
 			?(fieldID !== false)
 			{baseTable.fields.splice(fieldID, 1)}
 		)?
-		{{ tableName: fkTable.name, fieldName: fkTable.idField }}:references
+		GetReference(fkTable):references
 		AddTableField(baseTable, fkName, 'ForeignKey', required, null, references):fieldID
+		AddRelationship(baseTable, factType.slice(1), fkName, references)
+		GetResourceName(factType):factTypeResourceName
+		{
+			_.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
+				var actualFactType = $elf.MappedFactType(synForm);
+				if (actualFactType[0][3] === 0) {
+					$elf.AddRelationship(baseTable, synForm.slice(1), fkName, references);
+				} else {
+					var synResourceName = $elf.GetResourceName(synForm[0][1]);
+					var reverseReferences = $elf.GetReference(baseTable, fkName);
+					$elf.AddRelationship(synResourceName, synForm.slice(1), references.fieldName, reverseReferences);
+				}
+			})
+		}
 		(	?fieldID
 			// Field already exists, so we manually set the required attr
 			{baseTable.fields[fieldID].required = required}
 		)?
-		{this.tables[this.GetResourceName(factType)] = 'ForeignKey'},
+		GetResourceName(factType):linkResourceName
+		{delete this.relationships[linkResourceName]}
+		{this.tables[linkResourceName] = 'ForeignKey'},
 	AttrUnique :factType =
-		// TODO: This needs to have the dependency of coming after ForeignKey/Attribute attrs removed.
 		:required
 		GetTable(factType):baseTable
 		(	?(baseTable === 'Attribute' || baseTable === 'ForeignKey')
 			GetTable(factType[0][1]):baseTable
 		)?
-		{factType[2][1]}:uniqueField
+		FactTypeFieldName(factType):uniqueField
 		GetTableFieldID(baseTable, uniqueField):fieldID
 		?(fieldID !== false)
 		{baseTable.fields[fieldID].index = 'UNIQUE'},
-	// AttrSynonym :term =
-		// :synonym {this.identifiers[synonym[1]] = term[1]},
+	AttrSynonym :term =
+		:synonym
+		{this.synonyms[synonym[1]] = term[1]}
+	,
 	AttrSynonymousForm :factType =
 		:synForm
-		AddFactType(synForm, factType),
+		AddFactType(synForm, factType)
+		(	?(this.IsPrimitive(factType[0]) || this.IsPrimitive(synForm[0]))
+			// If we're on a primitive fact type we do nothing
+		|	GetResourceName(factType):resourceName
+			{	if(this.synonymousForms[resourceName] == null) {
+					this.synonymousForms[resourceName] = [];
+				}
+				this.synonymousForms[resourceName].push(synForm)
+			}
+			FactTypeFieldName(factType):fieldName
+			(	?(factType.length == 2)
+				GetResourceName(factType[0][1]):resourceName
+				AddRelationship(resourceName, synForm.slice(1), fieldName)
+			|	GetTable(synForm[2][1]):fkTable
+				(	?(!fkTable.primitive)
+					GetReference(fkTable)
+				)?:references
+				AddRelationship(resourceName, synForm.slice(1), synForm[2][1], references)
+				(	?references
+					GetTable(factType):linkTable
+					GetTable(synForm[0][1]):fromTable
+					// If we're on the first identifier we add a link from it to the link table
+					GetReference(linkTable, fieldName):linkRef
+					AddRelationship(fromTable, synForm.slice(1), references.fieldName, linkRef)
+				)?
+			)
+		)
+	,
 	AttrTermForm :factType =
-		:term
-		{	this.termForms[factType] = term;
-			this.identifiers[term[1]] = factType;
-			this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+		:termForm
+		GetResourceName(factType):linkResourceName
+		GetTable(factType):linkTable
+		{	var linkVerb;
+			this.termForms[factType] = termForm;
+			this.synonyms[termForm[1]] = linkResourceName;
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
-					var extraFactType = [term, ['Verb', 'has', false], factType[i]];
+					var extraFactType = [termForm, ['Verb', 'has', false], factType[i]];
 					this.AddFactType(extraFactType, extraFactType);
-					this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? 'Attribute' : 'ForeignKey';
+					var termTable = this.GetTable(factType[i][1]);
+					if (termTable.primitive) {
+						this.tables[this.GetResourceName(extraFactType)] = 'Attribute';
+					} else {
+						this.tables[this.GetResourceName(extraFactType)] = 'ForeignKey';
+						var fieldName = this.FactTypeFieldName([ ['Term', linkResourceName], linkVerb || ['Verb', 'has'], factType[i] ]);
+						var references = this.GetReference(linkTable, fieldName);
+						this.AddRelationship(termTable, [['Verb', 'has'], termForm], termTable.idField, references);
+					}
+				} else if (factType[i][0] === 'Verb') {
+					linkVerb = factType[i]
 				}
 			}
 		},
@@ -209,20 +304,36 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				// Eat input
 				(:factTypePart &(:attributes))+
 				GetTable(factType[0][1]):identifierTable
-				AddTableField(identifierTable, factType[1][1], 'Boolean', true)
+				FactTypeFieldName(factType):fieldName
+				AddTableField(identifierTable, fieldName, 'Boolean', true)
+				{delete this.relationships[resourceName]}
 				{this.tables[resourceName] = 'BooleanAttribute'}
-			|	{this.tables[resourceName] = this.CreateTable()}:linkTable
+				AddRelationship(identifierTable, factType.slice(1), fieldName)
+			|	CreateTable(resourceName, _(factType).map(1).join(' ')):linkTable
 				{[]}:uniqueFields
 				(	Identifier:identifier
-					{identifier.name + identifier.num}:fieldName
+					{[ ['Term', resourceName], ['Verb', 'has'], ['Term', identifier.name] ]}:linkHasFactType
+					{[ ['Term', resourceName], linkVerb, ['Term', identifier.name] ]}:linkVerbFactType
+					(	?linkVerb
+						// If we've seen a verb then we can use it in the name, indicating the direction (particularly important for self-referential many-many)
+						FactTypeFieldName(linkVerbFactType)
+					|	FactTypeFieldName(linkHasFactType)
+					):fieldName
 					{uniqueFields.push(fieldName)}
 					GetTable(identifier.name):fkTable
 					(	?fkTable.primitive
 						AddTableField(linkTable, fieldName, fkTable.primitive, true)
-					|	{{ tableName: fkTable.name, fieldName: fkTable.idField }}:references
-						AddTableField(linkTable, fieldName, 'ForeignKey', true, null, references)
-					)
+						-> null
+					|	GetReference(fkTable):references
+						AddTableField(linkTable, fieldName, 'ForeignKey', true, null, references):fieldID
+						-> references
+					):references
+					AddRelationship(resourceName, linkHasFactType.slice(2), fieldName, references)
+					(	?linkVerb
+						AddRelationship(resourceName, linkVerbFactType.slice(1), fieldName, references)
+					)?
 				|	['Verb' :verb :negated]
+					{['Verb', verb]}:linkVerb
 				)+
 				{linkTable.indexes.push({type: 'UNIQUE', fields: uniqueFields})}
 			)
@@ -381,17 +492,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			?(binds.length == 2)
 			{binds[0]}:bindFrom
 			{binds[1]}:bindTo
-			{actualFactType[2]}:baseToIdentifier
-			GetTable(baseToIdentifier[1]):tableTo
+			FactTypeFieldName(actualFactType):fieldName
+			GetTable(actualFactType[2][1]):tableTo
 		|	___ForeignKeyMatchingFailed___.die
 		)
-		-> ['Equals', ['ReferencedField', bindFrom.binding[1], baseToIdentifier[1]], ['ReferencedField', bindTo.binding[1], tableTo.idField]],
+		-> ['Equals', ['ReferencedField', bindFrom.binding[1], fieldName], ['ReferencedField', bindTo.binding[1], tableTo.idField]],
 
 	BooleanAttribute :actualFactType =
 		?(this.GetTable(actualFactType) == 'BooleanAttribute')
 		(	RoleBindings(actualFactType):binds
 			?(binds.length == 1)
-			{actualFactType[1][1]}:attributeName
+			FactTypeFieldName(actualFactType):attributeName
 			{actualFactType[1][2]}:negated
 		|	{console.error(this.input)}
 			___BooleanAttributeMatchingFailed___.die
@@ -607,8 +718,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier))
 						&& ($elf.bindAttributeDepth[bind.number] == null || $elf.bindAttributeDepth[bind.number] > depth);
 			})}:attrBinding
+			{_.cloneDeep(unmappedFactType)}:baseAttrFactType
+			{baseAttrFactType[2][1] = attrBinding.identifier.name}
+			FactTypeFieldName(baseAttrFactType):attrFieldName
 			{	this.bindAttributeDepth[attrBinding.number] = depth;
-				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrBinding.identifier.name]};
+				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]};
 			}
 		|	// Ignore primitive only fact types.
 			?_.some(binds, function(bind) {
@@ -696,16 +810,22 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		}
 		-> { // We omit any tables that are primitives and not depended upon.
 			tables: _.omitBy(this.tables, function(table, tableName) {
-				return table.primitive && !hasDependants[tableName];
+				return _.isString(table) || (table.primitive && !hasDependants[tableName]);
 			}),
-			rules: this.rules
+			relationships: this.relationships,
+			rules: this.rules,
+			synonyms: this.synonyms
 		}
 	,
 
-	CreateTable =
-		{{fields: [], primitive: false, name: null, indexes: [], idField: null}}:table
+	CreateTable :resourceName :modelName =
+		{{fields: [], primitive: false, name: null, indexes: [], idField: null, resourceName: resourceName, modelName: modelName}}:table
 		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
-		-> table
+		-> (this.tables[resourceName] = table)
+	,
+
+	GetReference :table :field =
+		-> { tableName: table.name, fieldName: field || table.idField }
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -730,7 +850,60 @@ LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, in
 		});
 	}
 	return fieldID;
-}
+};
+
+LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references, forceHas) {
+	var $elf = this;
+
+	if (forceHas !== true && factType[0][1] === 'has') {
+		// If this is an `x has y` fact type then also add an entry for the relationship without the 'has'
+		var strippedFactType = _.clone(factType);
+		strippedFactType.shift();
+		this.AddRelationship(resourceName, strippedFactType, fieldName, references);
+	}
+
+	if (_.isObject(resourceName)) {
+		// We actually had a "table" object passed in, so take its resourceName
+		resourceName = resourceName.resourceName;
+	}
+	if (this.relationships[resourceName] == null) {
+		this.relationships[resourceName] = {};
+	}
+
+	var relationships = this.relationships[resourceName];
+	_(factType).flatMap(function(factTypePart) {
+		return $elf.ResolveSynonym(factTypePart[1]).split('-');
+	}).each(function(partName) {
+		if (relationships[partName] == null) {
+			relationships[partName] = {};
+		}
+		relationships = relationships[partName];
+	})
+
+	var relationReference = [ fieldName ];
+	if (references != null) {
+		relationReference.push([ references.tableName, references.fieldName ]);
+	}
+
+	relationships.$ = relationReference;
+};
+
+LF2AbstractSQL.FactTypeFieldName = function(factType) {
+	if (factType.length > 3) {
+		// We don't currently handle multiple term fact types
+		throw new Error('Multiple term fact types are unsupported')
+	}
+	if (factType.length === 2) {
+		// Boolean fact type is just the verb
+		return factType[1][1];
+	}
+	if (factType[1][1] === 'has') {
+		// Otherwise if it's a has we just use the term
+		return factType[2][1];
+	}
+	// Otherwise we use verb-term
+	return factType[1][1] + '-' + factType[2][1];
+};
 
 LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
 	// TODO: Move these to optimisation passes?
@@ -819,7 +992,8 @@ LF2AbstractSQL.initialize = function() {
 LF2AbstractSQL.reset = function() {
 	SBVRCompilerLibs.initialize.call(this);
 	this.tables = {};
-	this.identifiers = {}; // TODO: Is this needed?
+	this.relationships = {};
+	this.synonymousForms = {};
 	this.rules = [];
 	this.attributes = {};
 	this.bindAttributes = [];
