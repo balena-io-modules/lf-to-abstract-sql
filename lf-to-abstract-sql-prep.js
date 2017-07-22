@@ -156,6 +156,7 @@
     });
     LF2AbstractSQLPrep.initialize = function() {
         _.assign(this, SBVRCompilerLibs);
+        SBVRCompilerLibs.initialize.call(this);
         LFOptimiser.initialize.call(this);
         this.foreignKeys = {};
         this.uniqueKeys = {};
@@ -176,7 +177,8 @@
                 this.SetHelped();
             }
             if (!attrsFound.hasOwnProperty("DatabaseTableName")) {
-                attrs.splice(1, 0, [ "DatabaseTableName", termOrFactType[1].replace(new RegExp(" ", "g"), "_") ]);
+                var tableName = this.GetResourceName(termOrFactType[1]);
+                attrs.splice(1, 0, [ "DatabaseTableName", tableName ]);
                 this.SetHelped();
             }
             if (!attrsFound.hasOwnProperty("DatabasePrimitive")) {
@@ -195,7 +197,7 @@
                     this.SetHelped();
                 }
                 if (!attrsFound.hasOwnProperty("DatabaseTableName")) {
-                    for (var tableName = actualFactType[1][1].replace(new RegExp(" ", "g"), "_"), i = 2; i < actualFactType.length; i++) tableName += "-" + actualFactType[i][1].replace(new RegExp(" ", "g"), "_");
+                    var tableName = this.GetResourceName(actualFactType.slice(1));
                     attrs.splice(1, 0, [ "DatabaseTableName", tableName ]);
                     this.SetHelped();
                 }

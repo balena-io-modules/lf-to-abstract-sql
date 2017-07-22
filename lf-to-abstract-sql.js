@@ -92,24 +92,36 @@
                 console.error("We already have an identifier with a name of: " + identifierName);
                 return this._pred(!1);
             });
-            this.identifiers[identifierName] = identifierName;
-            this.tables[resourceName] = this.CreateTable();
+            this._applyWithArgs("CreateTable", resourceName, identifierName);
             return identifierName;
         },
         Attributes: function(termOrFactType) {
-            var $elf = this, _fromIdx = this.input.idx, attributeName, attributeValue;
+            var $elf = this, _fromIdx = this.input.idx, attrOrder, attributeName, attributeVals, attributes;
             return this._or(function() {
                 return this._apply("end");
             }, function() {
-                return this._form(function() {
+                this._form(function() {
                     this._applyWithArgs("exactly", "Attributes");
+                    attributes = {};
                     return this._many(function() {
-                        return this._form(function() {
+                        this._form(function() {
                             attributeName = this.anything();
-                            return attributeValue = this._applyWithArgs("ApplyFirstExisting", [ "Attr" + attributeName, "DefaultAttr" ], [ termOrFactType ]);
+                            return attributeVals = this._many(function() {
+                                return this.anything();
+                            });
                         });
+                        return attributes[attributeName] = attributeVals;
                     });
                 });
+                attrOrder = [ "DatabaseTableName", "DatabaseIDField", "DatabasePrimitive", "TermForm", "ConceptType", "SynonymousForm", "Synonym", "ReferenceScheme", "ForeignKey", "Attribute", "Unique" ];
+                return function() {
+                    _.each(attrOrder, function(attributeName) {
+                        attributes.hasOwnProperty(attributeName) && $elf._applyWithArgs.apply($elf, [ "Attr" + attributeName, termOrFactType ].concat(attributes[attributeName]));
+                    });
+                    return _(attributes).omit(attrOrder).each(function(attributeVals, attributeName) {
+                        $elf._applyWithArgs.apply($elf, [ "ApplyFirstExisting", [ "Attr" + attributeName, "DefaultAttr" ], [ termOrFactType ].concat(attributeVals) ]);
+                    });
+                }.call(this);
             });
         },
         DefaultAttr: function(termOrFactType) {
@@ -142,10 +154,7 @@
                 return identifierTable.referenceScheme = conceptType;
             }, function() {
                 dataType = "ConceptType";
-                return references = {
-                    tableName: conceptTable.name,
-                    fieldName: conceptTable.idField
-                };
+                return references = this._applyWithArgs("GetReference", conceptTable);
             });
             return this._applyWithArgs("AddTableField", identifierTable, conceptType, dataType, !0, null, references);
         },
@@ -189,14 +198,22 @@
             });
         },
         AttrDatabaseTableName: function(termOrFactType) {
-            var $elf = this, _fromIdx = this.input.idx, table, tableID, tableName;
+            var $elf = this, _fromIdx = this.input.idx, baseTable, fieldName, linkResourceName, references, table, tableID, tableName;
             tableName = this.anything();
             tableID = this._applyWithArgs("GetTableID", termOrFactType);
             table = this._applyWithArgs("GetTable", tableID);
-            return this._or(function() {
+            this._or(function() {
                 return this._pred(_.isString(table));
             }, function() {
                 return table.name = tableName;
+            });
+            return this._opt(function() {
+                this._pred(_.isArray(termOrFactType[0]) && termOrFactType.length > 2);
+                linkResourceName = this._applyWithArgs("GetResourceName", termOrFactType);
+                baseTable = this._applyWithArgs("GetTable", termOrFactType[0][1]);
+                fieldName = this._applyWithArgs("FactTypeFieldName", [ [ "Term", linkResourceName ], [ "Verb", "has" ], termOrFactType[0] ]);
+                references = this._applyWithArgs("GetReference", table, fieldName);
+                return this._applyWithArgs("AddRelationship", baseTable, termOrFactType.slice(1), baseTable.idField, references, !0);
             });
         },
         AttrDatabasePrimitive: function(termOrFactType) {
@@ -206,40 +223,53 @@
             return this.GetTable(tableID).primitive = attrVal;
         },
         AttrDatabaseAttribute: function(factType) {
-            var $elf = this, _fromIdx = this.input.idx, attrVal, attributeName, attributeTable, baseTable, fieldID;
+            var $elf = this, _fromIdx = this.input.idx, attrVal, attributeTable, baseTable, fieldID, fieldName, linkResourceName;
             attrVal = this.anything();
             return this._opt(function() {
                 this._pred(attrVal);
                 this.attributes[factType] = attrVal;
-                this.tables[this.GetResourceName(factType)] = "Attribute";
+                linkResourceName = this._applyWithArgs("GetResourceName", factType);
+                delete this.relationships[linkResourceName];
+                this.tables[linkResourceName] = "Attribute";
                 baseTable = this._applyWithArgs("GetTable", factType[0][1]);
-                attributeName = factType[2][1];
-                attributeTable = this._applyWithArgs("GetTable", attributeName);
-                fieldID = this._applyWithArgs("GetTableFieldID", baseTable, attributeName);
-                return baseTable.fields[fieldID].dataType = attributeTable.primitive;
+                fieldName = this._applyWithArgs("FactTypeFieldName", factType);
+                attributeTable = this._applyWithArgs("GetTable", factType[2][1]);
+                fieldID = this._applyWithArgs("GetTableFieldID", baseTable, fieldName);
+                baseTable.fields[fieldID].dataType = attributeTable.primitive;
+                return this._applyWithArgs("AddRelationship", baseTable, factType.slice(1), fieldName);
             });
         },
         AttrForeignKey: function(factType) {
-            var $elf = this, _fromIdx = this.input.idx, baseTable, fieldID, fkName, fkTable, required;
+            var $elf = this, _fromIdx = this.input.idx, baseTable, factTypeResourceName, fieldID, fkName, fkTable, foreignTerm, linkResourceName, references, required;
             required = this.anything();
             baseTable = this._applyWithArgs("GetTable", factType[0][1]);
-            fkName = factType[2][1];
-            fkTable = this._applyWithArgs("GetTable", fkName);
+            foreignTerm = factType[2][1];
+            fkName = this._applyWithArgs("FactTypeFieldName", factType);
+            fkTable = this._applyWithArgs("GetTable", foreignTerm);
             this._opt(function() {
                 this._pred(baseTable.idField == fkName);
                 fieldID = this._applyWithArgs("GetTableFieldID", baseTable, fkName);
                 this._pred(fieldID !== !1);
                 return baseTable.fields.splice(fieldID, 1);
             });
-            fieldID = this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, null, {
-                tableName: fkTable.name,
-                fieldName: fkTable.idField
+            references = this._applyWithArgs("GetReference", fkTable);
+            fieldID = this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, null, references);
+            this._applyWithArgs("AddRelationship", baseTable, factType.slice(1), fkName, references);
+            factTypeResourceName = this._applyWithArgs("GetResourceName", factType);
+            _.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
+                var actualFactType = $elf.MappedFactType(synForm);
+                if (0 === actualFactType[0][3]) $elf.AddRelationship(baseTable, synForm.slice(1), fkName, references); else {
+                    var synResourceName = $elf.GetResourceName(synForm[0][1]), reverseReferences = $elf.GetReference(baseTable, fkName);
+                    $elf.AddRelationship(synResourceName, synForm.slice(1), references.fieldName, reverseReferences);
+                }
             });
             this._opt(function() {
                 this._pred(fieldID);
                 return baseTable.fields[fieldID].required = required;
             });
-            return this.tables[this.GetResourceName(factType)] = "ForeignKey";
+            linkResourceName = this._applyWithArgs("GetResourceName", factType);
+            delete this.relationships[linkResourceName];
+            return this.tables[linkResourceName] = "ForeignKey";
         },
         AttrUnique: function(factType) {
             var $elf = this, _fromIdx = this.input.idx, baseTable, fieldID, required, uniqueField;
@@ -249,28 +279,69 @@
                 this._pred("Attribute" === baseTable || "ForeignKey" === baseTable);
                 return baseTable = this._applyWithArgs("GetTable", factType[0][1]);
             });
-            uniqueField = factType[2][1];
+            uniqueField = this._applyWithArgs("FactTypeFieldName", factType);
             fieldID = this._applyWithArgs("GetTableFieldID", baseTable, uniqueField);
             this._pred(fieldID !== !1);
             return baseTable.fields[fieldID].index = "UNIQUE";
         },
+        AttrSynonym: function(term) {
+            var $elf = this, _fromIdx = this.input.idx, synonym;
+            synonym = this.anything();
+            return this.synonyms[synonym[1]] = term[1];
+        },
         AttrSynonymousForm: function(factType) {
-            var $elf = this, _fromIdx = this.input.idx, synForm;
+            var $elf = this, _fromIdx = this.input.idx, fieldName, fkTable, fromTable, linkRef, linkTable, references, resourceName, synForm;
             synForm = this.anything();
-            return this._applyWithArgs("AddFactType", synForm, factType);
+            this._applyWithArgs("AddFactType", synForm, factType);
+            return this._or(function() {
+                return this._pred(this.IsPrimitive(factType[0]) || this.IsPrimitive(synForm[0]));
+            }, function() {
+                resourceName = this._applyWithArgs("GetResourceName", factType);
+                (function() {
+                    null == this.synonymousForms[resourceName] && (this.synonymousForms[resourceName] = []);
+                    return this.synonymousForms[resourceName].push(synForm);
+                }).call(this);
+                fieldName = this._applyWithArgs("FactTypeFieldName", factType);
+                return this._or(function() {
+                    this._pred(2 == factType.length);
+                    resourceName = this._applyWithArgs("GetResourceName", factType[0][1]);
+                    return this._applyWithArgs("AddRelationship", resourceName, synForm.slice(1), fieldName);
+                }, function() {
+                    fkTable = this._applyWithArgs("GetTable", synForm[2][1]);
+                    references = this._opt(function() {
+                        this._pred(!fkTable.primitive);
+                        return this._applyWithArgs("GetReference", fkTable);
+                    });
+                    this._applyWithArgs("AddRelationship", resourceName, synForm.slice(1), synForm[2][1], references);
+                    return this._opt(function() {
+                        this._pred(references);
+                        linkTable = this._applyWithArgs("GetTable", factType);
+                        fromTable = this._applyWithArgs("GetTable", synForm[0][1]);
+                        linkRef = this._applyWithArgs("GetReference", linkTable, fieldName);
+                        return this._applyWithArgs("AddRelationship", fromTable, synForm.slice(1), references.fieldName, linkRef);
+                    });
+                });
+            });
         },
         AttrTermForm: function(factType) {
-            var $elf = this, _fromIdx = this.input.idx, term;
-            term = this.anything();
+            var $elf = this, _fromIdx = this.input.idx, linkResourceName, linkTable, termForm;
+            termForm = this.anything();
+            linkResourceName = this._applyWithArgs("GetResourceName", factType);
+            linkTable = this._applyWithArgs("GetTable", factType);
             return function() {
-                this.termForms[factType] = term;
-                this.identifiers[term[1]] = factType;
-                this.tables[this.GetResourceName(term[1])] = this.GetTable(factType);
+                var linkVerb;
+                this.termForms[factType] = termForm;
+                this.synonyms[termForm[1]] = linkResourceName;
                 for (var i = 0; i < factType.length; i++) if ("Term" === factType[i][0]) {
-                    var extraFactType = [ term, [ "Verb", "has", !1 ], factType[i] ];
+                    var extraFactType = [ termForm, [ "Verb", "has", !1 ], factType[i] ];
                     this.AddFactType(extraFactType, extraFactType);
-                    this.tables[this.GetResourceName(extraFactType)] = this.GetTable(factType[i][1]).primitive ? "Attribute" : "ForeignKey";
-                }
+                    var termTable = this.GetTable(factType[i][1]);
+                    if (termTable.primitive) this.tables[this.GetResourceName(extraFactType)] = "Attribute"; else {
+                        this.tables[this.GetResourceName(extraFactType)] = "ForeignKey";
+                        var fieldName = this.FactTypeFieldName([ [ "Term", linkResourceName ], linkVerb || [ "Verb", "has" ], factType[i] ]), references = this.GetReference(linkTable, fieldName);
+                        this.AddRelationship(termTable, [ [ "Verb", "has" ], termForm ], termTable.idField, references);
+                    }
+                } else "Verb" === factType[i][0] && (linkVerb = factType[i]);
             }.call(this);
         },
         AttrNecessity: function(tableID) {
@@ -278,7 +349,7 @@
             return this._apply("Rule");
         },
         FactType: function() {
-            var $elf = this, _fromIdx = this.input.idx, attributes, factType, factTypePart, fieldName, fkTable, identifier, identifierTable, linkTable, negated, resourceName, uniqueFields, verb;
+            var $elf = this, _fromIdx = this.input.idx, attributes, factType, factTypePart, fieldID, fieldName, fkTable, identifier, identifierTable, linkHasFactType, linkTable, linkVerb, linkVerbFactType, negated, references, resourceName, uniqueFields, verb;
             this._lookahead(function() {
                 return factType = this._many1(function() {
                     factTypePart = this.anything();
@@ -308,32 +379,48 @@
                         });
                     });
                     identifierTable = this._applyWithArgs("GetTable", factType[0][1]);
-                    this._applyWithArgs("AddTableField", identifierTable, factType[1][1], "Boolean", !0);
-                    return this.tables[resourceName] = "BooleanAttribute";
+                    fieldName = this._applyWithArgs("FactTypeFieldName", factType);
+                    this._applyWithArgs("AddTableField", identifierTable, fieldName, "Boolean", !0);
+                    delete this.relationships[resourceName];
+                    this.tables[resourceName] = "BooleanAttribute";
+                    return this._applyWithArgs("AddRelationship", identifierTable, factType.slice(1), fieldName);
                 }, function() {
-                    linkTable = this.tables[resourceName] = this.CreateTable();
+                    linkTable = this._applyWithArgs("CreateTable", resourceName, _(factType).map(1).join(" "));
                     uniqueFields = [];
                     this._many1(function() {
                         return this._or(function() {
                             identifier = this._apply("Identifier");
-                            fieldName = identifier.name + identifier.num;
+                            linkHasFactType = [ [ "Term", resourceName ], [ "Verb", "has" ], [ "Term", identifier.name ] ];
+                            linkVerbFactType = [ [ "Term", resourceName ], linkVerb, [ "Term", identifier.name ] ];
+                            fieldName = this._or(function() {
+                                this._pred(linkVerb);
+                                return this._applyWithArgs("FactTypeFieldName", linkVerbFactType);
+                            }, function() {
+                                return this._applyWithArgs("FactTypeFieldName", linkHasFactType);
+                            });
                             uniqueFields.push(fieldName);
                             fkTable = this._applyWithArgs("GetTable", identifier.name);
-                            return this._or(function() {
+                            references = this._or(function() {
                                 this._pred(fkTable.primitive);
-                                return this._applyWithArgs("AddTableField", linkTable, fieldName, fkTable.primitive, !0);
+                                this._applyWithArgs("AddTableField", linkTable, fieldName, fkTable.primitive, !0);
+                                return null;
                             }, function() {
-                                return this._applyWithArgs("AddTableField", linkTable, fieldName, "ForeignKey", !0, null, {
-                                    tableName: fkTable.name,
-                                    fieldName: fkTable.idField
-                                });
+                                references = this._applyWithArgs("GetReference", fkTable);
+                                fieldID = this._applyWithArgs("AddTableField", linkTable, fieldName, "ForeignKey", !0, null, references);
+                                return references;
+                            });
+                            this._applyWithArgs("AddRelationship", resourceName, linkHasFactType.slice(2), fieldName, references);
+                            return this._opt(function() {
+                                this._pred(linkVerb);
+                                return this._applyWithArgs("AddRelationship", resourceName, linkVerbFactType.slice(1), fieldName, references);
                             });
                         }, function() {
-                            return this._form(function() {
+                            this._form(function() {
                                 this._applyWithArgs("exactly", "Verb");
                                 verb = this.anything();
                                 return negated = this.anything();
                             });
+                            return linkVerb = [ "Verb", verb ];
                         });
                     });
                     return linkTable.indexes.push({
@@ -536,19 +623,19 @@
             return [ "Exists", query ];
         },
         ForeignKey: function(actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, baseToIdentifier, bindFrom, bindTo, binds, tableTo;
+            var $elf = this, _fromIdx = this.input.idx, bindFrom, bindTo, binds, fieldName, tableTo;
             this._pred("ForeignKey" == this.GetTable(actualFactType));
             this._or(function() {
                 binds = this._applyWithArgs("RoleBindings", actualFactType);
                 this._pred(2 == binds.length);
                 bindFrom = binds[0];
                 bindTo = binds[1];
-                baseToIdentifier = actualFactType[2];
-                return tableTo = this._applyWithArgs("GetTable", baseToIdentifier[1]);
+                fieldName = this._applyWithArgs("FactTypeFieldName", actualFactType);
+                return tableTo = this._applyWithArgs("GetTable", actualFactType[2][1]);
             }, function() {
                 return this._applyWithArgs("foreign", ___ForeignKeyMatchingFailed___, "die");
             });
-            return [ "Equals", [ "ReferencedField", bindFrom.binding[1], baseToIdentifier[1] ], [ "ReferencedField", bindTo.binding[1], tableTo.idField ] ];
+            return [ "Equals", [ "ReferencedField", bindFrom.binding[1], fieldName ], [ "ReferencedField", bindTo.binding[1], tableTo.idField ] ];
         },
         BooleanAttribute: function(actualFactType) {
             var $elf = this, _fromIdx = this.input.idx, attributeName, binds, negated;
@@ -556,7 +643,7 @@
             this._or(function() {
                 binds = this._applyWithArgs("RoleBindings", actualFactType);
                 this._pred(1 == binds.length);
-                attributeName = actualFactType[1][1];
+                attributeName = this._applyWithArgs("FactTypeFieldName", actualFactType);
                 return negated = actualFactType[1][2];
             }, function() {
                 console.error(this.input);
@@ -858,7 +945,7 @@
             }.call(this);
         },
         ProcessAtomicFormulationsAttributes: function(depth, unmappedFactType, actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, attrBinding, baseBinding, binds, tableAlias;
+            var $elf = this, _fromIdx = this.input.idx, attrBinding, attrFieldName, baseAttrFactType, baseBinding, binds, tableAlias;
             binds = this._applyWithArgs("RoleBindings", actualFactType);
             return this._or(function() {
                 this._pred(this.attributes.hasOwnProperty(unmappedFactType) && this.attributes[unmappedFactType]);
@@ -868,10 +955,13 @@
                 attrBinding = _.find(binds, function(bind) {
                     return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier)) && (null == $elf.bindAttributeDepth[bind.number] || $elf.bindAttributeDepth[bind.number] > depth);
                 });
+                baseAttrFactType = _.cloneDeep(unmappedFactType);
+                baseAttrFactType[2][1] = attrBinding.identifier.name;
+                attrFieldName = this._applyWithArgs("FactTypeFieldName", baseAttrFactType);
                 return function() {
                     this.bindAttributeDepth[attrBinding.number] = depth;
                     return this.bindAttributes[attrBinding.number] = {
-                        binding: [ "ReferencedField", baseBinding.binding[1], attrBinding.identifier.name ]
+                        binding: [ "ReferencedField", baseBinding.binding[1], attrFieldName ]
                     };
                 }.call(this);
             }, function() {
@@ -936,7 +1026,7 @@
             });
         },
         Process: function() {
-            var $elf = this, _fromIdx = this.input.idx, attributes, factType, identifierName, tables, type, vocab;
+            var $elf = this, _fromIdx = this.input.idx, attributes, factType, hasDependants, identifierName, type, vocab;
             this._form(function() {
                 this._applyWithArgs("exactly", "Model");
                 return this._many1(function() {
@@ -984,23 +1074,41 @@
                     });
                 });
             });
-            tables = {};
+            hasDependants = {};
+            _.each(this.tables, function(table) {
+                _.each(table.fields, function(field) {
+                    "ForeignKey" !== field.dataType && "ConceptType" !== field.dataType || (hasDependants[field.references.tableName] = !0);
+                });
+            });
             return {
-                tables: this.tables,
-                rules: this.rules
+                tables: _.omitBy(this.tables, function(table, tableName) {
+                    return _.isString(table) || table.primitive && !hasDependants[tableName];
+                }),
+                relationships: this.relationships,
+                rules: this.rules,
+                synonyms: this.synonyms
             };
         },
-        CreateTable: function() {
+        CreateTable: function(resourceName, modelName) {
             var $elf = this, _fromIdx = this.input.idx, table;
             table = {
                 fields: [],
                 primitive: !1,
                 name: null,
                 indexes: [],
-                idField: null
+                idField: null,
+                resourceName: resourceName,
+                modelName: modelName
             };
             this._applyWithArgs("AddTableField", table, "created at", "Date Time", !0, null, null, "CURRENT_TIMESTAMP");
-            return table;
+            return this.tables[resourceName] = table;
+        },
+        GetReference: function(table, field) {
+            var $elf = this, _fromIdx = this.input.idx;
+            return {
+                tableName: table.name,
+                fieldName: field || table.idField
+            };
         }
     });
     LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -1017,6 +1125,30 @@
             defaultValue: defaultValue
         });
         return fieldID;
+    };
+    LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references, forceHas) {
+        var $elf = this;
+        if (forceHas !== !0 && "has" === factType[0][1]) {
+            var strippedFactType = _.clone(factType);
+            strippedFactType.shift();
+            this.AddRelationship(resourceName, strippedFactType, fieldName, references);
+        }
+        _.isObject(resourceName) && (resourceName = resourceName.resourceName);
+        null == this.relationships[resourceName] && (this.relationships[resourceName] = {});
+        var relationships = this.relationships[resourceName];
+        _(factType).flatMap(function(factTypePart) {
+            return $elf.ResolveSynonym(factTypePart[1]).split("-");
+        }).each(function(partName) {
+            null == relationships[partName] && (relationships[partName] = {});
+            relationships = relationships[partName];
+        });
+        var relationReference = [ fieldName ];
+        null != references && relationReference.push([ references.tableName, references.fieldName ]);
+        relationships.$ = relationReference;
+    };
+    LF2AbstractSQL.FactTypeFieldName = function(factType) {
+        if (factType.length > 3) throw new Error("Multiple term fact types are unsupported");
+        return 2 === factType.length ? factType[1][1] : "has" === factType[1][1] ? factType[2][1] : factType[1][1] + "-" + factType[2][1];
     };
     LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
         if (!_.isEqual(whereBody, [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ])) if ("Exists" != whereBody[0] || "SelectQuery" != whereBody[1][0] && "InsertQuery" != whereBody[1][0] && "UpdateQuery" != whereBody[1][0] && "UpsertQuery" != whereBody[1][0]) {
@@ -1061,7 +1193,8 @@
     LF2AbstractSQL.reset = function() {
         SBVRCompilerLibs.initialize.call(this);
         this.tables = {};
-        this.identifiers = {};
+        this.relationships = {};
+        this.synonymousForms = {};
         this.rules = [];
         this.attributes = {};
         this.bindAttributes = [];

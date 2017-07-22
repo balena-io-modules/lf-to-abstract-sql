@@ -3,9 +3,20 @@
         return root[moduleName];
     }, root, root.OMeta);
 }(this, function(require, exports, OMeta) {
-    var SBVRLibs = require("@resin/sbvr-parser/sbvr-libs").SBVRLibs, _ = require("lodash"), SBVRCompilerLibs = exports.SBVRCompilerLibs = SBVRLibs._extend({});
+    var SBVRLibs = require("@resin/sbvr-parser/sbvr-libs").SBVRLibs, _ = require("lodash"), SBVRCompilerLibs = exports.SBVRCompilerLibs = SBVRLibs._extend({
+        ResolveSynonym: function(name) {
+            var $elf = this, _fromIdx = this.input.idx;
+            return this._or(function() {
+                this._pred(this.synonyms[name]);
+                return this.synonyms[name];
+            }, function() {
+                return name;
+            });
+        }
+    });
     SBVRCompilerLibs.initialize = function() {
         SBVRLibs.initialize.call(this);
+        this.synonyms = {};
     };
     SBVRCompilerLibs.TYPE_VOCAB = "Type";
     SBVRCompilerLibs.IsPrimitive = function(term) {
@@ -30,8 +41,8 @@
     };
     SBVRCompilerLibs.GetResourceName = function(termOrFactType) {
         var i = 0, resource = [];
-        if (_.isString(termOrFactType)) return termOrFactType.replace(new RegExp(" ", "g"), "_");
-        for (void 0; i < termOrFactType.length; i++) resource.push(termOrFactType[i][1].replace(new RegExp(" ", "g"), "_"));
+        if (_.isString(termOrFactType)) return this.ResolveSynonym(termOrFactType);
+        for (void 0; i < termOrFactType.length; i++) resource.push(this.ResolveSynonym(termOrFactType[i][1]));
         return resource.join("-");
     };
     SBVRCompilerLibs.GetTable = function(termNameOrFactType) {
