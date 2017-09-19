@@ -354,16 +354,16 @@ exports.TableSpace = ->
 					]
 
 				if primitiveFactType
-					switch factType[1][1]
+					comparison = switch factType[1][1]
 						when 'is greater than'
 							# Greater than gets reversed into a less than
-							return [
+							[
 								'LessThan'
 								bindings[1].embeddedData
 								bindings[0].embeddedData
 							]
 						when 'is less than'
-							return [
+							[
 								'LessThan'
 								bindings[0].embeddedData
 								bindings[1].embeddedData
@@ -373,9 +373,12 @@ exports.TableSpace = ->
 								'CharacterLength'
 								bindings[0].embeddedData
 							]
-							return attributeBindings[bindings[1].alias]
+							attributeBindings[bindings[1].alias]
 						else
 							throw new Error('Unknown primitive fact type: ' + factType[1][1])
+					if factType[1][2]
+						return ['Not', comparison]
+					return comparison
 
 				if getTable(tableName).table is 'Attribute'
 					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, generateFieldName(factType)]
