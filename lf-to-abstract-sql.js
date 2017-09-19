@@ -547,19 +547,26 @@
             };
         },
         NativeProperty: function(actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, binds, primitive, property, verb;
+            var $elf = this, _fromIdx = this.input.idx, binds, negated, operator, primitive, property, verb;
             this._pred(this.IsPrimitive(actualFactType[0]));
             this._pred(this.IsPrimitive(actualFactType[2]));
             binds = this._applyWithArgs("RoleBindings", actualFactType);
+            negated = actualFactType[1][2];
+            operator = this._or(function() {
+                this._pred(negated);
+                return "NotEquals";
+            }, function() {
+                return "Equals";
+            });
             this._pred(2 == binds.length);
             primitive = actualFactType[0][1];
             verb = actualFactType[1][1];
             property = actualFactType[2][1];
             this._pred(this.sbvrTypes[primitive] && this.sbvrTypes[primitive].nativeProperties && this.sbvrTypes[primitive].nativeProperties[verb] && this.sbvrTypes[primitive].nativeProperties[verb][property]);
-            return [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ];
+            return [ operator, [ "Boolean", !0 ], [ "Boolean", !0 ] ];
         },
         NativeFactType: function(actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, binds, primitive, secondPrimitive, verb;
+            var $elf = this, _fromIdx = this.input.idx, binds, comparison, negated, primitive, secondPrimitive, verb;
             this._pred(3 == actualFactType.length);
             this._pred(this.IsPrimitive(actualFactType[0]));
             this._pred(this.IsPrimitive(actualFactType[2]));
@@ -570,7 +577,14 @@
                 verb = actualFactType[1][1];
                 secondPrimitive = actualFactType[2][1];
                 this._pred(this.sbvrTypes[primitive] && this.sbvrTypes[primitive].nativeFactTypes && this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive] && this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb]);
-                return this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb](binds[0].binding, binds[1].binding);
+                comparison = this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb](binds[0].binding, binds[1].binding);
+                negated = actualFactType[1][2];
+                return this._or(function() {
+                    this._pred(negated);
+                    return [ "Not", comparison ];
+                }, function() {
+                    return comparison;
+                });
             }, function() {
                 return this._applyWithArgs("foreign", ___NativeFactTypeMatchingFailed___, "die");
             });
@@ -652,7 +666,7 @@
             return [ "Equals", [ "ReferencedField", binds[0].binding[1], attributeName ], [ "Boolean", !negated ] ];
         },
         Attribute: function(actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, bind, bindAttr, bindReal, binds;
+            var $elf = this, _fromIdx = this.input.idx, bind, bindAttr, bindReal, binds, negated, operator;
             this._pred("Attribute" == this.GetTable(actualFactType));
             this._or(function() {
                 binds = this._applyWithArgs("RoleBindings", actualFactType);
@@ -662,13 +676,20 @@
             }, function() {
                 return this._applyWithArgs("foreign", ___AttributeMatchingFailed___, "die");
             });
+            negated = actualFactType[1][2];
+            operator = this._or(function() {
+                this._pred(negated);
+                return "NotEquals";
+            }, function() {
+                return "Equals";
+            });
             return this._or(function() {
                 bind = this.bindAttributes[bindAttr.number];
                 bindAttr.binding = [ "ReferencedField", bindReal.binding[1], bind.binding[2] ];
                 this._pred(!_.isEqual(bindAttr.binding, bind.binding));
-                return [ "Equals", bindAttr.binding, bind.binding ];
+                return [ operator, bindAttr.binding, bind.binding ];
             }, function() {
-                return [ "Equals", [ "Boolean", !0 ], [ "Boolean", !0 ] ];
+                return [ operator, [ "Boolean", !0 ], [ "Boolean", !0 ] ];
             });
         },
         AtomicFormulation: function() {
