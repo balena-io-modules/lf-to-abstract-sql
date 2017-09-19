@@ -424,6 +424,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		?(this.IsPrimitive(actualFactType[0]))
 		?(this.IsPrimitive(actualFactType[2]))
 		RoleBindings(actualFactType):binds
+		{actualFactType[1][2]}:negated
+		(	?negated
+			-> 'NotEquals'
+		|	-> 'Equals'
+		):operator
 		?(binds.length == 2)
 		{actualFactType[0][1]}:primitive
 		{actualFactType[1][1]}:verb
@@ -432,7 +437,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			this.sbvrTypes[primitive].nativeProperties &&
 			this.sbvrTypes[primitive].nativeProperties[verb] &&
 			this.sbvrTypes[primitive].nativeProperties[verb][property])
-		-> ['Equals', ['Boolean', true], ['Boolean', true]],
+		-> [operator, ['Boolean', true], ['Boolean', true]],
 
 	NativeFactType :actualFactType =
 		?(actualFactType.length == 3)
@@ -447,7 +452,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				this.sbvrTypes[primitive].nativeFactTypes &&
 				this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive] &&
 				this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb])
-			-> this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb](binds[0].binding, binds[1].binding)
+			{this.sbvrTypes[primitive].nativeFactTypes[secondPrimitive][verb](binds[0].binding, binds[1].binding)}:comparison
+			{actualFactType[1][2]}:negated
+			(	?negated
+				-> ['Not', comparison]
+			|	-> comparison
+			)
 		|	___NativeFactTypeMatchingFailed___.die
 		),
 
@@ -517,13 +527,18 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{binds[1]}:bindAttr
 			|	___AttributeMatchingFailed___.die
 		)
+		{actualFactType[1][2]}:negated
+		(	?negated
+			-> 'NotEquals'
+		|	-> 'Equals'
+		):operator
 		(	{this.bindAttributes[bindAttr.number]}:bind
 			{bindAttr.binding = ['ReferencedField', bindReal.binding[1], bind.binding[2]]}
 			?(!_.isEqual(bindAttr.binding, bind.binding))
 			// If we're not the first bind we make sure we match it.
-			-> ['Equals', bindAttr.binding, bind.binding]
+			-> [operator, bindAttr.binding, bind.binding]
 		|	// Otherwise return true = true, just so things work.
-			-> ['Equals', ['Boolean', true], ['Boolean', true]]
+			-> [operator, ['Boolean', true], ['Boolean', true]]
 		),
 
 	AtomicFormulation =

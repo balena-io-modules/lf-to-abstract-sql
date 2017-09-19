@@ -8,6 +8,7 @@ integerType = term 'Integer', 'Type'
 lengthType = term 'Length', 'Type'
 
 name = term 'name'
+honorific = term 'honorific'
 yearsOfExperience = term 'years of experience'
 person = term 'person'
 pilot = term 'pilot'
@@ -22,6 +23,10 @@ planes = numberedTerms(plane, 2)
 describe 'pilots', ->
 	# Term:      name
 	test Table name
+	# 	Concept Type: Short Text (Type)
+	test attribute conceptType shortTextType
+	# Term:      honorific
+	test Table honorific
 	# 	Concept Type: Short Text (Type)
 	test attribute conceptType shortTextType
 	# Term:      years of experience
@@ -44,6 +49,10 @@ describe 'pilots', ->
 	test Table factType pilot, verb('has'), name
 	# 	Necessity: each pilot has exactly one name
 	test attribute necessity 'each', pilot, verb('has'), ['exactly', 'one'], name
+	# 	Fact type: pilot is addressed by honorific
+	test Table factType pilot, verb('is addressed by'), honorific
+	# 	Necessity: each pilot is addressed by exactly one honorific
+	test attribute necessity 'each', pilot, verb('is addressed by'), ['exactly', 'one'], honorific
 	# Fact Type: pilot has years of experience
 	test Table factType pilot, verb('has'), yearsOfExperience
 	# 	Necessity: each pilot has exactly one years of experience
@@ -88,6 +97,8 @@ describe 'pilots', ->
 
 	# Rule:       It is necessary that each pilot has a years of experience that is greater than 0
 	test rule 'Necessity', 'each', pilot, verb('has'), 'a', [yearsOfExperience, verb('is greater than'), 0]
+	# Rule:       It is necessary that each pilot has a years of experience that is not greater than 0
+	test rule 'Necessity', 'each', pilot, verb('has'), 'a', [yearsOfExperience, verb('is greater than', true), 0]
 
 	# -- OR
 
