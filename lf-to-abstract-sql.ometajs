@@ -98,14 +98,14 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		[	'Term'
 			:conceptType
 			:vocab
-		]:term
+		]:conceptTerm
 		{	if (this.termForms[termOrFactType]) {
 				termOrFactType = this.termForms[termOrFactType];
 			}
 		}
-		{this.vocabularies[termOrFactType[2]]['ConceptTypes'][termOrFactType] = term}
+		{this.vocabularies[termOrFactType[2]]['ConceptTypes'][termOrFactType] = conceptTerm}
 
-		IsPrimitive(term):primitive
+		IsPrimitive(conceptTerm):primitive
 		GetTable(conceptType):conceptTable
 		GetTable(termOrFactType[1]):identifierTable
 		(	?(primitive !== false && conceptType === primitive)
@@ -120,7 +120,9 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	{'ConceptType'}:dataType
 			GetReference(conceptTable):references
 		)
-		AddTableField(identifierTable, conceptType, dataType, true, null, references),
+		AddTableField(identifierTable, conceptType, dataType, true, null, references)
+		AddRelationship(identifierTable, [['Verb', 'has'], conceptTerm], conceptType, references)
+	,
 	AttrDatabaseIDField :termOrFactType =
 		:idField
 		GetTableID(termOrFactType):tableID
