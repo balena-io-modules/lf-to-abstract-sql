@@ -129,8 +129,8 @@
             return anything = this.anything();
         },
         AttrConceptType: function(termOrFactType) {
-            var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptType, dataType, fieldID, identifierTable, primitive, references, term, vocab;
-            term = this._form(function() {
+            var $elf = this, _fromIdx = this.input.idx, conceptTable, conceptTerm, conceptType, dataType, fieldID, identifierTable, primitive, references, vocab;
+            conceptTerm = this._form(function() {
                 this._applyWithArgs("exactly", "Term");
                 conceptType = this.anything();
                 return vocab = this.anything();
@@ -138,8 +138,8 @@
             (function() {
                 this.termForms[termOrFactType] && (termOrFactType = this.termForms[termOrFactType]);
             }).call(this);
-            this.vocabularies[termOrFactType[2]].ConceptTypes[termOrFactType] = term;
-            primitive = this._applyWithArgs("IsPrimitive", term);
+            this.vocabularies[termOrFactType[2]].ConceptTypes[termOrFactType] = conceptTerm;
+            primitive = this._applyWithArgs("IsPrimitive", conceptTerm);
             conceptTable = this._applyWithArgs("GetTable", conceptType);
             identifierTable = this._applyWithArgs("GetTable", termOrFactType[1]);
             this._or(function() {
@@ -156,7 +156,8 @@
                 dataType = "ConceptType";
                 return references = this._applyWithArgs("GetReference", conceptTable);
             });
-            return this._applyWithArgs("AddTableField", identifierTable, conceptType, dataType, !0, null, references);
+            this._applyWithArgs("AddTableField", identifierTable, conceptType, dataType, !0, null, references);
+            return this._applyWithArgs("AddRelationship", identifierTable, [ [ "Verb", "has" ], conceptTerm ], conceptType, references);
         },
         AttrDatabaseIDField: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, fieldID, idField, table, tableID;
