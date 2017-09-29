@@ -167,6 +167,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			FactTypeFieldName([ ['Term', linkResourceName], ['Verb', 'has'], termOrFactType[0] ]):fieldName
 			GetReference(table, fieldName):references
 			AddRelationship(baseTable, termOrFactType.slice(1), baseTable.idField, references, true)
+			AddRelationship(baseTable, termOrFactType, baseTable.idField, references, true)
 		)?,
 	AttrDatabasePrimitive :termOrFactType =
 		:attrVal
@@ -184,7 +185,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			GetTable(factType[2][1]):attributeTable
 			GetTableFieldID(baseTable, fieldName):fieldID
 			{baseTable.fields[fieldID].dataType = attributeTable.primitive}
-			// Overwrite the foreign key relationship with an attribute one
+			// Overwrite the foreign key relationships with attribute ones
+			AddRelationship(baseTable, factType, fieldName)
 			AddRelationship(baseTable, factType.slice(1), fieldName)
 		)?,
 	AttrForeignKey :factType =
