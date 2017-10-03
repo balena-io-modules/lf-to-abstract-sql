@@ -214,7 +214,8 @@
                 baseTable = this._applyWithArgs("GetTable", termOrFactType[0][1]);
                 fieldName = this._applyWithArgs("FactTypeFieldName", [ [ "Term", linkResourceName ], [ "Verb", "has" ], termOrFactType[0] ]);
                 references = this._applyWithArgs("GetReference", table, fieldName);
-                return this._applyWithArgs("AddRelationship", baseTable, termOrFactType.slice(1), baseTable.idField, references, !0);
+                this._applyWithArgs("AddRelationship", baseTable, termOrFactType.slice(1), baseTable.idField, references, !0);
+                return this._applyWithArgs("AddRelationship", baseTable, termOrFactType, baseTable.idField, references, !0);
             });
         },
         AttrDatabasePrimitive: function(termOrFactType) {
@@ -237,6 +238,7 @@
                 attributeTable = this._applyWithArgs("GetTable", factType[2][1]);
                 fieldID = this._applyWithArgs("GetTableFieldID", baseTable, fieldName);
                 baseTable.fields[fieldID].dataType = attributeTable.primitive;
+                this._applyWithArgs("AddRelationship", baseTable, factType, fieldName);
                 return this._applyWithArgs("AddRelationship", baseTable, factType.slice(1), fieldName);
             });
         },
