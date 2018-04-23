@@ -111,11 +111,8 @@ exports.TableSpace = ->
 						for factTypePart, i in factType
 							name = generateName(factTypePart[1])
 							tableName.push(name)
-							referenceTableName = resolveSynonym(name)
-							resourceName.push(referenceTableName)
-							if getTable(referenceTableName)?
-								# Update to the table's true name, for instance in the case of term form.
-								referenceTableName = getTable(referenceTableName).tableName
+							referenceResourceName = resolveSynonym(name)
+							resourceName.push(referenceResourceName)
 							if factTypePart[0] is 'Term'
 								fieldName =
 									if i is 0
@@ -131,7 +128,7 @@ exports.TableSpace = ->
 									dataType = 'ForeignKey'
 									references =
 										fieldName: 'id'
-										tableName: referenceTableName
+										resourceName: referenceResourceName
 								fields.push(
 									dataType: dataType
 									fieldName: fieldName
@@ -214,7 +211,7 @@ exports.TableSpace = ->
 								index: null
 								references:
 									fieldName: 'id'
-									tableName: generateName(typeName)
+									resourceName: generateName(typeName)
 								defaultValue: null
 							@property = 'tables.' + @table.resourceName
 							@matches = _.cloneDeep(@table)

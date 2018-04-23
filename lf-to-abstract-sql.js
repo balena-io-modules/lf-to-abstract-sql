@@ -1101,12 +1101,12 @@
             hasDependants = {};
             _.each(this.tables, function(table) {
                 _.each(table.fields, function(field) {
-                    "ForeignKey" !== field.dataType && "ConceptType" !== field.dataType || (hasDependants[field.references.tableName] = !0);
+                    "ForeignKey" !== field.dataType && "ConceptType" !== field.dataType || (hasDependants[field.references.resourceName] = !0);
                 });
             });
             return {
-                tables: _.omitBy(this.tables, function(table, tableName) {
-                    return _.isString(table) || table.primitive && !hasDependants[tableName];
+                tables: _.omitBy(this.tables, function(table, resourceName) {
+                    return _.isString(table) || table.primitive && !hasDependants[resourceName];
                 }),
                 relationships: this.relationships,
                 rules: this.rules,
@@ -1130,7 +1130,7 @@
         GetReference: function(table, field) {
             var $elf = this, _fromIdx = this.input.idx;
             return {
-                tableName: table.name,
+                resourceName: table.resourceName,
                 fieldName: field || table.idField
             };
         }
@@ -1167,7 +1167,7 @@
             relationships = relationships[partName];
         });
         var relationReference = [ fieldName ];
-        null != references && relationReference.push([ references.tableName, references.fieldName ]);
+        null != references && relationReference.push([ references.resourceName, references.fieldName ]);
         relationships.$ = relationReference;
     };
     LF2AbstractSQL.FactTypeFieldName = function(factType) {

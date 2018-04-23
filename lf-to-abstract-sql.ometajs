@@ -822,14 +822,14 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			_.each(this.tables, function(table) {
 				_.each(table.fields, function(field) {
 					if (field.dataType === 'ForeignKey' || field.dataType === 'ConceptType') {
-						hasDependants[field.references.tableName] = true;
+						hasDependants[field.references.resourceName] = true;
 					}
 				})
 			})
 		}
 		-> { // We omit any tables that are primitives and not depended upon.
-			tables: _.omitBy(this.tables, function(table, tableName) {
-				return _.isString(table) || (table.primitive && !hasDependants[tableName]);
+			tables: _.omitBy(this.tables, function(table, resourceName) {
+				return _.isString(table) || (table.primitive && !hasDependants[resourceName]);
 			}),
 			relationships: this.relationships,
 			rules: this.rules,
@@ -844,7 +844,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	,
 
 	GetReference :table :field =
-		-> { tableName: table.name, fieldName: field || table.idField }
+		-> { resourceName: table.resourceName, fieldName: field || table.idField }
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
@@ -901,7 +901,7 @@ LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, ref
 
 	var relationReference = [ fieldName ];
 	if (references != null) {
-		relationReference.push([ references.tableName, references.fieldName ]);
+		relationReference.push([ references.resourceName, references.fieldName ]);
 	}
 
 	relationships.$ = relationReference;
