@@ -277,14 +277,18 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			this.synonyms[termForm[1]] = linkResourceName;
 			for(var i = 0; i < factType.length; i++) {
 				if(factType[i][0] === 'Term') {
-					var extraFactType = [termForm, ['Verb', 'has', false], factType[i]];
-					this.AddFactType(extraFactType, extraFactType);
+					var hasFactType = [termForm, ['Verb', 'has', false], factType[i]];
+					var extraFactType = [ termForm, linkVerb || ['Verb', 'has'], factType[i] ];
+					this.AddFactType(hasFactType, extraFactType);
+					if (linkVerb && linkVerb[1] !== 'has') {
+						this.AddFactType(extraFactType, extraFactType);
+					}
 					var termTable = this.GetTable(factType[i][1]);
 					if (termTable.primitive) {
 						this.tables[this.GetResourceName(extraFactType)] = 'Attribute';
 					} else {
 						this.tables[this.GetResourceName(extraFactType)] = 'ForeignKey';
-						var fieldName = this.FactTypeFieldName([ ['Term', linkResourceName], linkVerb || ['Verb', 'has'], factType[i] ]);
+						var fieldName = this.FactTypeFieldName(extraFactType);
 						var references = this.GetReference(linkTable, fieldName);
 						this.AddRelationship(termTable, [['Verb', 'has'], termForm], termTable.idField, references);
 					}
