@@ -336,12 +336,13 @@
                 this.termForms[factType] = termForm;
                 this.synonyms[termForm[1]] = linkResourceName;
                 for (var i = 0; i < factType.length; i++) if ("Term" === factType[i][0]) {
-                    var extraFactType = [ termForm, [ "Verb", "has", !1 ], factType[i] ];
-                    this.AddFactType(extraFactType, extraFactType);
+                    var hasFactType = [ termForm, [ "Verb", "has", !1 ], factType[i] ], extraFactType = [ termForm, linkVerb || [ "Verb", "has" ], factType[i] ];
+                    this.AddFactType(hasFactType, extraFactType);
+                    linkVerb && "has" !== linkVerb[1] && this.AddFactType(extraFactType, extraFactType);
                     var termTable = this.GetTable(factType[i][1]);
                     if (termTable.primitive) this.tables[this.GetResourceName(extraFactType)] = "Attribute"; else {
                         this.tables[this.GetResourceName(extraFactType)] = "ForeignKey";
-                        var fieldName = this.FactTypeFieldName([ [ "Term", linkResourceName ], linkVerb || [ "Verb", "has" ], factType[i] ]), references = this.GetReference(linkTable, fieldName);
+                        var fieldName = this.FactTypeFieldName(extraFactType), references = this.GetReference(linkTable, fieldName);
                         this.AddRelationship(termTable, [ [ "Verb", "has" ], termForm ], termTable.idField, references);
                     }
                 } else "Verb" === factType[i][0] && (linkVerb = factType[i]);
