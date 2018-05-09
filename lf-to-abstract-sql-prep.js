@@ -8,7 +8,7 @@
             var $elf = this, _fromIdx = this.input.idx, conceptType;
             conceptType = LFOptimiser._superApplyWithArgs(this, "AttrConceptType", termName);
             this._opt(function() {
-                this._pred(this.primitives[termName] === !1 && this.primitives[conceptType] !== !1);
+                this._pred(!1 === this.primitives[termName] && !1 !== this.primitives[conceptType]);
                 this.primitives[conceptType] = !1;
                 return this._apply("SetHelped");
             });
@@ -17,7 +17,7 @@
         AttrDatabaseAttribute: function(termOrFactType) {
             var $elf = this, _fromIdx = this.input.idx, attrVal, newAttrVal;
             attrVal = this.anything();
-            newAttrVal = "Term" == termOrFactType[0] && (!this.attributes.hasOwnProperty(termOrFactType[3]) || this.attributes[termOrFactType[3]] === !0) || "FactType" == termOrFactType[0] && 4 == termOrFactType.length && (!this.attributes.hasOwnProperty(termOrFactType[3]) || this.attributes[termOrFactType[3]] === !0) && this.primitives.hasOwnProperty(termOrFactType[3]) && this.primitives[termOrFactType[3]] !== !1;
+            newAttrVal = "Term" == termOrFactType[0] && (!this.attributes.hasOwnProperty(termOrFactType[3]) || !0 === this.attributes[termOrFactType[3]]) || "FactType" == termOrFactType[0] && 4 == termOrFactType.length && (!this.attributes.hasOwnProperty(termOrFactType[3]) || !0 === this.attributes[termOrFactType[3]]) && this.primitives.hasOwnProperty(termOrFactType[3]) && !1 !== this.primitives[termOrFactType[3]];
             this.attributes[termOrFactType] = newAttrVal;
             this._opt(function() {
                 this._pred(newAttrVal != attrVal);
@@ -150,7 +150,7 @@
                 this._applyWithArgs("token", "StructuredEnglish");
                 return null;
             }, function() {
-                return LFOptimiser._superApplyWithArgs(this, "Rule");
+                return LFOptimiser._superApply(this, "Rule");
             });
         }
     });
@@ -226,10 +226,10 @@
                     }
                 }
                 if (3 == actualFactType.length) {
-                    this.primitives.hasOwnProperty(actualFactType[1]) && this.primitives[actualFactType[1]] === !1 || this.SetHelped();
+                    this.primitives.hasOwnProperty(actualFactType[1]) && !1 === this.primitives[actualFactType[1]] || this.SetHelped();
                     this.primitives[actualFactType[1]] = !1;
                 } else if (actualFactType.length > 4) for (var i = 1; i < actualFactType.length; i += 2) {
-                    this.attributes.hasOwnProperty(actualFactType[i]) && this.attributes[actualFactType[i]] === !1 || this.SetHelped();
+                    this.attributes.hasOwnProperty(actualFactType[i]) && !1 === this.attributes[actualFactType[i]] || this.SetHelped();
                     this.attributes[actualFactType[i]] = !1;
                 }
             }

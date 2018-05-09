@@ -143,12 +143,12 @@
             conceptTable = this._applyWithArgs("GetTable", conceptType);
             identifierTable = this._applyWithArgs("GetTable", termOrFactType[1]);
             this._or(function() {
-                this._pred(primitive !== !1 && conceptType === primitive);
+                this._pred(!1 !== primitive && conceptType === primitive);
                 dataType = primitive;
                 this._opt(function() {
                     this._pred(identifierTable.hasOwnProperty("referenceScheme"));
                     fieldID = this._applyWithArgs("GetTableFieldID", identifierTable, identifierTable.referenceScheme);
-                    this._pred(fieldID !== !1);
+                    this._pred(!1 !== fieldID);
                     return identifierTable.fields.splice(fieldID, 1);
                 });
                 return identifierTable.referenceScheme = conceptType;
@@ -169,7 +169,7 @@
             }, function() {
                 fieldID = this._applyWithArgs("AddTableField", table, idField, "Serial", !0, "PRIMARY KEY");
                 this._opt(function() {
-                    this._pred(fieldID !== !1);
+                    this._pred(!1 !== fieldID);
                     return table.fields[fieldID].index = "PRIMARY KEY";
                 });
                 return table.idField = idField;
@@ -192,7 +192,7 @@
                 this._opt(function() {
                     this._pred(table.hasOwnProperty("referenceScheme"));
                     fieldID = this._applyWithArgs("GetTableFieldID", table, table.referenceScheme);
-                    this._pred(fieldID !== !1);
+                    this._pred(!1 !== fieldID);
                     return table.fields[fieldID].fieldName = referenceScheme;
                 });
                 return table.referenceScheme = referenceScheme;
@@ -252,7 +252,7 @@
             this._opt(function() {
                 this._pred(baseTable.idField == fkName);
                 fieldID = this._applyWithArgs("GetTableFieldID", baseTable, fkName);
-                this._pred(fieldID !== !1);
+                this._pred(!1 !== fieldID);
                 return baseTable.fields.splice(fieldID, 1);
             });
             references = this._applyWithArgs("GetReference", fkTable);
@@ -260,8 +260,7 @@
             this._applyWithArgs("AddRelationship", baseTable, factType.slice(1), fkName, references);
             factTypeResourceName = this._applyWithArgs("GetResourceName", factType);
             _.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
-                var actualFactType = $elf.MappedFactType(synForm);
-                if (0 === actualFactType[0][3]) $elf.AddRelationship(baseTable, synForm.slice(1), fkName, references); else {
+                if (0 === $elf.MappedFactType(synForm)[0][3]) $elf.AddRelationship(baseTable, synForm.slice(1), fkName, references); else {
                     var synResourceName = $elf.GetResourceName(synForm[0][1]), reverseReferences = $elf.GetReference(baseTable, fkName);
                     $elf.AddRelationship(synResourceName, synForm.slice(1), references.fieldName, reverseReferences);
                 }
@@ -284,7 +283,7 @@
             });
             uniqueField = this._applyWithArgs("FactTypeFieldName", factType);
             fieldID = this._applyWithArgs("GetTableFieldID", baseTable, uniqueField);
-            this._pred(fieldID !== !1);
+            this._pred(!1 !== fieldID);
             return baseTable.fields[fieldID].index = "UNIQUE";
         },
         AttrSynonym: function(term) {
@@ -1141,7 +1140,7 @@
         void 0 === index && (index = null);
         void 0 === defaultValue && (defaultValue = null);
         var fieldID = this.GetTableFieldID(table, fieldName);
-        fieldID === !1 && table.fields.push({
+        !1 === fieldID && table.fields.push({
             dataType: dataType,
             fieldName: fieldName,
             required: required,
@@ -1153,7 +1152,7 @@
     };
     LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, references, forceHas) {
         var $elf = this;
-        if (forceHas !== !0 && "has" === factType[0][1]) {
+        if (!0 !== forceHas && "has" === factType[0][1]) {
             var strippedFactType = _.clone(factType);
             strippedFactType.shift();
             this.AddRelationship(resourceName, strippedFactType, fieldName, references);
@@ -1195,18 +1194,18 @@
         this.conceptTypeResolvers[parentAlias] = function(untilConcept) {
             var conceptTable, conceptAlias;
             parentAlias = _.last(conceptTypeResolutions);
-            if (parentAlias !== !0 && !_.includes(conceptTypeResolutions, untilConcept)) {
-                for (;(concept = this.FollowConceptType(concept)) !== !1; ) {
+            if (!0 !== parentAlias && !_.includes(conceptTypeResolutions, untilConcept)) {
+                for (;!1 !== (concept = this.FollowConceptType(concept)); ) {
                     conceptAlias = concept[1] + varNum;
                     conceptTable = this.GetTable(concept[1]);
-                    if (conceptTable.primitive !== !1) break;
+                    if (!1 !== conceptTable.primitive) break;
                     query.push([ "From", [ conceptTable.name, conceptAlias ] ]);
                     this.AddWhereClause(query, [ "Equals", [ "ReferencedField", parentAlias, concept[1] ], [ "ReferencedField", conceptAlias, conceptTable.idField ] ]);
                     parentAlias = conceptAlias;
                     conceptTypeResolutions.push(parentAlias);
                     if (null != untilConcept && !this.IdentifiersEqual(concept, untilConcept)) break;
                 }
-                concept === !1 && conceptTypeResolutions.push(!0);
+                !1 === concept && conceptTypeResolutions.push(!0);
             }
         }.bind(this);
     };
