@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "lint": "resin-lint test",
-    "pretest": "npm run prepublish",
+    "pretest": "npm run prepublishOnly",
     "test": "mocha",
-    "prepublish": "ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
+    "prepublish": "require-npm4-to-publish",
+    "prepublishOnly": "ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
   "repository": "https://github.com/resin-io-modules/lf-to-abstract-sql.git",
   "author": "",
@@ -22,6 +23,7 @@
     "chai": "^3.0.0",
     "coffee-script": "~1.10.0",
     "mocha": "^3.0.2",
+    "require-npm4-to-publish": "^1.0.0",
     "resin-lint": "^1.2.2"
   }
 }
