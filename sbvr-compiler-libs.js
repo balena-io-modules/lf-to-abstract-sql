@@ -20,22 +20,24 @@
     };
     SBVRCompilerLibs.TYPE_VOCAB = "Type";
     SBVRCompilerLibs.IsPrimitive = function(term) {
-        return term[2] == this.TYPE_VOCAB ? term[1] : (term = this.FollowConceptType(term)) !== !1 && term[2] == this.TYPE_VOCAB ? term[1] : !1;
+        return term[2] == this.TYPE_VOCAB ? term[1] : !1 !== (term = this.FollowConceptType(term)) && term[2] == this.TYPE_VOCAB && term[1];
     };
     SBVRCompilerLibs.IsChild = function(child, parent) {
-        do if (this.IdentifiersEqual(child, parent)) return !0; while ((child = this.FollowConceptType(child)) !== !1);
+        do {
+            if (this.IdentifiersEqual(child, parent)) return !0;
+        } while (!1 !== (child = this.FollowConceptType(child)));
         return !1;
     };
     SBVRCompilerLibs.MappedFactType = function(factType) {
         var traverseInfo = this._traverseFactType(factType), mappedFactType = [];
-        if (traverseInfo === !1 || !traverseInfo.hasOwnProperty("__valid")) return !1;
+        if (!1 === traverseInfo || !traverseInfo.hasOwnProperty("__valid")) return !1;
         for (var i = 0; i < traverseInfo.__valid.length; i++) mappedFactType[i] = traverseInfo.__valid[i].slice();
         mappedFactType[1][2] = factType[1][2];
         return mappedFactType;
     };
     SBVRCompilerLibs.UnmappedFactType = function(factType) {
         var mappedFactType = this.MappedFactType(factType);
-        if (mappedFactType === !1) return !1;
+        if (!1 === mappedFactType) return !1;
         for (var i = 0; i < mappedFactType.length; i++) mappedFactType[i] = mappedFactType[i].slice(0, 3);
         return mappedFactType;
     };
@@ -60,7 +62,7 @@
     };
     SBVRCompilerLibs.GetTableField = function(table, fieldName) {
         var fieldID = this.GetTableFieldID(table, fieldName);
-        return fieldID === !1 ? !1 : table.fields[fieldID];
+        return !1 !== fieldID && table.fields[fieldID];
     };
     SBVRCompilerLibs.GetTableFieldID = function(table, fieldName) {
         for (var tableFields = table.fields, i = 0; i < tableFields.length; i++) if (tableFields[i].fieldName == fieldName) return i;
