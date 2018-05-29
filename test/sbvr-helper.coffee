@@ -377,7 +377,9 @@ exports.TableSpace = ->
 						return ['Not', comparison]
 					return comparison
 
-				if getTable(tableName).table is 'Attribute'
+				linkTable = getTable(tableName)
+
+				if linkTable.table is 'Attribute'
 					attributeBindings[binding.alias] = ['ReferencedField', bindings[0].alias, generateFieldName(factType)]
 					return attributeBindings[binding.alias]
 
@@ -390,8 +392,14 @@ exports.TableSpace = ->
 					[	'Where'
 						['And'].concat(
 							bindings.map (binding, i) ->
-								[	'Equals'
-									['ReferencedField', tableAlias, factType[i * 2][1]]
+								baseIdentifierName = factType[i * 2][1]
+								foreignKeyField = _.filter(linkTable.table.fields, (field) ->
+									field.dataType == 'ForeignKey' &&
+									field.references.resourceName == baseIdentifierName
+								)[0]
+
+								return ['Equals'
+									['ReferencedField', tableAlias, foreignKeyField.fieldName]
 									['ReferencedField', binding.alias, 'id']
 								]
 						)
