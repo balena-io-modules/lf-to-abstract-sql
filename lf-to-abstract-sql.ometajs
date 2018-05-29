@@ -496,9 +496,21 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{['SelectQuery', ['Select', []], ['From', [this.GetTable(actualFactType).name, tableAlias]]]}:query
 		{	_.each(binds, function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
-					table = $elf.GetTable(baseIdentifierName);
-				if(!table.primitive) {
-					$elf.AddWhereClause(query, ['Equals', ['ReferencedField', tableAlias, baseIdentifierName], ['ReferencedField', bind.binding[1], table.idField]]);
+					linkTable = $elf.GetTable(actualFactType),
+					targetTable = $elf.GetTable(baseIdentifierName),
+					foreignKeyField;
+				if(!targetTable.primitive) {
+					foreignKeyField = _.filter(linkTable.fields, function(field) {
+						return field.dataType === 'ForeignKey' &&
+							field.references.resourceName === baseIdentifierName;
+					})[0];
+
+					$elf.AddWhereClause(query,
+						['Equals',
+							['ReferencedField', tableAlias, foreignKeyField.fieldName],
+							['ReferencedField', bind.binding[1], targetTable.idField]
+						]
+					);
 				}
 			})
 		}

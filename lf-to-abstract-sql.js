@@ -634,8 +634,13 @@
             tableAlias = this._applyWithArgs("LinkTableAlias", binds, actualFactType);
             query = [ "SelectQuery", [ "Select", [] ], [ "From", [ this.GetTable(actualFactType).name, tableAlias ] ] ];
             _.each(binds, function(bind, i) {
-                var baseIdentifierName = actualFactType[2 * i][1], table = $elf.GetTable(baseIdentifierName);
-                table.primitive || $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, baseIdentifierName ], [ "ReferencedField", bind.binding[1], table.idField ] ]);
+                var baseIdentifierName = actualFactType[2 * i][1], linkTable = $elf.GetTable(actualFactType), targetTable = $elf.GetTable(baseIdentifierName), foreignKeyField;
+                if (!targetTable.primitive) {
+                    foreignKeyField = _.filter(linkTable.fields, function(field) {
+                        return "ForeignKey" === field.dataType && field.references.resourceName === baseIdentifierName;
+                    })[0];
+                    $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, foreignKeyField.fieldName ], [ "ReferencedField", bind.binding[1], targetTable.idField ] ]);
+                }
             });
             return [ "Exists", query ];
         },
