@@ -493,22 +493,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	LinkTable :actualFactType =
 		RoleBindings(actualFactType):binds
 		LinkTableAlias(binds, actualFactType):tableAlias
-		{['SelectQuery', ['Select', []], ['From', [this.GetTable(actualFactType).name, tableAlias]]]}:query
+		GetTable(actualFactType):linkTable
+		{['SelectQuery', ['Select', []], ['From', [linkTable.name, tableAlias]]]}:query
 		{	_.each(binds, function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
-					linkTable = $elf.GetTable(actualFactType),
-					targetTable = $elf.GetTable(baseIdentifierName),
-					foreignKeyField;
+					targetTable = $elf.GetTable(baseIdentifierName);
 				if(!targetTable.primitive) {
-					foreignKeyField = _.filter(linkTable.fields, function(field) {
-						return field.dataType === 'ForeignKey' &&
-							field.references.resourceName === baseIdentifierName;
-					})[0];
-
+					var relationshipMapping = $elf.relationships[linkTable.name][baseIdentifierName].$;
 					$elf.AddWhereClause(query,
 						['Equals',
-							['ReferencedField', tableAlias, foreignKeyField.fieldName],
-							['ReferencedField', bind.binding[1], targetTable.idField]
+							['ReferencedField', tableAlias, relationshipMapping[0]],
+							['ReferencedField', bind.binding[1], relationshipMapping[1][1]]
 						]
 					);
 				}
