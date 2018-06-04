@@ -629,13 +629,17 @@
             return factType.join("-");
         },
         LinkTable: function(actualFactType) {
-            var $elf = this, _fromIdx = this.input.idx, binds, query, tableAlias;
+            var $elf = this, _fromIdx = this.input.idx, binds, linkTable, query, tableAlias;
             binds = this._applyWithArgs("RoleBindings", actualFactType);
             tableAlias = this._applyWithArgs("LinkTableAlias", binds, actualFactType);
-            query = [ "SelectQuery", [ "Select", [] ], [ "From", [ this.GetTable(actualFactType).name, tableAlias ] ] ];
+            linkTable = this._applyWithArgs("GetTable", actualFactType);
+            query = [ "SelectQuery", [ "Select", [] ], [ "From", [ linkTable.name, tableAlias ] ] ];
             _.each(binds, function(bind, i) {
-                var baseIdentifierName = actualFactType[2 * i][1], table = $elf.GetTable(baseIdentifierName);
-                table.primitive || $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, baseIdentifierName ], [ "ReferencedField", bind.binding[1], table.idField ] ]);
+                var baseIdentifierName = actualFactType[2 * i][1];
+                if (!$elf.GetTable(baseIdentifierName).primitive) {
+                    var relationshipMapping = $elf.relationships[linkTable.resourceName][baseIdentifierName].$;
+                    $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, relationshipMapping[0] ], [ "ReferencedField", bind.binding[1], relationshipMapping[1][1] ] ]);
+                }
             });
             return [ "Exists", query ];
         },
