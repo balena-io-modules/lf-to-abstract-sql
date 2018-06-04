@@ -637,7 +637,7 @@
             _.each(binds, function(bind, i) {
                 var baseIdentifierName = actualFactType[2 * i][1];
                 if (!$elf.GetTable(baseIdentifierName).primitive) {
-                    var relationshipMapping = $elf.relationships[linkTable.name][baseIdentifierName].$;
+                    var relationshipMapping = $elf.relationships[linkTable.resourceName][baseIdentifierName].$;
                     $elf.AddWhereClause(query, [ "Equals", [ "ReferencedField", tableAlias, relationshipMapping[0] ], [ "ReferencedField", bind.binding[1], relationshipMapping[1][1] ] ]);
                 }
             });
