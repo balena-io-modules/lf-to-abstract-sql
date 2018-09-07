@@ -499,7 +499,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				var baseIdentifierName = actualFactType[i*2][1],
 					targetTable = $elf.GetTable(baseIdentifierName);
 				if(!targetTable.primitive) {
-					var relationshipMapping = $elf.relationships[linkTable.resourceName][baseIdentifierName].$;
+					var relationships = $elf.relationships[linkTable.resourceName];
+					_.each($elf.ResolveSynonym(baseIdentifierName).split('-'), function(partName) {
+						relationships = relationships[partName];
+					});
+					var relationshipMapping = relationships.$;
 					$elf.AddWhereClause(query,
 						['Equals',
 							['ReferencedField', tableAlias, relationshipMapping[0]],
