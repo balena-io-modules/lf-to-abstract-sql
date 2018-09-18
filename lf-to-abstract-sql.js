@@ -243,7 +243,7 @@
             });
         },
         AttrForeignKey: function(factType) {
-            var $elf = this, _fromIdx = this.input.idx, baseTable, factTypeResourceName, fieldID, fkName, fkTable, foreignTerm, linkResourceName, references, required;
+            var $elf = this, _fromIdx = this.input.idx, baseTable, factTypeResourceName, fieldID, fkName, fkTable, foreignTerm, index, linkResourceName, references, required;
             required = this.anything();
             baseTable = this._applyWithArgs("GetTable", factType[0][1]);
             foreignTerm = factType[2][1];
@@ -253,10 +253,11 @@
                 this._pred(baseTable.idField == fkName);
                 fieldID = this._applyWithArgs("GetTableFieldID", baseTable, fkName);
                 this._pred(!1 !== fieldID);
+                index = baseTable.fields[fieldID].index;
                 return baseTable.fields.splice(fieldID, 1);
             });
             references = this._applyWithArgs("GetReference", fkTable);
-            fieldID = this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, null, references);
+            fieldID = this._applyWithArgs("AddTableField", baseTable, fkName, "ForeignKey", required, index, references);
             this._applyWithArgs("AddRelationship", baseTable, factType.slice(1), fkName, references);
             factTypeResourceName = this._applyWithArgs("GetResourceName", factType);
             _.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
