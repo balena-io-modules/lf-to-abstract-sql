@@ -1,2 +1,5 @@
 node_modules
 *.swp
+/lf-to-abstract-sql-prep.js
+/lf-to-abstract-sql.js
+/sbvr-compiler-libs.js

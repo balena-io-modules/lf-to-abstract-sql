@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "lint": "resin-lint test",
-    "pretest": "npm run prepublishOnly",
+    "pretest": "npm run prepare",
     "test": "mocha",
     "prepublish": "require-npm4-to-publish",
-    "prepublishOnly": "ometajs2js --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
+    "prepare": "ometajs2js --commonjs --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --commonjs --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --commonjs --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
   "repository": "https://github.com/resin-io-modules/lf-to-abstract-sql.git",
   "author": "",
@@ -18,7 +18,7 @@
     "ometa-js": "^1.5.3"
   },
   "devDependencies": {
-    "@resin/sbvr-parser": "^0.1.4",
+    "@resin/sbvr-parser": "^0.2.1",
     "@resin/sbvr-types": "^2.0.0",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
