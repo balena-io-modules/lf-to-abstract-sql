@@ -18,7 +18,7 @@
     "ometa-js": "^1.5.3"
   },
   "devDependencies": {
-    "@resin/sbvr-parser": "^0.1.4",
+    "@resin/sbvr-parser": "^0.2.1",
     "@resin/sbvr-types": "^2.0.0",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
