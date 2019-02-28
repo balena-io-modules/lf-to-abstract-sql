@@ -38,6 +38,14 @@ createdAtField =
 	references: null
 	defaultValue: 'CURRENT_TIMESTAMP'
 
+modifiedAtField =
+	dataType: 'Date Time'
+	fieldName: 'modified at'
+	required: true
+	index: null
+	references: null
+	defaultValue: 'CURRENT_TIMESTAMP'
+
 exports.TableSpace = ->
 	tables = {}
 	synonyms = {}
@@ -91,7 +99,7 @@ exports.TableSpace = ->
 				currentTable = this
 
 				idField = 'id'
-				fields = [createdAtField]
+				fields = [createdAtField, modifiedAtField]
 				indexes = []
 				switch lf[0]
 					when 'Term'
@@ -156,6 +164,14 @@ exports.TableSpace = ->
 					idField
 					fields
 					indexes
+					triggers: [
+						{
+							fnName: 'trigger_update_modified_at'
+							level: 'ROW'
+							operation: 'UPDATE'
+							when: 'BEFORE'
+						}
+					]
 				}
 				if referenceScheme?
 					tableDefinition.referenceScheme = referenceScheme
@@ -199,6 +215,7 @@ exports.TableSpace = ->
 								referenceScheme: typeName
 								fields: [
 									createdAtField
+									modifiedAtField
 									primitiveField
 								]
 							@matches = undefined

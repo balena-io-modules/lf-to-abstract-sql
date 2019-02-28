@@ -22,7 +22,7 @@
     "@resin/sbvr-types": "^2.0.0",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "require-npm4-to-publish": "^1.0.0",
     "resin-lint": "^2.0.1"
   }
