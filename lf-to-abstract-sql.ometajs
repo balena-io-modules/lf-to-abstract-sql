@@ -1,5 +1,13 @@
 var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
-	_ = require('lodash');
+	_ = require('lodash'),
+	updateModifiedAt = {
+		type: 'trigger',
+		body: '\
+NEW."modified at" = NOW();\n\
+RETURN NEW;',
+		language: 'plpgsql'
+	};
+
 export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	Number =
 		[	'Number'
@@ -848,20 +856,43 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			tables: _.omitBy(this.tables, function(table, resourceName) {
 				return _.isString(table) || (table.primitive && !hasDependants[resourceName]);
 			}),
+			functions: {
+				trigger_update_modified_at: updateModifiedAt
+			},
 			relationships: this.relationships,
 			rules: this.rules,
 			synonyms: this.synonyms
 		}
 	,
 
-	CreateTable :resourceName :modelName =
-		{{fields: [], primitive: false, name: null, indexes: [], idField: null, resourceName: resourceName, modelName: modelName}}:table
-		AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
-		-> (this.tables[resourceName] = table)
-	,
-
 	GetReference :table :field =
 		-> { resourceName: table.resourceName, fieldName: field || table.idField }
+}
+
+LF2AbstractSQL.CreateTable = function(resourceName, modelName) {
+	var table = {
+		fields: [],
+		primitive: false,
+		name: null,
+		indexes: [],
+		idField: null,
+		resourceName: resourceName,
+		modelName: modelName,
+		triggers: []
+	};
+	this.AddTableField(table, 'created at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
+	this.AddTableField(table, 'modified at', 'Date Time', true, null, null, 'CURRENT_TIMESTAMP')
+	this.AddTableTrigger(table, 'BEFORE', 'UPDATE', 'ROW', 'trigger_update_modified_at')
+	return this.tables[resourceName] = table
+}
+
+LF2AbstractSQL.AddTableTrigger = function(table, when, operation, level, fnName) {
+	table.triggers.push({
+		when: when,
+		operation: operation,
+		level: level,
+		fnName: fnName
+	});
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
