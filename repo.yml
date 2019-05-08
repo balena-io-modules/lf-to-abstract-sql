@@ -1,0 +1,6 @@
+type: 'node'
+upstream:
+  - repo: 'sbvr-parser'
+    url: 'https://github.com/balena-io-modules/sbvr-parser'
+  - repo: 'sbvr-types'
+    url: 'https://github.com/balena-io-modules/sbvr-types'
