@@ -1,283 +1,329 @@
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: major
-    hash: dc10a94a8547b413ced003e87cd4c8272b1b3b59
-    subject: Add automatic modified at fields
-  date: "2019-03-08T15:40:33Z"
+    - subject: Add node 12 tests
+      hash: 83bc641d081b6cb8ba3cc9c027e0d789dfee4380
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Add repo.yml for upstream changelogs
+      hash: e877b3cbb7c314cd4a3632b9aed309ba392448d4
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Add .versionbot/CHANGELOG.yml for downstream changelogs
+      hash: 42abf7389d8bc95c621e2f012ecae9edfca24580
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.0.1
+  date: 2019-05-08T15:55:22.023Z
+- commits:
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: major
+      hash: dc10a94a8547b413ced003e87cd4c8272b1b3b59
+      subject: Add automatic modified at fields
+  date: '2019-03-08T15:40:33Z'
   version: 3.0.0
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: minor
-    hash: 20de60f7f2deaf974897eba428354e638d288d31
-    subject: Switch to generating commonjs format
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: minor
-    hash: 1cda4b293c10f7a715d39019394bb6ed7e679df2
-    subject: Switch to using a prepare script so npm git installs can work
-  - author: Pagan Gazzard
-    body: ""
-    hash: bd58688933d06e87391ee6b01d3fae688066438e
-    subject: Update dev dependencies
-  date: "2018-11-03T13:13:33Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: minor
+      hash: 20de60f7f2deaf974897eba428354e638d288d31
+      subject: Switch to generating commonjs format
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: minor
+      hash: 1cda4b293c10f7a715d39019394bb6ed7e679df2
+      subject: Switch to using a prepare script so npm git installs can work
+    - author: Pagan Gazzard
+      body: ''
+      hash: bd58688933d06e87391ee6b01d3fae688066438e
+      subject: Update dev dependencies
+  date: '2018-11-03T13:13:33Z'
   version: 2.1.0
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-      signed-off-by: Pagan Gazzard <page@resin.io>
-    hash: 907c645b227dc21aa9372aef06da73dfd12c1406
-    subject: Update dependencies
-  date: "2018-10-11T11:55:02Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+        signed-off-by: Pagan Gazzard <page@resin.io>
+      hash: 907c645b227dc21aa9372aef06da73dfd12c1406
+      subject: Update dependencies
+  date: '2018-10-11T11:55:02Z'
   version: 2.0.8
 - commits:
-  - author: Pagan Gazzard
-    body: This is necessary to keep the primary key index for custom id fields
-    footers:
-      change-type: patch
-      signed-off-by: Pagan Gazzard <page@resin.io>
-    hash: 170490ab05b92c16995fdd1ff153ead3c374ac4c
-    subject: Keep the index intact when replacing the id field
-  date: "2018-09-18T12:51:12Z"
+    - author: Pagan Gazzard
+      body: This is necessary to keep the primary key index for custom id fields
+      footers:
+        change-type: patch
+        signed-off-by: Pagan Gazzard <page@resin.io>
+      hash: 170490ab05b92c16995fdd1ff153ead3c374ac4c
+      subject: Keep the index intact when replacing the id field
+  date: '2018-09-18T12:51:12Z'
   version: 2.0.7
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-      signed-off-by: Pagan Gazzard <page@resin.io>
-    hash: 34de0f9712b35ca8896738efd42a46d04fdf0f51
-    subject: Resolve synonyms for link tables, fixing term forms on term forms
-  date: "2018-09-07T14:32:06Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+        signed-off-by: Pagan Gazzard <page@resin.io>
+      hash: 34de0f9712b35ca8896738efd42a46d04fdf0f51
+      subject: 'Resolve synonyms for link tables, fixing term forms on term forms'
+  date: '2018-09-07T14:32:06Z'
   version: 2.0.6
 - commits:
-  - author: Tim Perry
-    body: ""
-    footers:
-      change-type: patch
-    hash: 6abbfb0266b2b3c7a5d1fd32155302cd75874539
-    subject: Ensure the correct FK field name is used in link table rules
-  - author: Tim Perry
-    body: ""
-    hash: 4ad82a7367d9b4d4eeaa0b88f2db8b357acad42d
-    subject: Fix FK field name generation in tests too
-  - author: Tim Perry
-    body: ""
-    hash: 11d2f20b5feb2e8dc9cfe8f2b2cce06ec7a2cc4c
-    subject: Fix FK field names to use the correct verb as well
-  - author: Tim Perry
-    body: ""
-    hash: 4b936ca0e0822da65fe785d56c53eca9d1d74bb5
-    subject: Fix FK field names even if you override the DB table name
-  date: "2018-06-04T14:35:15Z"
+    - author: Tim Perry
+      body: ''
+      footers:
+        change-type: patch
+      hash: 6abbfb0266b2b3c7a5d1fd32155302cd75874539
+      subject: Ensure the correct FK field name is used in link table rules
+    - author: Tim Perry
+      body: ''
+      hash: 4ad82a7367d9b4d4eeaa0b88f2db8b357acad42d
+      subject: Fix FK field name generation in tests too
+    - author: Tim Perry
+      body: ''
+      hash: 11d2f20b5feb2e8dc9cfe8f2b2cce06ec7a2cc4c
+      subject: Fix FK field names to use the correct verb as well
+    - author: Tim Perry
+      body: ''
+      hash: 4b936ca0e0822da65fe785d56c53eca9d1d74bb5
+      subject: Fix FK field names even if you override the DB table name
+  date: '2018-06-04T14:35:15Z'
   version: 2.0.5
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: c2d2da51b1f5088ebea2396e493cad5d428260d9
-    subject: Update dependencies
-  date: "2018-05-10T07:51:41Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: c2d2da51b1f5088ebea2396e493cad5d428260d9
+      subject: Update dependencies
+  date: '2018-05-10T07:51:41Z'
   version: 2.0.4
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: d2fc0a93ef7c86653827afb7a7e2e61ff6f46414
-    subject: Require npm 4+ to publish, to avoid issues with publishing
-  date: "2018-05-10T06:57:56Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: d2fc0a93ef7c86653827afb7a7e2e61ff6f46414
+      subject: 'Require npm 4+ to publish, to avoid issues with publishing'
+  date: '2018-05-10T06:57:56Z'
   version: 2.0.3
 - commits:
-  - author: Pagan Gazzard
-    body: This fixes issues where the wrong attribute name would be used when generating
-      the abstract sql using those relationships
-    footers:
-      change-type: patch
-    hash: 10d30670ff5c008e169af5909bbdd5ff583f19c4
-    subject: Make sure the canonical fact types for term forms include the linked
-      verb.
-  date: "2018-05-07T15:39:44Z"
+    - author: Pagan Gazzard
+      body: >-
+        This fixes issues where the wrong attribute name would be used when
+        generating the abstract sql using those relationships
+      footers:
+        change-type: patch
+      hash: 10d30670ff5c008e169af5909bbdd5ff583f19c4
+      subject: >-
+        Make sure the canonical fact types for term forms include the linked
+        verb.
+  date: '2018-05-07T15:39:44Z'
   version: 2.0.2
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: 996e618755fb86fadb9fa0da9f22d0d430aaca9c
-    subject: Move circle.yml to .circleci/config.yml
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: 88f1c49ac3d14a3234110e622675e0284a34b58b
-    subject: Add node 10 to the circleci tests
-  date: "2018-04-30T16:23:56Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: 996e618755fb86fadb9fa0da9f22d0d430aaca9c
+      subject: Move circle.yml to .circleci/config.yml
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: 88f1c49ac3d14a3234110e622675e0284a34b58b
+      subject: Add node 10 to the circleci tests
+  date: '2018-04-30T16:23:56Z'
   version: 2.0.1
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: major
-    hash: a1b1cea2836243b11350d62c76e7687a95d501b7
-    subject: Switch references to use the `resourceName` which is the lookup key for
-      the `tables` entry of the abstract sql model, and will allow for much easier
-      lookups.
-  date: "2018-04-25T18:42:30Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: major
+      hash: a1b1cea2836243b11350d62c76e7687a95d501b7
+      subject: >-
+        Switch references to use the `resourceName` which is the lookup key for
+        the `tables` entry of the abstract sql model, and will allow for much
+        easier lookups.
+  date: '2018-04-25T18:42:30Z'
   version: 2.0.0
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: 571f4d520450f1d502c3bcf4fce51f1eb053e483
-    subject: Set up circleci auto-publishing
-  date: "2017-12-11T17:52:29Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: 571f4d520450f1d502c3bcf4fce51f1eb053e483
+      subject: Set up circleci auto-publishing
+  date: '2017-12-11T17:52:29Z'
   version: 1.0.4
 - commits:
-  - author: Pagan Gazzard
-    body: eg `pilot/pilot__can_fly__plane` will now work alongside `pilot/can_fly__plane`
-    footers:
-      change-type: patch
-    hash: 9de3b93b2d59d75429f2e52596933662802b1282
-    subject: Include the full relationship which includes the first term for all foreign
-      keys, rather than just term forms.
-  date: "2017-10-03T18:50:12Z"
+    - author: Pagan Gazzard
+      body: >-
+        eg `pilot/pilot__can_fly__plane` will now work alongside
+        `pilot/can_fly__plane`
+      footers:
+        change-type: patch
+      hash: 9de3b93b2d59d75429f2e52596933662802b1282
+      subject: >-
+        Include the full relationship which includes the first term for all
+        foreign keys, rather than just term forms.
+  date: '2017-10-03T18:50:12Z'
   version: 1.0.3
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    footers:
-      change-type: patch
-    hash: 343aeda3ff777c1bb1bf5b13d7be1486a0a2e517
-    subject: Add relationship info for concept types
-  date: "2017-09-21T13:13:57Z"
+    - author: Pagan Gazzard
+      body: ''
+      footers:
+        change-type: patch
+      hash: 343aeda3ff777c1bb1bf5b13d7be1486a0a2e517
+      subject: Add relationship info for concept types
+  date: '2017-09-21T13:13:57Z'
   version: 1.0.2
 - commits:
-  - author: Giovanni Garufi
-    body: ""
-    footers:
-      change-type: patch
-    hash: a0d7f5f8d95180e412d3197b11b580a3d64c52e4
-    subject: Added negation across all factTypes
-  - author: Giovanni Garufi
-    body: ""
-    footers:
-      change-type: patch
-    hash: 868643ed348c7fab371b5c595a43e39b43d11643
-    subject: Added versionist
-  date: "2017-09-19T15:52:07Z"
+    - author: Giovanni Garufi
+      body: ''
+      footers:
+        change-type: patch
+      hash: a0d7f5f8d95180e412d3197b11b580a3d64c52e4
+      subject: Added negation across all factTypes
+    - author: Giovanni Garufi
+      body: ''
+      footers:
+        change-type: patch
+      hash: 868643ed348c7fab371b5c595a43e39b43d11643
+      subject: Added versionist
+  date: '2017-09-19T15:52:07Z'
   version: 1.0.1
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    hash: 9ed0fdf516c07fb853b0356fab2c510be05e2a8d
-    subject: Remove tables that should not exist from the output.
-  - author: Pagan Gazzard
-    body: ""
-    hash: e7a72cf38704660cc7286524b919661a2d83c165
-    subject: Change table names to keep spaces in terms and verbs, but `-` between
-      them, matching fields, eg 'pilot-can fly-plane'
-  - author: Pagan Gazzard
-    body: ""
-    hash: 1c4e1b392b33c54cf9d3aefd11b8207ed02ceeb8
-    subject: Switch to generating field names as "verb-term", except when the verb
-      is 'has'
-  - author: Pagan Gazzard
-    body: ""
-    hash: 64b5d0c75b9115b01398789636cfc813954cafd4
-    subject: Add `modelName` to the table info.
-  - author: Pagan Gazzard
-    body: ""
-    hash: a02033b3e480fbe99be282d10027605afde8dcfb
-    subject: Pass the resource name into CreateTable so it can handle the table assignment
-  - author: Pagan Gazzard
-    body: ""
-    hash: eaecd374782f0d9c92974e63aa48e35305ba6824
-    subject: Use a GetReference rule to consolidate foreign key references creation
-  - author: Pagan Gazzard
-    body: ""
-    hash: cf2ede4a834c83f9abfe324a22cf12e1e776eb03
-    subject: Add relationship info for attributes, foreign keys, boolean attributes,
-      and from link tables (fact types) to its component terms.
-  - author: Pagan Gazzard
-    body: ""
-    hash: 2b164ecd8513be7571ac4a6f8a5afd92784f52fd
-    subject: Add a list of synonyms to the result
-  - author: Pagan Gazzard
-    body: ""
-    hash: 2a1267d6952bff60abf8e2700e989fff724430d7
-    subject: Add ordering to attribute handling so it's possible to rely on encountering
-      attributes in a specific order
-  - author: Pagan Gazzard
-    body: ""
-    hash: c6eefad355fa6798c33d0ba0c6e5f34174b0f4bd
-    subject: Add relationship info for synonymous form relationships
-  - author: Pagan Gazzard
-    body: ""
-    hash: 72f20ff368ebce44fae8c20f31b279e73ce3afe8
-    subject: Remove 'BooleanAttribute'/'Attribute'/'ForeignKey' placeholder tables
-      from the output.
-  - author: Pagan Gazzard
-    body: ""
-    hash: 561d8c7e0152e32646cb54f176471a9792687676
-    subject: Add relationship info from the first term of a fact type to the fact
-      type table
-  - author: Pagan Gazzard
-    body: ""
-    hash: 33fef756c8059b574ecebab793055b9b33a78057
-    subject: Add relationship info from the first term of a synonymous form to the
-      fact type table
-  - author: Pagan Gazzard
-    body: ""
-    hash: 233fe9d2f4bed55a428de705e9d6c9b8defbac4d
-    subject: Add relationship info from the term form of a fact type to it's component
-      terms
-  - author: Pagan Gazzard
-    body: ""
-    hash: 62e600bd778239f60f79c4593f89897a7fdf8f09
-    subject: Update to sbvr-parser ^0.1.0 so we can rely on the `has`/`is of` synonymous
-      forms being in the LF.
-  - author: Pagan Gazzard
-    body: ""
-    hash: 1ce4a2164c914d1e5216c34bea85ba538274ffdb
-    subject: Make sure synonyms are resolved when adding relationship info
-  - author: Pagan Gazzard
-    body: |-
-      Instead we consistently use the original resource name via synonym resolution.
-      This also fixes an issue where relationships info for foreign keys of term form tables was incorrect
-    hash: 37413bbdc76154cbfa0bf4d4f1a23671b2d63e55
-    subject: Stop adding a alias for the term form of a fact type to the returned
-      tables list
-  - author: Pagan Gazzard
-    body: ""
-    hash: b5136f12c5f38e4eb820ee68e021bc1bab938075
-    subject: Switched relationships info to terminate with a $ property, this fixes
-      cases where one relationship is a subset of another
-  date: "2017-03-03T02:10:47Z"
+    - author: Pagan Gazzard
+      body: ''
+      hash: 9ed0fdf516c07fb853b0356fab2c510be05e2a8d
+      subject: Remove tables that should not exist from the output.
+    - author: Pagan Gazzard
+      body: ''
+      hash: e7a72cf38704660cc7286524b919661a2d83c165
+      subject: >-
+        Change table names to keep spaces in terms and verbs, but `-` between
+        them, matching fields, eg 'pilot-can fly-plane'
+    - author: Pagan Gazzard
+      body: ''
+      hash: 1c4e1b392b33c54cf9d3aefd11b8207ed02ceeb8
+      subject: >-
+        Switch to generating field names as "verb-term", except when the verb is
+        'has'
+    - author: Pagan Gazzard
+      body: ''
+      hash: 64b5d0c75b9115b01398789636cfc813954cafd4
+      subject: Add `modelName` to the table info.
+    - author: Pagan Gazzard
+      body: ''
+      hash: a02033b3e480fbe99be282d10027605afde8dcfb
+      subject: >-
+        Pass the resource name into CreateTable so it can handle the table
+        assignment
+    - author: Pagan Gazzard
+      body: ''
+      hash: eaecd374782f0d9c92974e63aa48e35305ba6824
+      subject: Use a GetReference rule to consolidate foreign key references creation
+    - author: Pagan Gazzard
+      body: ''
+      hash: cf2ede4a834c83f9abfe324a22cf12e1e776eb03
+      subject: >-
+        Add relationship info for attributes, foreign keys, boolean attributes,
+        and from link tables (fact types) to its component terms.
+    - author: Pagan Gazzard
+      body: ''
+      hash: 2b164ecd8513be7571ac4a6f8a5afd92784f52fd
+      subject: Add a list of synonyms to the result
+    - author: Pagan Gazzard
+      body: ''
+      hash: 2a1267d6952bff60abf8e2700e989fff724430d7
+      subject: >-
+        Add ordering to attribute handling so it's possible to rely on
+        encountering attributes in a specific order
+    - author: Pagan Gazzard
+      body: ''
+      hash: c6eefad355fa6798c33d0ba0c6e5f34174b0f4bd
+      subject: Add relationship info for synonymous form relationships
+    - author: Pagan Gazzard
+      body: ''
+      hash: 72f20ff368ebce44fae8c20f31b279e73ce3afe8
+      subject: >-
+        Remove 'BooleanAttribute'/'Attribute'/'ForeignKey' placeholder tables
+        from the output.
+    - author: Pagan Gazzard
+      body: ''
+      hash: 561d8c7e0152e32646cb54f176471a9792687676
+      subject: >-
+        Add relationship info from the first term of a fact type to the fact
+        type table
+    - author: Pagan Gazzard
+      body: ''
+      hash: 33fef756c8059b574ecebab793055b9b33a78057
+      subject: >-
+        Add relationship info from the first term of a synonymous form to the
+        fact type table
+    - author: Pagan Gazzard
+      body: ''
+      hash: 233fe9d2f4bed55a428de705e9d6c9b8defbac4d
+      subject: >-
+        Add relationship info from the term form of a fact type to it's
+        component terms
+    - author: Pagan Gazzard
+      body: ''
+      hash: 62e600bd778239f60f79c4593f89897a7fdf8f09
+      subject: >-
+        Update to sbvr-parser ^0.1.0 so we can rely on the `has`/`is of`
+        synonymous forms being in the LF.
+    - author: Pagan Gazzard
+      body: ''
+      hash: 1ce4a2164c914d1e5216c34bea85ba538274ffdb
+      subject: Make sure synonyms are resolved when adding relationship info
+    - author: Pagan Gazzard
+      body: >-
+        Instead we consistently use the original resource name via synonym
+        resolution.
+
+        This also fixes an issue where relationships info for foreign keys of
+        term form tables was incorrect
+      hash: 37413bbdc76154cbfa0bf4d4f1a23671b2d63e55
+      subject: >-
+        Stop adding a alias for the term form of a fact type to the returned
+        tables list
+    - author: Pagan Gazzard
+      body: ''
+      hash: b5136f12c5f38e4eb820ee68e021bc1bab938075
+      subject: >-
+        Switched relationships info to terminate with a $ property, this fixes
+        cases where one relationship is a subset of another
+  date: '2017-03-03T02:10:47Z'
   version: 1.0.0
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    hash: dab03975dba3b8305c10f4f59fe2186338ced9bb
-    subject: Switch to only adding concept type joins if they're actually needed.
-  - author: Pagan Gazzard
-    body: ""
-    hash: 52c160fb1a175445be3749ccb88d2d0418e773f1
-    subject: Add a test for a self-referential fact type and synonymous form.
-  date: "2017-01-13T01:37:52Z"
+    - author: Pagan Gazzard
+      body: ''
+      hash: dab03975dba3b8305c10f4f59fe2186338ced9bb
+      subject: Switch to only adding concept type joins if they're actually needed.
+    - author: Pagan Gazzard
+      body: ''
+      hash: 52c160fb1a175445be3749ccb88d2d0418e773f1
+      subject: Add a test for a self-referential fact type and synonymous form.
+  date: '2017-01-13T01:37:52Z'
   version: 0.0.19
 - commits:
-  - author: Pagan Gazzard
-    body: ""
-    hash: 4ba58ff5c73f0c72583db383b6955390760d8854
-    subject: Add support for concept type on term form fact types.
-  date: "2016-07-18T18:11:03Z"
+    - author: Pagan Gazzard
+      body: ''
+      hash: 4ba58ff5c73f0c72583db383b6955390760d8854
+      subject: Add support for concept type on term form fact types.
+  date: '2016-07-18T18:11:03Z'
   version: 0.0.18
