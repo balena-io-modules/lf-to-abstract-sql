@@ -1,4 +1,14 @@
 - commits:
+    - subject: Fix `updateModifiedAt` formatting
+      hash: 8791bf7a0fe088472d1ace8a6ebd6b9d721b3759
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.0.2
+  date: 2019-06-14T14:17:38.056Z
+- commits:
     - subject: Add node 12 tests
       hash: 83bc641d081b6cb8ba3cc9c027e0d789dfee4380
       body: ''
