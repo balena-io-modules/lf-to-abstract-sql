@@ -2,9 +2,7 @@ var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
 	_ = require('lodash'),
 	updateModifiedAt = {
 		type: 'trigger',
-		body: '\
-NEW."modified at" = NOW();\n\
-RETURN NEW;',
+		body: 'NEW."modified at" = NOW();\nRETURN NEW;',
 		language: 'plpgsql'
 	};
 
