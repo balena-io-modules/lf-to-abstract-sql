@@ -108,38 +108,39 @@ exports.TableSpace = ->
 						factType = lf[1...-1]
 						if factType.length is 2
 							booleanAttribute = true
-						for factTypePart, i in factType
-							name = generateName(factTypePart[1])
-							tableName.push(name)
-							referenceResourceName = resolveSynonym(name)
-							resourceName.push(referenceResourceName)
-							if factTypePart[0] is 'Term'
-								fieldName =
-									if i is 0
-										generateName(factTypePart[1])
+						else
+							for factTypePart, i in factType
+								name = generateName(factTypePart[1])
+								tableName.push(name)
+								referenceResourceName = resolveSynonym(name)
+								resourceName.push(referenceResourceName)
+								if factTypePart[0] is 'Term'
+									fieldName =
+										if i is 0
+											generateName(factTypePart[1])
+										else
+											generateFieldName(factType[i - 2..i])
+									uniqueIndex.fields.push(fieldName)
+									primitive = isPrimitive(factTypePart)
+									if primitive
+										dataType = primitive
+										references = null
 									else
-										generateFieldName(factType[i - 2..i])
-								uniqueIndex.fields.push(fieldName)
-								primitive = isPrimitive(factTypePart)
-								if primitive
-									dataType = primitive
-									references = null
-								else
-									dataType = 'ForeignKey'
-									references =
-										fieldName: 'id'
-										resourceName: referenceResourceName
-								fields.push(
-									dataType: dataType
-									fieldName: fieldName
-									required: true
-									index: null
-									references: references
-									defaultValue: null
-								)
-						indexes.push(uniqueIndex)
-						tableName = tableName.join('-')
-						resourceName = resourceName.join('-')
+										dataType = 'ForeignKey'
+										references =
+											fieldName: 'id'
+											resourceName: referenceResourceName
+									fields.push(
+										dataType: dataType
+										fieldName: fieldName
+										required: true
+										index: null
+										references: references
+										defaultValue: null
+									)
+							indexes.push(uniqueIndex)
+							tableName = tableName.join('-')
+							resourceName = resourceName.join('-')
 				fields.push(
 					dataType: 'Serial'
 					fieldName: idField
@@ -162,6 +163,14 @@ exports.TableSpace = ->
 
 				# If we're a boolean attribute then we override the definition.
 				if booleanAttribute
+					getTable(factType[0][1]).table.fields.push({
+						dataType: 'Boolean'
+						defaultValue: null
+						fieldName: factType[1][1]
+						index: null
+						references: null
+						required: true
+					})
 					tableDefinition = 'BooleanAttribute'
 					@matches = undefined
 				else
@@ -230,14 +239,56 @@ exports.TableSpace = ->
 							card = nest(quant, ['MaximumCardinality', 'Number'])
 						if card and card[1] is 1
 							bindings = nest(quant, ['AtomicFormulation', 'RoleBinding'], true)[0]
-							if _.some(bindings, (binding) -> getTable(binding[1][1]).table.primitive)
-								@table = 'Attribute'
+							factType = nest(quant, ['AtomicFormulation', 'FactType'])
+							primitiveTable = bindings.map((binding) -> getTable(binding[1][1]).table).find((table) -> table.primitive)
+							baseTable = getTable(factType[1][1]).table
+
+							if baseTable == primitiveTable
+								# If the primitive table is also the base table then it's actually a unique
+								# constraint rather than a cardinality constraint
+								_.find(@baseTable.fields, { fieldName: primitiveTable.name }).index = 'UNIQUE'
+								@matches = _.cloneDeep(@baseTable)
 							else
-								@table = 'ForeignKey'
-							@matches = undefined
+								if primitiveTable
+									@table = 'Attribute'
+								else
+									@table = 'ForeignKey'
+								dataType = primitiveTable?.primitive ? 'ForeignKey'
+
+								@baseTable = baseTable
+
+								required = quant[0] == 'ExactQuantification'
+								fieldName = _(factType).slice(2).map(1).reject((v) -> v == 'has').join('-')
+								field = _.find(@baseTable.fields, { fieldName })
+								if field
+									field.required = required
+								else
+									@baseTable.fields.push({
+										dataType
+										fieldName
+										required: required
+										index: null
+										references:
+											fieldName: if primitiveTable then null else 'id'
+											resourceName: _.last(factType)[1]
+										defaultValue: null
+									})
+								@property = 'tables.' + @baseTable.resourceName
+								@matches = _.cloneDeep(@baseTable)
 					when 'Definition'
-						# Nulling the property just checks that there are no changes to the previous test result.
-						@property = null
+						definition = lf[1]
+						if definition[0] == 'Enum'
+							lastField = _.last(@baseTable.fields)
+							lastField.checks = [[
+								'In',
+								[ 'Field', lastField.fieldName ],
+								definition[1...]...
+							]]
+							@property = 'tables.' + @baseTable.resourceName
+							@matches = _.cloneDeep(@baseTable)
+						else
+							# Nulling the property just checks that there are no changes to the previous test result.
+							@property = null
 					when 'SynonymousForm'
 						tableName = parseFactType(lf[1]).tableName
 						tables[tableName] = this
