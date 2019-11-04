@@ -98,8 +98,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			}
 	,
 	DefaultAttr :termOrFactType =
-		:anything,
-		// {console.log('Default', termOrFactType, anything)},
+		anything,
 	AttrConceptType :termOrFactType =
 		[	'Term'
 			:conceptType
@@ -307,6 +306,31 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		},
 	AttrNecessity :tableID =
 		Rule,
+	AttrDefinition :factType =
+			[	'Enum'
+				Value+:values
+			]
+
+			GetTable(factType):baseTable
+			(	?(baseTable === 'Attribute' || baseTable === 'ForeignKey')
+				GetTable(factType[0][1]):baseTable
+			)?
+			// Check we were able to find the base table, if not it's probably
+			// a definition on a term and not a fact type
+			?baseTable
+			FactTypeFieldName(factType):uniqueField
+			GetTableFieldID(baseTable, uniqueField):fieldID
+			?(fieldID !== false)
+			{baseTable.fields[fieldID].checks = baseTable.fields[fieldID].checks || []}:checks
+			{checks.push(
+				[	'In',
+					[	'Field',
+						baseTable.fields[fieldID].fieldName
+					]
+				].concat(values)
+			)}
+		|	anything
+	,
 
 	/** Fact Types **/
 	FactType =
