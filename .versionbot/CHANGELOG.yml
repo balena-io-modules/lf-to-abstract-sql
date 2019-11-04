@@ -1,4 +1,14 @@
 - commits:
+    - subject: Add support for enum definitions on fact types
+      hash: c78811ce696b4408c365dafe091af50f674be5cf
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+  version: 3.1.0
+  date: 2019-11-01T20:37:37.720Z
+- commits:
     - subject: Fix `updateModifiedAt` formatting
       hash: 8791bf7a0fe088472d1ace8a6ebd6b9d721b3759
       body: ''
