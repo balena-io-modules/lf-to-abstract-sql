@@ -1,4 +1,14 @@
 - commits:
+    - subject: Add CODEOWNERS
+      hash: 84138a590beefb6a5efeb67e271fe26ec8706d4c
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.1.1
+  date: 2020-01-22T15:41:30.465Z
+- commits:
     - subject: Add support for enum definitions on fact types
       hash: c78811ce696b4408c365dafe091af50f674be5cf
       body: ''
