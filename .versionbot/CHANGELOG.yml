@@ -1,4 +1,14 @@
 - commits:
+    - subject: 'CI: Remove circleci publishing in favor of balenaCI'
+      hash: 857edf20512d8876483751083d3738fd792b1a34
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.1.2
+  date: 2020-02-26T13:45:32.126Z
+- commits:
     - subject: Add CODEOWNERS
       hash: 84138a590beefb6a5efeb67e271fe26ec8706d4c
       body: ''
