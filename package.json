@@ -4,7 +4,7 @@
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
-    "lint": "resin-lint test",
+    "lint": "balena-lint test",
     "pretest": "npm run prepare",
     "test": "mocha",
     "prepublish": "require-npm4-to-publish",
@@ -18,12 +18,12 @@
     "ometa-js": "^1.5.3"
   },
   "devDependencies": {
-    "@resin/sbvr-parser": "^0.2.3",
-    "@resin/sbvr-types": "^2.0.3",
+    "@balena/lint": "^5.0.2",
+    "@resin/sbvr-parser": "^0.2.7",
+    "@resin/sbvr-types": "^2.0.5",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
-    "mocha": "^6.2.2",
-    "require-npm4-to-publish": "^1.0.0",
-    "resin-lint": "^2.0.1"
+    "mocha": "^7.1.1",
+    "require-npm4-to-publish": "^1.0.0"
   }
 }
