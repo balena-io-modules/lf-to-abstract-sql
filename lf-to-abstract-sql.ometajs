@@ -4,7 +4,9 @@ var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
 		type: 'trigger',
 		body: 'NEW."modified at" = NOW();\nRETURN NEW;',
 		language: 'plpgsql'
-	};
+	},
+	LINK_RESOLVE_QUEUED = true,
+	LINK_RESOLVE_DONE = false;
 
 export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	Number =
@@ -400,20 +402,20 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				{_.clone(bind.binding)}:selectBody
 				-> ['SelectQuery', ['Select', [selectBody]]]
 			|	{'.' + num}:varNum
-				{['SelectQuery', ['Select', []], ['From', [this.GetTable(identifier.name).name, identifier.name + varNum]]]}:query
-				CreateConceptTypesResolver(query, identifier, varNum)
+				{['SelectQuery', ['Select', []]]}:query
+				CreateConceptTypesResolver(query, identifier, varNum):checkConceptTypeResolver
 				-> query
 			):query
-			(	RulePart:whereBody
-				(	?query
-					AddWhereClause(query, whereBody)
-				)?
+			(	{checkConceptTypeResolver && checkConceptTypeResolver()}
+				RulePart:whereBody
+				AddWhereClause(query, whereBody)
 			)?
 		]
-		(	RulePart:whereBody2
-			AddWhereClause(query, whereBody2)
+		(	{checkConceptTypeResolver && checkConceptTypeResolver()}
+			RulePart:whereBody
+			AddWhereClause(query, whereBody)
 		)?
-		(	?(!_.some(query, {0: 'From'}))
+		(	?(selectBody && !_.some(query, {0: 'From'}))
 			(	{_.find(query, {0: 'Where'})}:whereBody
 				?whereBody
 				{selectBody.whereBody = whereBody[1]}
@@ -448,16 +450,18 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	?baseBind
 			-> baseBind.binding
 		|	{this.conceptTypeResolvers[identifier.name + '.' + number]}:conceptTypeResolver
-			(	?(!conceptTypeResolver)
-			|	{conceptTypeResolver(baseTermName)}
-			)
 			-> ['ReferencedField', baseTermName + '.' + number, identifier.name]
 		):binding
 		-> {
 			identifier: identifier,
 			number: number,
 			data: data,
-			binding: binding
+			binding: binding,
+			used: function() {
+				if (conceptTypeResolver) {
+					conceptTypeResolver(baseTermName)
+				}
+			}
 		},
 
 	NativeProperty :actualFactType =
@@ -536,12 +540,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 						relationships = relationships[partName];
 					});
 					var relationshipMapping = relationships.$;
-					$elf.AddWhereClause(query,
-						['Equals',
-							['ReferencedField', tableAlias, relationshipMapping[0]],
-							['ReferencedField', bind.binding[1], relationshipMapping[1][1]]
-						]
-					);
+					$elf.CreateLinkTableResolver(query, tableAlias, bind, relationshipMapping);
 				}
 			})
 		}
@@ -557,6 +556,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			GetTable(actualFactType[2][1]):tableTo
 		|	___ForeignKeyMatchingFailed___.die
 		)
+		{
+			bindFrom.used();
+			bindTo.used();
+		}
 		-> ['Equals', ['ReferencedField', bindFrom.binding[1], fieldName], ['ReferencedField', bindTo.binding[1], tableTo.idField]],
 
 	BooleanAttribute :actualFactType =
@@ -568,6 +571,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	{console.error(this.input)}
 			___BooleanAttributeMatchingFailed___.die
 		)
+		{binds[0].used()}
 		-> ['Equals', ['ReferencedField', binds[0].binding[1], attributeName], ['Boolean', !negated]],
 
 	Attribute :actualFactType =
@@ -584,7 +588,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	-> 'Equals'
 		):operator
 		(	{this.bindAttributes[bindAttr.number]}:bind
-			{bindAttr.binding = ['ReferencedField', bindReal.binding[1], bind.binding[2]]}
+			{
+				bindReal.used();
+				bindAttr.binding = ['ReferencedField', bindReal.binding[1], bind.binding[2]]
+			}
 			?(!_.isEqual(bindAttr.binding, bind.binding))
 			// If we're not the first bind we make sure we match it.
 			-> [operator, bindAttr.binding, bind.binding]
@@ -1037,12 +1044,18 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		throw new Error('Concept type resolver already added for "' + parentAlias + '"!')
 	}
 
-	// We start off with the first level already having been resolved
-	conceptTypeResolutions = [ identifier.name ];
+	conceptTypeResolutions = [];
 
-	this.conceptTypeResolvers[parentAlias] = (function(untilConcept) {
+	var conceptTypeResolver = (function(untilConcept) {
 		var conceptTable,
 			conceptAlias;
+
+		if (conceptTypeResolutions.length === 0) {
+			// Resolve the initial level on first call
+			conceptTypeResolutions.push(identifier.name);
+			query.push(['From', [this.GetTable(identifier.name).name, parentAlias]])
+			this.ResolveLinkTable(parentAlias);
+		}
 
 		// Pick up where we left off with previous concept type resolutions
 		parentAlias = _.last(conceptTypeResolutions);
@@ -1058,6 +1071,8 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 			}
 			query.push(['From', [conceptTable.name, conceptAlias]]);
 			this.AddWhereClause(query, ['Equals', ['ReferencedField', parentAlias, concept[1]], ['ReferencedField', conceptAlias, conceptTable.idField]]);
+			this.ResolveLinkTable(parentAlias);
+
 			parentAlias = conceptAlias;
 			conceptTypeResolutions.push(parentAlias);
 			if (untilConcept != null && !this.IdentifiersEqual(concept, untilConcept)) {
@@ -1070,6 +1085,58 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 			conceptTypeResolutions.push(true);
 		}
 	}).bind(this);
+
+	this.conceptTypeResolvers[parentAlias] = conceptTypeResolver;
+
+	return function() {
+		// Return a helper function that when called checks that there is input in a buffer and that it's
+		// not an AtomicFormulation, if so then we resolve the base term, the reason AtomicFormulation is
+		// special is because it just says that we've reached the end and how to link to the created var,
+		// and doesn't actually use it at all
+		var next = $elf.input.head();
+		if (next && next[0] !== 'AtomicFormulation') {
+			conceptTypeResolver(identifier.name);
+		}
+	}
+};
+
+LF2AbstractSQL.ResolveLinkTable = function(tableAlias) {
+	if (this.linkTableResolvers[tableAlias] === LINK_RESOLVE_DONE) {
+		return;
+	}
+	if (typeof this.linkTableResolvers[tableAlias] === 'function') {
+		this.linkTableResolvers[tableAlias]();
+	} else {
+		this.linkTableResolvers[tableAlias] = LINK_RESOLVE_QUEUED;
+	}
+}
+LF2AbstractSQL.CreateLinkTableResolver = function(query, linkTableAlias, bind, relationshipMapping) {
+	var parentAlias = bind.identifier.name + '.' + bind.number,
+		$elf = this;
+
+	var linkTableResolver = function() {
+		$elf.linkTableResolvers[parentAlias] = LINK_RESOLVE_DONE;
+		bind.used();
+		$elf.AddWhereClause(query,
+			['Equals',
+				['ReferencedField', linkTableAlias, relationshipMapping[0]],
+				['ReferencedField', bind.binding[1], relationshipMapping[1][1]]
+			]
+		);
+	};
+	// If it's queued run it immediately, if it's already been done then that means this is a different link table from the same resource
+	// and we should also immediately resolve for this one
+	if (this.linkTableResolvers[parentAlias] === LINK_RESOLVE_QUEUED || this.linkTableResolvers[parentAlias] === LINK_RESOLVE_DONE) {
+		linkTableResolver();
+	} else if (typeof this.linkTableResolvers[parentAlias] === 'function') {
+		var existingLinkTableResolver = this.linkTableResolvers[parentAlias];
+		this.linkTableResolvers[parentAlias] = function() {
+			existingLinkTableResolver();
+			linkTableResolver();
+		}
+	} else {
+		this.linkTableResolvers[parentAlias] = linkTableResolver;
+	}
 };
 
 LF2AbstractSQL.initialize = function() {
@@ -1092,6 +1159,7 @@ LF2AbstractSQL.reset = function() {
 
 LF2AbstractSQL.ResetRuleState = function() {
 	this.conceptTypeResolvers = {};
+	this.linkTableResolvers = {};
 };
 
 LF2AbstractSQL.addTypes = function(types) {

@@ -551,3 +551,32 @@ exports.TableSpace = ->
 					ruleSQL: lf
 				}
 	}
+
+stripLinkTable = (sql, tableAliases) ->
+	_.remove(sql, (sqlPart) ->
+		if !Array.isArray(sqlPart)
+			return false
+
+		# Remove [ 'From', [ tableName', tableAlias ] ]
+		if sqlPart[0] == 'From' && tableAliases.includes(sqlPart[1][1])
+			return true
+
+		refFields = tableAliases.map((tableAlias) -> [ 'ReferencedField', tableAlias, 'id' ])
+		# Remove [ 'Equals', refField, linkField ] or [ 'Equals', linkField, refField ]
+		if sqlPart[0] == 'Equals' && (
+				refFields.some((refField) -> _.isEqual(sqlPart[1], refField)) ||
+				refFields.some((refField) -> _.isEqual(sqlPart[2], refField))
+			)
+			return true
+
+		if stripLinkTable(sqlPart, tableAliases).length > 0
+			# Handle ANDs we've dropped down to one
+			if (sqlPart[0] == 'And' && sqlPart.length == 2)
+				sqlPart.splice(0, sqlPart.length, sqlPart[1]...)
+		return false
+	)
+exports.stripLinkTable = (tableAlias, ruleObj) ->
+	if !Array.isArray(tableAlias)
+		tableAlias = [tableAlias]
+	stripLinkTable(ruleObj.ruleSQL, tableAlias)
+	return ruleObj
