@@ -415,7 +415,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			AddWhereClause(query, whereBody)
 		)?
 		(	?(selectBody && !_.some(query, {0: 'From'}))
-			(	{_.find(query, {0: 'Where'})}:whereBody
+			(	{query.find(function(part) { return part[0] === 'Where'; })}:whereBody
 				?whereBody
 				{selectBody.whereBody = whereBody[1]}
 			)?
@@ -782,11 +782,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		RoleBindings(actualFactType):binds
 		(	?(this.attributes.hasOwnProperty(unmappedFactType) && this.attributes[unmappedFactType])
 			// Find the "base" binding - the one that isn't primitive
-			{_.find(binds, function(bind) {
+			{binds.find(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 			})}:baseBinding
 			// Use the "base" binding in the attribute binding list, but only if we are as shallow as possible.
-			{_.find(binds, function(bind) {
+			{binds.find(function(bind) {
 				return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier))
 						&& ($elf.bindAttributeDepth[bind.number] == null || $elf.bindAttributeDepth[bind.number] > depth);
 			})}:attrBinding
