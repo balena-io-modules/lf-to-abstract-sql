@@ -8,7 +8,7 @@ expect = require('chai').expect
 deleteWhereBodies = (value) ->
 	delete value.whereBody
 	if Array.isArray(value)
-		_.forEach(value, deleteWhereBodies)
+		value.forEach(deleteWhereBodies)
 
 module.exports = (builtInVocab = false) ->
 	SBVRParser = require('@resin/sbvr-parser').SBVRParser.createInstance()

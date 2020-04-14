@@ -88,7 +88,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				'Unique'
 			]}:attrOrder
 			{
-				_.each(attrOrder, function(attributeName) {
+				attrOrder.forEach(function(attributeName) {
 					if(attributes.hasOwnProperty(attributeName)) {
 						$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributes[attributeName]));
 					}
@@ -214,7 +214,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		AddRelationship(baseTable, factType.slice(1), fkName, references)
 		GetResourceName(factType):factTypeResourceName
 		{
-			_.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
+			_.forEach($elf.synonymousForms[factTypeResourceName], function(synForm) {
 				var actualFactType = $elf.MappedFactType(synForm);
 				if (actualFactType[0][3] === 0) {
 					$elf.AddRelationship(baseTable, synForm.slice(1), fkName, references);
@@ -530,12 +530,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		LinkTableAlias(binds, actualFactType):tableAlias
 		GetTable(actualFactType):linkTable
 		{['SelectQuery', ['Select', []], ['From', [linkTable.name, tableAlias]]]}:query
-		{	_.each(binds, function(bind, i) {
+		{	binds.forEach(function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
 					targetTable = $elf.GetTable(baseIdentifierName);
 				if(!targetTable.primitive) {
 					var relationships = $elf.relationships[linkTable.resourceName];
-					_.each($elf.ResolveSynonym(baseIdentifierName).split('-'), function(partName) {
+					$elf.ResolveSynonym(baseIdentifierName).split('-').forEach(function(partName) {
 						relationships = relationships[partName];
 					});
 					var relationshipMapping = relationships.$;
@@ -872,8 +872,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		]
 		{{}}:hasDependants
 		{
-			_.each(this.tables, function(table) {
-				_.each(table.fields, function(field) {
+			_.forEach(this.tables, function(table) {
+				_.forEach(table.fields, function(field) {
 					if (field.dataType === 'ForeignKey' || field.dataType === 'ConceptType') {
 						hasDependants[field.references.resourceName] = true;
 					}
