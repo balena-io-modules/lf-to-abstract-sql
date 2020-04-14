@@ -1,4 +1,16 @@
 - commits:
+    - subject: Only add the destination of a link table if it's actually necessary
+      hash: 463870590602492accc12ed53753f66862d42cd6
+      body: |
+        This can significantly speed up queries by avoiding a join when the
+        result is unused
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+  version: 3.2.0
+  date: 2020-04-13T16:48:53.658Z
+- commits:
     - subject: 'CI: Remove circleci publishing in favor of balenaCI'
       hash: 857edf20512d8876483751083d3738fd792b1a34
       body: ''
