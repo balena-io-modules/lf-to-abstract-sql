@@ -200,7 +200,7 @@ exports.TableSpace = ->
 				tables[tableName] = this
 
 			attribute: (lf, currentVocab = 'Default') ->
-				if _.isArray(lf)
+				if Array.isArray(lf)
 					se = toSE(lf, currentVocab)
 				else if _.isObject(lf)
 					{ lf, se } = lf
