@@ -1162,5 +1162,5 @@ LF2AbstractSQL.ResetRuleState = function() {
 };
 
 LF2AbstractSQL.addTypes = function(types) {
-	_.assign(this.sbvrTypes, types);
+	Object.assign(this.sbvrTypes, types);
 };

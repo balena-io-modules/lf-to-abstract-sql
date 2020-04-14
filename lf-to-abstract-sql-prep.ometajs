@@ -1,6 +1,5 @@
 var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
-	LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser,
-	_ = require('lodash');
+	LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser;
 export ometa LF2AbstractSQLPrep <: LFOptimiser {
 	AttrConceptType :termName =
 		^AttrConceptType(termName):conceptType
@@ -118,7 +117,7 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 }
 
 LF2AbstractSQLPrep.initialize = function() {
-	_.assign(this, SBVRCompilerLibs);
+	Object.assign(this, SBVRCompilerLibs);
 	SBVRCompilerLibs.initialize.call(this);
 	LFOptimiser.initialize.call(this);
 	this.foreignKeys = {};

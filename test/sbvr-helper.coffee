@@ -218,7 +218,7 @@ exports.TableSpace = ->
 								index: null
 								references: null
 								defaultValue: null
-							_.assign @table,
+							Object.assign @table,
 								idField: null
 								primitive: primitive
 								referenceScheme: typeName
