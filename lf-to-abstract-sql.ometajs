@@ -1058,7 +1058,7 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 
 		// Pick up where we left off with previous concept type resolutions
 		parentAlias = _.last(conceptTypeResolutions);
-		if(parentAlias === true || _.includes(conceptTypeResolutions, untilConcept)) {
+		if(parentAlias === true || conceptTypeResolutions.includes(untilConcept)) {
 			// We already either resolved the entire chain, or at least as far as we need to, so we can just return :)
 			return;
 		}
