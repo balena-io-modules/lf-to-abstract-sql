@@ -133,7 +133,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		:idField
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	(	AddTableField(table, idField, 'Serial', true, 'PRIMARY KEY'):fieldID
 				(	?(fieldID !== false)
 					// If the field already exists then update it instead.
@@ -150,7 +150,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		):referenceScheme
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	// Find existing name field and update it if it exists.
 			(	?(table.hasOwnProperty('referenceScheme'))
 				GetTableFieldID(table, table.referenceScheme):fieldID
@@ -163,7 +163,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		:tableName
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	{table.name = tableName}
 		)
 		(	?(_.isArray(termOrFactType[0]) && termOrFactType.length > 2)
@@ -882,7 +882,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		}
 		-> { // We omit any tables that are primitives and not depended upon.
 			tables: _.omitBy(this.tables, function(table, resourceName) {
-				return _.isString(table) || (table.primitive && !hasDependants[resourceName]);
+				return typeof table === 'string' || (table.primitive && !hasDependants[resourceName]);
 			}),
 			functions: {
 				trigger_update_modified_at: updateModifiedAt
