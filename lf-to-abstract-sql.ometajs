@@ -43,7 +43,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 
 	/** Terms **/
 	Identifier =
-		{''}:num
 		[	(	'Term'
 			|	'Name'
 			):type
@@ -1124,9 +1123,9 @@ LF2AbstractSQL.CreateLinkTableResolver = function(query, linkTableAlias, bind, r
 			]
 		);
 	};
-	// If it's queued run it immediately, if it's already been done then that means this is a different link table from the same resource
-	// and we should also immediately resolve for this one
-	if (this.linkTableResolvers[parentAlias] === LINK_RESOLVE_QUEUED || this.linkTableResolvers[parentAlias] === LINK_RESOLVE_DONE) {
+	// If it's queued run it immediately, if it's already been done then that means this is a different link table from the same resource and
+	// we should also immediately resolve for this one, and if the bind is for a numbered identifier then assume it will be used at some point
+	if (this.linkTableResolvers[parentAlias] === LINK_RESOLVE_QUEUED || this.linkTableResolvers[parentAlias] === LINK_RESOLVE_DONE || bind.identifier.num != null) {
 		linkTableResolver();
 	} else if (typeof this.linkTableResolvers[parentAlias] === 'function') {
 		var existingLinkTableResolver = this.linkTableResolvers[parentAlias];
