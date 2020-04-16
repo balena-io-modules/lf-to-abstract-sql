@@ -1,4 +1,14 @@
 - commits:
+    - subject: Always treat numbered terms as if they're used
+      hash: 78cf69b82166d736865e73f5b01bc403da468569
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.2.2
+  date: 2020-04-16T10:35:48.200Z
+- commits:
     - subject: Update dependencies
       hash: 960c673069134bb8184dd7c09ee139ea71a7822d
       body: |
