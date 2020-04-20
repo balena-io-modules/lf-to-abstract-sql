@@ -414,7 +414,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			RulePart:whereBody
 			AddWhereClause(query, whereBody)
 		)?
-		(	?(selectBody && !_.some(query, {0: 'From'}))
+		(	?(selectBody && !query.some(function (p) { return p[0] === 'From'; }))
 			(	{query.find(function(part) { return part[0] === 'Where'; })}:whereBody
 				?whereBody
 				{selectBody.whereBody = whereBody[1]}
@@ -797,7 +797,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]};
 			}
 		|	// Ignore primitive only fact types.
-			?_.some(binds, function(bind) {
+			?binds.some(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 			})
 			LinkTableAlias(binds, actualFactType):tableAlias
