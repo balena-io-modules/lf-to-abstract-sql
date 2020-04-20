@@ -1,4 +1,70 @@
 - commits:
+    - subject: Switch to native some
+      hash: 9db59aa4e6d5bd2447671cdf048dcac41ce3229a
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native findIndex
+      hash: 41edb97a980d1e206a15d57d4f07a5707b767201
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native every
+      hash: 22e9532c671d8b5db90f6907bef9adba9159d2fe
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native find
+      hash: baf6ef67ddc40096d55999df05cfe0781616b4e3
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native forEach where possible
+      hash: e417e3b6decaad51c6a24053ba3a734b43cd7de4
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native includes
+      hash: 5768d76d2ebc2a457c890a181a39aa8879552dee
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native array type checking
+      hash: 3f3ecfbc69ab6b1f9606d8183354cea3111111bf
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native string type checking
+      hash: 93b0ee63ecc4740a2de9c5b01a703ddca94533fb
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+    - subject: Switch to native Object.assign
+      hash: bf1f7a2564bbd8fb01b0b298b872d79e676f7a18
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.2.3
+  date: 2020-04-20T13:06:37.433Z
+- commits:
     - subject: Always treat numbered terms as if they're used
       hash: 78cf69b82166d736865e73f5b01bc403da468569
       body: ''
