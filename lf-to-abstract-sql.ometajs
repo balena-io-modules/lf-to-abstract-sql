@@ -427,7 +427,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	RoleBindings :actualFactType =
 		{[]}:binds
 		{	for(var i = 0; i < actualFactType.length; i += 2) {
-				var j = _.findIndex(actualFactType, {3: i});
+				var j = actualFactType.findIndex(function (p) { return p[3] === i; });
 				// Map the bind into the position matching that of the fact type.
 				binds[j/2] = this.RoleBinding(actualFactType[j][1]);
 			}
