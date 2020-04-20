@@ -818,7 +818,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		),
 	ProcessAtomicFormulationsNativeProperties :depth :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
-		?_.every(binds, function(bind) {
+		?binds.every(function(bind) {
 			return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 		})
 		?(binds.length == 2)
