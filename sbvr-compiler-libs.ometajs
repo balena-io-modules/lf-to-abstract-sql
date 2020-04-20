@@ -1,5 +1,4 @@
-var SBVRLibs = require('@resin/sbvr-parser/sbvr-libs').SBVRLibs,
-	_ = require('lodash');
+var SBVRLibs = require('@resin/sbvr-parser/sbvr-libs').SBVRLibs;
 
 export ometa SBVRCompilerLibs <: SBVRLibs {
 	ResolveSynonym :name =
@@ -66,7 +65,7 @@ SBVRCompilerLibs.UnmappedFactType = function(factType) {
 
 SBVRCompilerLibs.GetResourceName = function(termOrFactType) {
 	var i = 0, resource = [];
-	if(_.isString(termOrFactType)) {
+	if(typeof termOrFactType === 'string') {
 		return this.ResolveSynonym(termOrFactType);
 	}
 	else {

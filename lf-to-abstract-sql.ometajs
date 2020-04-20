@@ -88,7 +88,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				'Unique'
 			]}:attrOrder
 			{
-				_.each(attrOrder, function(attributeName) {
+				attrOrder.forEach(function(attributeName) {
 					if(attributes.hasOwnProperty(attributeName)) {
 						$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributes[attributeName]));
 					}
@@ -133,7 +133,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		:idField
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	(	AddTableField(table, idField, 'Serial', true, 'PRIMARY KEY'):fieldID
 				(	?(fieldID !== false)
 					// If the field already exists then update it instead.
@@ -144,13 +144,13 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		),
 	AttrReferenceScheme :termOrFactType =
 		:referenceScheme
-		(	?_.isArray(referenceScheme)
+		(	?Array.isArray(referenceScheme)
 			-> referenceScheme[1]
 		|	-> referenceScheme
 		):referenceScheme
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	// Find existing name field and update it if it exists.
 			(	?(table.hasOwnProperty('referenceScheme'))
 				GetTableFieldID(table, table.referenceScheme):fieldID
@@ -163,10 +163,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		:tableName
 		GetTableID(termOrFactType):tableID
 		GetTable(tableID):table
-		(	?_.isString(table)
+		(	?(typeof table === 'string')
 		|	{table.name = tableName}
 		)
-		(	?(_.isArray(termOrFactType[0]) && termOrFactType.length > 2)
+		(	?(Array.isArray(termOrFactType[0]) && termOrFactType.length > 2)
 			GetResourceName(termOrFactType):linkResourceName
 			GetTable(termOrFactType[0][1]):baseTable
 			// When we add the table name to the link table we have to add the relationship to it from the base table
@@ -214,7 +214,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		AddRelationship(baseTable, factType.slice(1), fkName, references)
 		GetResourceName(factType):factTypeResourceName
 		{
-			_.each($elf.synonymousForms[factTypeResourceName], function(synForm) {
+			_.forEach($elf.synonymousForms[factTypeResourceName], function(synForm) {
 				var actualFactType = $elf.MappedFactType(synForm);
 				if (actualFactType[0][3] === 0) {
 					$elf.AddRelationship(baseTable, synForm.slice(1), fkName, references);
@@ -414,8 +414,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			RulePart:whereBody
 			AddWhereClause(query, whereBody)
 		)?
-		(	?(selectBody && !_.some(query, {0: 'From'}))
-			(	{_.find(query, {0: 'Where'})}:whereBody
+		(	?(selectBody && !query.some(function (p) { return p[0] === 'From'; }))
+			(	{query.find(function(part) { return part[0] === 'Where'; })}:whereBody
 				?whereBody
 				{selectBody.whereBody = whereBody[1]}
 			)?
@@ -427,7 +427,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	RoleBindings :actualFactType =
 		{[]}:binds
 		{	for(var i = 0; i < actualFactType.length; i += 2) {
-				var j = _.findIndex(actualFactType, {3: i});
+				var j = actualFactType.findIndex(function (p) { return p[3] === i; });
 				// Map the bind into the position matching that of the fact type.
 				binds[j/2] = this.RoleBinding(actualFactType[j][1]);
 			}
@@ -530,12 +530,12 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		LinkTableAlias(binds, actualFactType):tableAlias
 		GetTable(actualFactType):linkTable
 		{['SelectQuery', ['Select', []], ['From', [linkTable.name, tableAlias]]]}:query
-		{	_.each(binds, function(bind, i) {
+		{	binds.forEach(function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
 					targetTable = $elf.GetTable(baseIdentifierName);
 				if(!targetTable.primitive) {
 					var relationships = $elf.relationships[linkTable.resourceName];
-					_.each($elf.ResolveSynonym(baseIdentifierName).split('-'), function(partName) {
+					$elf.ResolveSynonym(baseIdentifierName).split('-').forEach(function(partName) {
 						relationships = relationships[partName];
 					});
 					var relationshipMapping = relationships.$;
@@ -757,7 +757,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNativeProperties'),
 	ProcessAtomicFormulationsRecurse :depth :rule =
 		(	// Bit of a hack, but we only want to drill into the input if it's an array, otherwise we get infinite recursion.
-			?(_.isArray(this.input.hd))
+			?(Array.isArray(this.input.hd))
 			[	'AtomicFormulation'
 				[	'FactType'
 					anything+:factType
@@ -782,11 +782,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		RoleBindings(actualFactType):binds
 		(	?(this.attributes.hasOwnProperty(unmappedFactType) && this.attributes[unmappedFactType])
 			// Find the "base" binding - the one that isn't primitive
-			{_.find(binds, function(bind) {
+			{binds.find(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 			})}:baseBinding
 			// Use the "base" binding in the attribute binding list, but only if we are as shallow as possible.
-			{_.find(binds, function(bind) {
+			{binds.find(function(bind) {
 				return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier))
 						&& ($elf.bindAttributeDepth[bind.number] == null || $elf.bindAttributeDepth[bind.number] > depth);
 			})}:attrBinding
@@ -797,7 +797,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]};
 			}
 		|	// Ignore primitive only fact types.
-			?_.some(binds, function(bind) {
+			?binds.some(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 			})
 			LinkTableAlias(binds, actualFactType):tableAlias
@@ -818,7 +818,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		),
 	ProcessAtomicFormulationsNativeProperties :depth :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
-		?_.every(binds, function(bind) {
+		?binds.every(function(bind) {
 			return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
 		})
 		?(binds.length == 2)
@@ -872,8 +872,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		]
 		{{}}:hasDependants
 		{
-			_.each(this.tables, function(table) {
-				_.each(table.fields, function(field) {
+			_.forEach(this.tables, function(table) {
+				_.forEach(table.fields, function(field) {
 					if (field.dataType === 'ForeignKey' || field.dataType === 'ConceptType') {
 						hasDependants[field.references.resourceName] = true;
 					}
@@ -882,7 +882,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		}
 		-> { // We omit any tables that are primitives and not depended upon.
 			tables: _.omitBy(this.tables, function(table, resourceName) {
-				return _.isString(table) || (table.primitive && !hasDependants[resourceName]);
+				return typeof table === 'string' || (table.primitive && !hasDependants[resourceName]);
 			}),
 			functions: {
 				trigger_update_modified_at: updateModifiedAt
@@ -1058,7 +1058,7 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 
 		// Pick up where we left off with previous concept type resolutions
 		parentAlias = _.last(conceptTypeResolutions);
-		if(parentAlias === true || _.includes(conceptTypeResolutions, untilConcept)) {
+		if(parentAlias === true || conceptTypeResolutions.includes(untilConcept)) {
 			// We already either resolved the entire chain, or at least as far as we need to, so we can just return :)
 			return;
 		}
@@ -1162,5 +1162,5 @@ LF2AbstractSQL.ResetRuleState = function() {
 };
 
 LF2AbstractSQL.addTypes = function(types) {
-	_.assign(this.sbvrTypes, types);
+	Object.assign(this.sbvrTypes, types);
 };

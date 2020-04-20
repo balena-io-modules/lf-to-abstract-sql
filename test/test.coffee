@@ -7,8 +7,8 @@ expect = require('chai').expect
 # This allows us to ignore the "whereBody" property at every level of the result
 deleteWhereBodies = (value) ->
 	delete value.whereBody
-	if _.isArray(value)
-		_.forEach(value, deleteWhereBodies)
+	if Array.isArray(value)
+		value.forEach(deleteWhereBodies)
 
 module.exports = (builtInVocab = false) ->
 	SBVRParser = require('@resin/sbvr-parser').SBVRParser.createInstance()
@@ -27,7 +27,7 @@ module.exports = (builtInVocab = false) ->
 	currentVocab = 'Default'
 
 	runExpectation = (describe, input, expectation) ->
-		if _.isArray(input)
+		if Array.isArray(input)
 			type = getLineType(input)
 			input = type + ': ' + toSE(input, currentVocab)
 			if type is 'Vocabulary'

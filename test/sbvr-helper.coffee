@@ -68,7 +68,7 @@ exports.TableSpace = ->
 			switch part[0]
 				when 'Term'
 					termName = part[1]
-					binding = _.find(bindings, { termName })
+					binding = bindings?.find((binding) -> binding.termName == termName)
 					tableName.push(generateName(termName))
 					tableAlias.push(binding?.alias)
 					if !isPrimitive(part)
@@ -200,7 +200,7 @@ exports.TableSpace = ->
 				tables[tableName] = this
 
 			attribute: (lf, currentVocab = 'Default') ->
-				if _.isArray(lf)
+				if Array.isArray(lf)
 					se = toSE(lf, currentVocab)
 				else if _.isObject(lf)
 					{ lf, se } = lf
@@ -218,7 +218,7 @@ exports.TableSpace = ->
 								index: null
 								references: null
 								defaultValue: null
-							_.assign @table,
+							Object.assign @table,
 								idField: null
 								primitive: primitive
 								referenceScheme: typeName
@@ -263,7 +263,7 @@ exports.TableSpace = ->
 							if baseTable == primitiveTable
 								# If the primitive table is also the base table then it's actually a unique
 								# constraint rather than a cardinality constraint
-								_.find(@baseTable.fields, { fieldName: primitiveTable.name }).index = 'UNIQUE'
+								@baseTable.fields.find((field) -> field.fieldName == primitiveTable.name).index = 'UNIQUE'
 								@matches = _.cloneDeep(@baseTable)
 							else
 								if primitiveTable
@@ -276,7 +276,7 @@ exports.TableSpace = ->
 
 								required = quant[0] == 'ExactQuantification'
 								fieldName = _(factType).slice(2).map(1).reject((v) -> v == 'has').join('-')
-								field = _.find(@baseTable.fields, { fieldName })
+								field = @baseTable.fields.find((field) -> field.fieldName == fieldName)
 								if field
 									field.required = required
 								else
