@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@balena/lint": "^5.0.2",
+    "@balena/sbvr-types": "^3.0.0",
     "@resin/sbvr-parser": "^0.2.7",
-    "@resin/sbvr-types": "^2.0.5",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
     "mocha": "^7.1.1",

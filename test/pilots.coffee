@@ -1,4 +1,4 @@
-typeVocab = require('fs').readFileSync(require.resolve('@resin/sbvr-types/Type.sbvr'))
+typeVocab = require('fs').readFileSync(require.resolve('@balena/sbvr-types/Type.sbvr'))
 test = require('./test')(typeVocab)
 { TableSpace, term, numberedTerms, verb, factType, termForm, conceptType, referenceScheme, synonymousForm, necessity, definition, _or, _and, _nestedOr, _nestedAnd, stripLinkTable } = require './sbvr-helper'
 { Table, attribute, rule } = TableSpace()
