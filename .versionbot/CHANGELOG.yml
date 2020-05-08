@@ -1,4 +1,14 @@
 - commits:
+    - subject: 'CI: Add nodejs 14 to the test matrix'
+      hash: ed093ef0606bfac0c5af3dbfdd718f2d8fed8a08
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.2.5
+  date: 2020-05-08T12:58:37.760Z
+- commits:
     - subject: Update to @balena/sbvr-types 3.0.0
       hash: 7c0691eec12504387b8ad3616cf3e4fa6d796779
       body: |
