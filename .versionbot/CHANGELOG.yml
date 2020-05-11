@@ -1,4 +1,97 @@
 - commits:
+    - subject: Update to @balena/sbvr-parser
+      hash: 6b504869a3ecb387961781dfe6b757f3a6e62de2
+      body: |
+        Update sbvr-parser from 0.2.7 to 1.0.1
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested:
+        - commits:
+            - subject: Update to mocha 7.x
+              hash: f9b2009c28f50a0635738a2c49d1be17491a05b3
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-1.0.1
+          date: 2020-05-11T14:06:40.102Z
+        - commits:
+            - subject: Convert coffeescript tests to javascript
+              hash: 4e4a14476fb29242dbcd278cf079738900fdb0c8
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+            - subject: Drop support for node 6/8
+              hash: fc61a212d5918a552ef6bbf8698413d096953429
+              body: ''
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+            - subject: Rename to @balena/sbvr-parser
+              hash: f7c3e6b15c907a25661f02ab54046f9f7faa64b5
+              body: ''
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+          version: sbvr-parser-1.0.0
+          date: 2020-05-08T18:44:57.766Z
+        - commits:
+            - subject: 'CI: Add nodejs 14 to the test matrix'
+              hash: b532a53263ba8c853851ba524d62d2c2862e976f
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+            - subject: 'CI: Remove circleci publishing in favor of balenaCI'
+              hash: 899c978e14b686681a40ff46ce992b432974d257
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-0.2.11
+          date: 2020-05-08T12:59:18.046Z
+        - commits:
+            - subject: Update to to @balena/sbvr-types
+              hash: 5092a2ed3c12c286661ec75dc7901adc5e5debba
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-0.2.10
+          date: 2020-05-08T12:40:48.095Z
+        - commits:
+            - subject: Update to @balena/lint 5.x
+              hash: 7df67c7d823941cb513227b18a06af273fb71e64
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-0.2.9
+          date: 2020-05-08T11:03:41.450Z
+        - commits:
+            - subject: Reduce lodash usage
+              hash: 275276c0c0a49a2ce638666c404d4a23495a01ff
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-0.2.8
+          date: 2020-04-27T15:12:07.898Z
+  version: 3.2.6
+  date: 2020-05-11T14:25:47.833Z
+- commits:
     - subject: 'CI: Add nodejs 14 to the test matrix'
       hash: ed093ef0606bfac0c5af3dbfdd718f2d8fed8a08
       body: ''
