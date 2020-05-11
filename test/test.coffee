@@ -11,7 +11,7 @@ deleteWhereBodies = (value) ->
 		value.forEach(deleteWhereBodies)
 
 module.exports = (builtInVocab = false) ->
-	SBVRParser = require('@resin/sbvr-parser').SBVRParser.createInstance()
+	SBVRParser = require('@balena/sbvr-parser').SBVRParser.createInstance()
 	SBVRParser.enableReusingMemoizations(SBVRParser._sideEffectingRules)
 
 	LF2AbstractSQL = require '../index'

@@ -1,8 +1,8 @@
 _ = require 'lodash'
-LFOptimiser = require('@resin/sbvr-parser/lf-optimiser').LFOptimiser
+LFOptimiser = require('@balena/sbvr-parser/lf-optimiser').LFOptimiser
 
 # Inherit from the sbvr-parser's sbvr-helper module.
-module.exports = exports = require '@resin/sbvr-parser/test/sbvr-helper.coffee'
+module.exports = exports = require '@balena/sbvr-parser/test/sbvr-helper'
 { toSE, rule, getLineType } = exports
 
 nest = (lf, sequence, allMatches = false) ->
@@ -564,9 +564,9 @@ stripLinkTable = (sql, tableAliases) ->
 		refFields = tableAliases.map((tableAlias) -> [ 'ReferencedField', tableAlias, 'id' ])
 		# Remove [ 'Equals', refField, linkField ] or [ 'Equals', linkField, refField ]
 		if sqlPart[0] == 'Equals' && (
-				refFields.some((refField) -> _.isEqual(sqlPart[1], refField)) ||
-				refFields.some((refField) -> _.isEqual(sqlPart[2], refField))
-			)
+			refFields.some((refField) -> _.isEqual(sqlPart[1], refField)) ||
+			refFields.some((refField) -> _.isEqual(sqlPart[2], refField))
+		)
 			return true
 
 		if stripLinkTable(sqlPart, tableAliases).length > 0
