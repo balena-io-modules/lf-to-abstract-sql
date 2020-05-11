@@ -4,7 +4,8 @@
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
-    "lint": "balena-lint test",
+    "lint": "balena-lint test && balena-lint --typescript index.js",
+    "lint-fix": "balena-lint --typescript --fix index.js",
     "pretest": "npm run prepare",
     "test": "mocha",
     "prepublish": "require-npm4-to-publish",
