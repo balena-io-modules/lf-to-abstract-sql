@@ -8,6 +8,7 @@
     "lint-fix": "balena-lint --typescript --fix index.js",
     "pretest": "npm run prepare",
     "test": "mocha",
+    "posttest": "npm run lint",
     "prepublish": "require-npm4-to-publish",
     "prepare": "ometajs2js --commonjs --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --commonjs --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --commonjs --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
   },
