@@ -1,7 +1,7 @@
 (function (root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module.
-		define(['@resin/lf-to-abstract-sql/lf-to-abstract-sql-prep', '@resin/lf-to-abstract-sql/lf-to-abstract-sql'], factory);
+		define(['@balena/lf-to-abstract-sql/lf-to-abstract-sql-prep', '@balena/lf-to-abstract-sql/lf-to-abstract-sql'], factory);
 	} else if (typeof exports === 'object') {
 		// Node. Does not work with strict CommonJS, but
 		// only CommonJS-like enviroments that support module.exports,

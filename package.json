@@ -1,5 +1,5 @@
 {
-  "name": "@resin/lf-to-abstract-sql",
+  "name": "@balena/lf-to-abstract-sql",
   "version": "3.2.6",
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
