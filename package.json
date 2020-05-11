@@ -14,12 +14,12 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
+    "@balena/sbvr-parser": "^1.0.1",
     "lodash": "^4.17.15",
     "ometa-js": "^1.5.3"
   },
   "devDependencies": {
     "@balena/lint": "^5.0.4",
-    "@balena/sbvr-parser": "^1.0.1",
     "@balena/sbvr-types": "^3.0.0",
     "chai": "^4.2.0",
     "coffee-script": "~1.12.7",
