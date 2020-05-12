@@ -1,4 +1,14 @@
 - commits:
+    - subject: Move @balena/sbvr-parser to production dependencies
+      hash: cf4653791f11a556196af95434d80fdf1187e17d
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 3.2.7
+  date: 2020-05-12T09:21:53.939Z
+- commits:
     - subject: Update to @balena/sbvr-parser
       hash: 6b504869a3ecb387961781dfe6b757f3a6e62de2
       body: |
