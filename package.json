@@ -4,8 +4,8 @@
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
-    "lint": "balena-lint test && balena-lint --typescript index.js",
-    "lint-fix": "balena-lint --typescript --fix index.js",
+    "lint": "balena-lint --typescript -e js test index.js",
+    "lint-fix": "balena-lint --typescript --fix -e js test index.js",
     "pretest": "npm run prepare",
     "test": "mocha",
     "posttest": "npm run lint",
@@ -24,7 +24,6 @@
     "@balena/lint": "^5.0.4",
     "@balena/sbvr-types": "^3.0.0",
     "chai": "^4.2.0",
-    "coffee-script": "~1.12.7",
     "mocha": "^7.1.2",
     "require-npm4-to-publish": "^1.0.0"
   }
