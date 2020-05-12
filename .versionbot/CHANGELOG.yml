@@ -1,4 +1,14 @@
 - commits:
+    - subject: Convert tests from coffeescript to javascript
+      hash: b3fd9a0b212ae9684f98c6977f82d354f5352bcb
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+  version: 4.0.1
+  date: 2020-05-12T12:39:31.742Z
+- commits:
     - subject: Include linting as part of the tests
       hash: 3c898aff5a6495b58ab963f6d979646dc43ca134
       body: ''
