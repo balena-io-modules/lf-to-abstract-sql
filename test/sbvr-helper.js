@@ -50,8 +50,6 @@ const createdAtField = {
 	dataType: 'Date Time',
 	fieldName: 'created at',
 	required: true,
-	index: null,
-	references: null,
 	defaultValue: 'CURRENT_TIMESTAMP',
 };
 
@@ -59,8 +57,6 @@ const modifiedAtField = {
 	dataType: 'Date Time',
 	fieldName: 'modified at',
 	required: true,
-	index: null,
-	references: null,
 	defaultValue: 'CURRENT_TIMESTAMP',
 };
 
@@ -177,24 +173,21 @@ exports.TableSpace = function () {
 										  );
 								uniqueIndex.fields.push(fieldName);
 								primitive = isPrimitive(factTypePart);
+
+								const f = {
+									fieldName,
+									required: true,
+								};
 								if (primitive) {
-									dataType = primitive;
-									references = null;
+									f.dataType = primitive;
 								} else {
-									dataType = 'ForeignKey';
-									references = {
+									f.dataType = 'ForeignKey';
+									f.references = {
 										fieldName: 'id',
 										resourceName: referenceResourceName,
 									};
 								}
-								fields.push({
-									dataType,
-									fieldName,
-									required: true,
-									index: null,
-									references,
-									defaultValue: null,
-								});
+								fields.push(f);
 							}
 						}
 						indexes.push(uniqueIndex);
@@ -208,8 +201,6 @@ exports.TableSpace = function () {
 				fieldName: idField,
 				required: true,
 				index: 'PRIMARY KEY',
-				references: null,
-				defaultValue: null,
 			});
 			let tableDefinition = {
 				name: tableName,
@@ -236,10 +227,7 @@ exports.TableSpace = function () {
 			if (booleanAttribute) {
 				getTable(factType[0][1]).table.fields.push({
 					dataType: 'Boolean',
-					defaultValue: null,
 					fieldName: factType[1][1],
-					index: null,
-					references: null,
 					required: true,
 				});
 				tableDefinition = 'BooleanAttribute';
@@ -282,9 +270,6 @@ exports.TableSpace = function () {
 							dataType: primitive,
 							fieldName: typeName,
 							required: true,
-							index: null,
-							references: null,
-							defaultValue: null,
 						};
 						Object.assign(this.table, {
 							idField: null,
@@ -299,12 +284,10 @@ exports.TableSpace = function () {
 							dataType: 'ConceptType',
 							fieldName: typeName,
 							required: true,
-							index: null,
 							references: {
 								fieldName: 'id',
 								resourceName: generateName(typeName),
 							},
-							defaultValue: null,
 						});
 						this.property = 'tables.' + this.table.resourceName;
 						this.matches = _.cloneDeep(this.table);
@@ -377,12 +360,10 @@ exports.TableSpace = function () {
 									dataType,
 									fieldName,
 									required,
-									index: null,
 									references: {
 										fieldName: primitiveTable ? null : 'id',
 										resourceName: _.last(factType)[1],
 									},
-									defaultValue: null,
 								});
 							}
 							this.property = 'tables.' + this.baseTable.resourceName;

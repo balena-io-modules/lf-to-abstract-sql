@@ -924,25 +924,23 @@ LF2AbstractSQL.AddTableTrigger = function(table, when, operation, level, fnName)
 }
 
 LF2AbstractSQL.AddTableField = function(table, fieldName, dataType, required, index, references, defaultValue) {
-	if(references === undefined) {
-		references = null;
-	}
-	if(index === undefined) {
-		index = null;
-	}
-	if(defaultValue === undefined) {
-		defaultValue = null;
-	}
 	var fieldID = this.GetTableFieldID(table, fieldName);
 	if(fieldID === false) {
-		table.fields.push({
+		var f = {
 			dataType: dataType,
 			fieldName: fieldName,
-			required: required,
-			index: index,
-			references: references,
-			defaultValue: defaultValue
-		});
+			required: required
+		}
+		if(references != null) {
+			f.references = references;
+		}
+		if(index != null) {
+			f.index = index;
+		}
+		if(defaultValue != null) {
+			f.defaultValue = defaultValue;
+		}
+		table.fields.push(f);
 	}
 	return fieldID;
 };
