@@ -1,4 +1,23 @@
 - commits:
+    - subject: Omit AbstractSqlField props when null to match the expected types
+      hash: e3875ffb74fb362a2e9535e82d35fdaa26eb4b68
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+    - subject: Convert tests from coffeescript to javascript
+      hash: b3fd9a0b212ae9684f98c6977f82d354f5352bcb
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 4.1.0
+  date: 2020-10-02T13:22:19.194Z
+- commits:
     - subject: Include linting as part of the tests
       hash: 3c898aff5a6495b58ab963f6d979646dc43ca134
       body: ''
