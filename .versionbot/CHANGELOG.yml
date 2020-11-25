@@ -1,4 +1,74 @@
 - commits:
+    - subject: Update dependencies
+      hash: c43d7a4beb0643938bb5e09f137caa1bee079f92
+      body: |
+        Update sbvr-parser from 1.0.1 to 1.1.1
+        Update sbvr-types from 3.0.0 to 3.1.2
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested:
+        - commits:
+            - subject: Update dependencies
+              hash: 5739ec4e6a5da71bfcfe1cb6a9b5c3e13dc1f56e
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-1.1.1
+          date: 2020-10-07T12:54:19.137Z
+        - commits:
+            - subject: Add support for negative numbers for embedded data
+              hash: a5d4f168e66ee209b673f7b20bfc4eb7e2ad657a
+              body: ''
+              footer:
+                Change-type: minor
+                change-type: minor
+              author: Pagan Gazzard
+          version: sbvr-parser-1.1.0
+          date: 2020-10-07T12:26:21.195Z
+        - commits:
+            - subject: Add a `castType` property to type functions
+              hash: 409077eb9d6c0315779ddd877220280c251b4eb5
+              body: >
+                This allows specifying the correct type to cast to when
+                necessary
+
+                rather than relying on the fact the currently all type functions
+                happen
+
+                to be integers
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-types-3.1.2
+          date: 2020-11-25T14:49:48.878Z
+        - commits:
+            - subject: Update dependencies
+              hash: 394b8c4d10ef16da163e05734ffb65a84717e204
+              body: ''
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-types-3.1.1
+          date: 2020-11-25T14:34:09.586Z
+        - commits:
+            - subject: Update dependencies
+              hash: 33be8837bde82d29f182506f4b93e33157bea185
+              body: ''
+              footer:
+                Change-type: minor
+                change-type: minor
+              author: Pagan Gazzard
+          version: sbvr-types-3.1.0
+          date: 2020-06-17T21:13:53.393Z
+  version: 4.1.1
+  date: 2020-11-25T15:56:29.282Z
+- commits:
     - subject: Omit AbstractSqlField props when null to match the expected types
       hash: e3875ffb74fb362a2e9535e82d35fdaa26eb4b68
       body: ''
