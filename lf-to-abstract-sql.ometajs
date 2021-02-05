@@ -441,6 +441,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			Identifier:identifier
 			(	number:number
 			|	Value:data
+			|	NativeNameBinding(baseTermName)
 			)
 		]
 		{this.bindAttributes[number]}:baseBind
@@ -462,6 +463,16 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				}
 			}
 		},
+
+	NativeNameBinding :baseTermName =
+		Identifier:name
+		?(name.type === 'Name')
+		?(this.IsPrimitive(this.ReconstructIdentifier(name)))
+
+		?(this.sbvrTypes[baseTermName] &&
+			this.sbvrTypes[baseTermName].nativeNames &&
+			this.sbvrTypes[baseTermName].nativeNames[name.name])
+		-> this.sbvrTypes[baseTermName].nativeNames[name.name],
 
 	NativeProperty :actualFactType =
 		?(this.IsPrimitive(actualFactType[0]))
