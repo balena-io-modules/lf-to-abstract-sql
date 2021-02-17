@@ -441,13 +441,15 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			Identifier:identifier
 			(	number:number
 			|	Value:data
-			|	NativeNameBinding(baseTermName)
+			|	NativeNameBinding(baseTermName):nativeNameBinding
 			)
 		]
-		{this.bindAttributes[number]}:baseBind
 		(	?data
 			-> data
-		|	?baseBind
+		|	?nativeNameBinding
+			-> nativeNameBinding
+		|	{this.bindAttributes[number]}:baseBind
+			?baseBind
 			-> baseBind.binding
 		|	{this.conceptTypeResolvers[identifier.name + '.' + number]}:conceptTypeResolver
 			-> ['ReferencedField', baseTermName + '.' + number, identifier.name]
