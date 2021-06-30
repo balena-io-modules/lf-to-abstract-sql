@@ -1,4 +1,19 @@
 - commits:
+    - subject: Delete CODEOWNERS
+      hash: cb88bffb06f6b1cc21a2df9ef22cfb4886fb0696
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+        See: >-
+          https://www.flowdock.com/app/rulemotion/pub/threads/trLcZFnSX9fLZn4LiaIv4xuBbah
+        see: >-
+          https://www.flowdock.com/app/rulemotion/pub/threads/trLcZFnSX9fLZn4LiaIv4xuBbah
+      author: Thodoris Greasidis
+      nested: []
+  version: 4.2.2
+  date: 2021-06-30T21:33:40.014Z
+- commits:
     - subject: Correctly use the native name result in the generated abstract sql
       hash: 94ec88b994d5e924da272cf473ac59f5e9916bc6
       body: ''
