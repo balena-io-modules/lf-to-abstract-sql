@@ -125,6 +125,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{identifierTable.referenceScheme = conceptType}
 		|	{'ConceptType'}:dataType
 			GetReference(conceptTable):references
+
+			// Only add the `is of` reverse reference when the concept type is not a primitive
+			GetReference(identifierTable, conceptType):reverseReferences
+			AddRelationship(conceptTable, [['Verb', 'is of'], termOrFactType], references.fieldName, reverseReferences)
 		)
 		AddTableField(identifierTable, conceptType, dataType, true, null, references)
 		AddRelationship(identifierTable, [['Verb', 'has'], conceptTerm], conceptType, references)
