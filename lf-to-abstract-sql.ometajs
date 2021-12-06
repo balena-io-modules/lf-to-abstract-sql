@@ -1015,6 +1015,44 @@ LF2AbstractSQL.FactTypeFieldName = function(factType) {
 	return factType[1][1] + '-' + factType[2][1];
 };
 
+LF2AbstractSQL.JoinOptimization = function(query, whereBody) {
+	if (whereBody[0] == 'And') {
+		// If the where clause is an `AND` then check through each branch to see if it can be optimized
+		for (var i = 1; i < whereBody.length; i++) {
+			if (this.JoinOptimization(query, whereBody[i])) {
+				// If we optimized it away then remove it
+				whereBody.splice(i, 1);
+				// And decrement i to recognize that we removed it
+				i--;
+			}
+		}
+		if (whereBody.length === 1) {
+			return true;
+		}
+	} else if (
+		whereBody[0] == 'Exists' &&
+		(whereBody[1][0] == 'SelectQuery' ||
+			whereBody[1][0] == 'InsertQuery' ||
+			whereBody[1][0] == 'UpdateQuery' ||
+			whereBody[1][0] == 'UpsertQuery')
+	) {
+		// If the where clause is an `EXISTS($query)` then it can be optimized into a join for LF
+		whereBody = whereBody[1].slice(1);
+		for (var i = 0; i < whereBody.length; i++) {
+			if (whereBody[i][0] == 'From') {
+				query.push(whereBody[i]);
+			}
+		}
+		for (var i = 0; i < whereBody.length; i++) {
+			if (whereBody[i][0] == 'Where') {
+				this.AddWhereClause(query, whereBody[i][1]);
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
 LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
 	// TODO: Move these to optimisation passes?
 	// Check if it's true == true
@@ -1022,22 +1060,11 @@ LF2AbstractSQL.AddWhereClause = function(query, whereBody) {
 		return;
 	}
 	// Check if it's a place where we can do a join optimisation.
-	if(whereBody[0] == 'Exists' && (
-			whereBody[1][0] == 'SelectQuery' || whereBody[1][0] == 'InsertQuery' ||
-			whereBody[1][0] == 'UpdateQuery' || whereBody[1][0] == 'UpsertQuery')) {
-		whereBody = whereBody[1].slice(1);
-		for(var i=0; i < whereBody.length; i++) {
-			if(whereBody[i][0] == 'From') {
-				query.push(whereBody[i]);
-			}
-		}
-		for(var i=0; i < whereBody.length; i++) {
-			if(whereBody[i][0] == 'Where') {
-				this.AddWhereClause(query, whereBody[i][1]);
-			}
-		}
+	if (this.JoinOptimization(query, whereBody)) {
+		// We optimized away the entire thing so we don't need to add it at all
 	}
 	else {
+		// Some is left so we add it
 		for(var i=1; i < query.length; i++) {
 			if(query[i][0] == 'Where') {
 				query[i][1] = ['And', query[i][1], whereBody];
