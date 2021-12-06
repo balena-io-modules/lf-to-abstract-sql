@@ -1,4 +1,15 @@
 - commits:
+    - subject: Support the join optimization for `AND` clauses
+      hash: 968b6755664f48d5d84b8af63597986adbfbbc36
+      body: ''
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+  version: 4.4.0
+  date: 2021-12-06T16:54:33.974Z
+- commits:
     - subject: Add an automatic `is of` reverse relationship for concept types
       hash: f84a80730b68b34203bfec29f97e5dac6b464857
       body: ''
