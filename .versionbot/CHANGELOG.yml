@@ -1,4 +1,15 @@
 - commits:
+    - subject: Respect negated verbs for link tables and foreign keys
+      hash: e1a76937586d85db1c054f4d01fbf1f878772273
+      body: ''
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 4.4.1
+  date: 2021-12-16T17:05:43.999Z
+- commits:
     - subject: Support the join optimization for `AND` clauses
       hash: 968b6755664f48d5d84b8af63597986adbfbbc36
       body: ''
