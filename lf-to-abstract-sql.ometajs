@@ -84,6 +84,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				'Synonym',
 				'ReferenceScheme',
 				'ForeignKey',
+				'ReferenceType',
 				'Attribute',
 				'Unique'
 			]}:attrOrder
@@ -236,6 +237,13 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		GetResourceName(factType):linkResourceName
 		{delete this.relationships[linkResourceName]}
 		{this.tables[linkResourceName] = 'ForeignKey'},
+	AttrReferenceType :factType =
+		:referenceType
+		GetTable(factType[0][1]):baseTable
+		FactTypeFieldName(factType):fkName
+		GetTableFieldID(baseTable, fkName):fieldID
+		?(fieldID !== false)
+		{baseTable.fields[fieldID].references.type = referenceType},
 	AttrUnique :factType =
 		:required
 		GetTable(factType):baseTable
