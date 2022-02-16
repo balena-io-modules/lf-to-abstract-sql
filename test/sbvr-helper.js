@@ -401,6 +401,13 @@ exports.TableSpace = function () {
 					this.property = 'synonyms';
 					this.matches = _.clone(synonyms);
 					break;
+				case 'ReferenceType':
+					const idx = this.baseTable.fields.findIndex(
+						(f) => f.dataType === 'ForeignKey',
+					);
+					this.baseTable.fields[idx].references.type = lf[1];
+					this.matches = _.cloneDeep(this.baseTable);
+					break;
 				default:
 					console.log(
 						'Unknown attribute',
