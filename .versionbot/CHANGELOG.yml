@@ -1,4 +1,43 @@
 - commits:
+    - subject: Update dependencies
+      hash: 5b17ef11e039219dec3498c531288a1bdfbbc83b
+      body: |
+        Update @balena/sbvr-parser from 1.4.0 to 1.4.1
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested:
+        - commits:
+            - subject: Update dependencies
+              hash: 28e057c3c2329b9a3e76dcc136632eab7e271f48
+              body: ""
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+            - subject: Remove circleci
+              hash: cd8d96dc294daa11873cee5d723ecb816e015089
+              body: ""
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-parser-1.4.1
+          title: "'Remove circleci/update deps'"
+          date: 2022-04-08T11:53:36.217Z
+    - subject: Remove circleci
+      hash: 2f10bfa8381fba27ed211c4dfe0e47dfec779b21
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 4.5.1
+  title: "'Remove circleci/update deps'"
+  date: 2022-04-08T12:05:32.848Z
+- commits:
     - subject: Reference property type for informative references
       hash: 647c05a1111f39fb5f1b03de59a641cf32050bf6
       body: ""
