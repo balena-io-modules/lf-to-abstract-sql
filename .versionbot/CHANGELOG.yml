@@ -1,4 +1,16 @@
 - commits:
+    - subject: Switch from balenaCI to flowzone
+      hash: ed2b55d1fa843ffe3d2f5705e85dcce1b14a8297
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 4.5.2
+  title: ""
+  date: 2022-10-14T16:18:40.351Z
+- commits:
     - subject: Update dependencies
       hash: 5b17ef11e039219dec3498c531288a1bdfbbc83b
       body: |
@@ -165,8 +177,7 @@
             - subject: Add a `castType` property to type functions
               hash: 409077eb9d6c0315779ddd877220280c251b4eb5
               body: >
-                This allows specifying the correct type to cast to when
-                necessary
+                This allows specifying the correct type to cast to when necessary
 
                 rather than relying on the fact the currently all type functions happen
 
