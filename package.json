@@ -16,7 +16,7 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "@balena/sbvr-parser": "^1.4.1",
+    "@balena/sbvr-parser": "^1.4.2",
     "lodash": "^4.17.21",
     "ometa-js": "^1.5.4"
   },
