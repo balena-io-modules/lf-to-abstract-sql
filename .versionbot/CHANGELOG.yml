@@ -1,4 +1,19 @@
 - commits:
+    - subject: Add .npmrc
+      hash: a2569a1953c937353ec94139a137283d719b9de3
+      body: |
+        Add .npmrc to stop generating package-lock.json on npm install
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Josh Bowling <josh@monarci.com>
+        signed-off-by: Josh Bowling <josh@monarci.com>
+      author: Josh Bowling
+      nested: []
+  version: 4.5.4
+  title: ""
+  date: 2022-11-17T08:30:56.151Z
+- commits:
     - subject: Bump dev dependencies
       hash: 53085507feff809010f36a8ba33297c177185af9
       body: ""
