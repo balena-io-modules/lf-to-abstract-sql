@@ -1,4 +1,18 @@
 - commits:
+    - subject: Update @balena/sbvr-parser from 1.4.1 to 1.4.2
+      hash: 66473607a0ad66965d6660c94d8941e312282a6c
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Josh Bowling <josh@monarci.com>
+        signed-off-by: Josh Bowling <josh@monarci.com>
+      author: Josh Bowling
+      nested: []
+  version: 4.5.5
+  title: ""
+  date: 2022-11-17T08:50:36.617Z
+- commits:
     - subject: Add .npmrc
       hash: a2569a1953c937353ec94139a137283d719b9de3
       body: |
