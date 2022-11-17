@@ -1,4 +1,18 @@
 - commits:
+    - subject: Bump dev dependencies
+      hash: 53085507feff809010f36a8ba33297c177185af9
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Josh Bowling <josh@monarci.com>
+        signed-off-by: Josh Bowling <josh@monarci.com>
+      author: Josh Bowling
+      nested: []
+  version: 4.5.3
+  title: ""
+  date: 2022-11-17T08:23:43.909Z
+- commits:
     - subject: Switch from balenaCI to flowzone
       hash: ed2b55d1fa843ffe3d2f5705e85dcce1b14a8297
       body: ""
