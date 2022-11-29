@@ -16,13 +16,13 @@
   "author": "",
   "license": "BSD",
   "dependencies": {
-    "@balena/sbvr-parser": "^1.4.2",
+    "@balena/sbvr-parser": "^1.4.3",
     "lodash": "^4.17.21",
     "ometa-js": "^1.5.4"
   },
   "devDependencies": {
     "@balena/lint": "^6.2.1",
-    "@balena/sbvr-types": "^3.4.8",
+    "@balena/sbvr-types": "^3.4.18",
     "chai": "^4.3.7",
     "mocha": "^10.1.0",
     "require-npm4-to-publish": "^1.0.0"

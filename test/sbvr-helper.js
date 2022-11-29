@@ -486,7 +486,14 @@ exports.TableSpace = function () {
 				const query = [
 					'SelectQuery',
 					['Select', []],
-					['From', [generateName(termName), termName + '.' + varNum]],
+					[
+						'From',
+						[
+							'Alias',
+							['Table', generateName(termName)],
+							termName + '.' + varNum,
+						],
+					],
 				];
 				let extra = [];
 				if (lf.length === 4) {
@@ -586,7 +593,7 @@ exports.TableSpace = function () {
 					}
 
 					return [
-						['From', [tableName, tableAlias]],
+						['From', ['Alias', ['Table', tableName], tableAlias]],
 						[
 							'Where',
 							['And'].concat(
@@ -711,8 +718,8 @@ const stripLinkTable = (sql, tableAliases) =>
 			return false;
 		}
 
-		// Remove [ 'From', [ tableName', tableAlias ] ]
-		if (sqlPart[0] === 'From' && tableAliases.includes(sqlPart[1][1])) {
+		// Remove [ 'From', [ 'Alias', [ 'Table', tableName' ], tableAlias ] ]
+		if (sqlPart[0] === 'From' && tableAliases.includes(sqlPart[1][2])) {
 			return true;
 		}
 
