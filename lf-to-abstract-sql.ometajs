@@ -554,7 +554,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		RoleBindings(actualFactType):binds
 		LinkTableAlias(binds, actualFactType):tableAlias
 		GetTable(actualFactType):linkTable
-		{['SelectQuery', ['Select', []], ['From', [linkTable.name, tableAlias]]]}:query
+		{['SelectQuery', ['Select', []], ['From', ['Alias', ['Table', linkTable.name], tableAlias]]]}:query
 		{	binds.forEach(function(bind, i) {
 				var baseIdentifierName = actualFactType[i*2][1],
 					targetTable = $elf.GetTable(baseIdentifierName);
@@ -1112,7 +1112,7 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		if (conceptTypeResolutions.length === 0) {
 			// Resolve the initial level on first call
 			conceptTypeResolutions.push(identifier.name);
-			query.push(['From', [this.GetTable(identifier.name).name, parentAlias]])
+			query.push(['From', ['Alias', ['Table', this.GetTable(identifier.name).name], parentAlias]])
 			this.ResolveLinkTable(parentAlias);
 		}
 
@@ -1128,7 +1128,7 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 			if(conceptTable.primitive !== false) {
 				break;
 			}
-			query.push(['From', [conceptTable.name, conceptAlias]]);
+			query.push(['From', ['Alias', ['Table', conceptTable.name], conceptAlias]]);
 			this.AddWhereClause(query, ['Equals', ['ReferencedField', parentAlias, concept[1]], ['ReferencedField', conceptAlias, conceptTable.idField]]);
 			this.ResolveLinkTable(parentAlias);
 

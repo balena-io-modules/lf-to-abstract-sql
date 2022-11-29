@@ -136,7 +136,7 @@ describe('pilots', function () {
 						[
 							'SelectQuery',
 							['Select', []],
-							['From', ['pilot', 'pilot.0']],
+							['From', ['Alias', ['Table', 'pilot'], 'pilot.0']],
 							[
 								'Where',
 								[
@@ -148,7 +148,11 @@ describe('pilots', function () {
 											['Select', []],
 											[
 												'From',
-												['pilot-can fly-plane', 'pilot.0-can fly-plane.1'],
+												[
+													'Alias',
+													['Table', 'pilot-can fly-plane'],
+													'pilot.0-can fly-plane.1',
+												],
 											],
 											[
 												'Where',
