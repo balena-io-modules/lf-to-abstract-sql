@@ -37,10 +37,6 @@ export ometa LF2AbstractSQLPrep <: LFOptimiser {
 		anything
 	,
 
-	UniversalQuantification
-		"Variable":v trans*:xs SetHelped
-		-> ['LogicalNegation', ['ExistentialQuantification', v, ['LogicalNegation'].concat(xs)]],
-
 	AtMostNQuantification
 		"MaximumCardinality":maxCard "Variable":v trans*:xs SetHelped
 		{maxCard[1][1]++}
