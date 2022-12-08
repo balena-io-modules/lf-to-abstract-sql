@@ -1,4 +1,16 @@
 - commits:
+    - subject: Switch UniversalQuantification from NOT EXISTS to COUNT(*) = 0
+      hash: a22870ca3143cbd12d4ffbdb911a1e1be177e952
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+  version: 4.6.0
+  title: ""
+  date: 2022-12-08T10:37:22.330Z
+- commits:
     - subject: "Flowzone: Allow external contributions"
       hash: 0ae49b7c253761661f0d71f9868fe0528e5fee47
       body: ""
