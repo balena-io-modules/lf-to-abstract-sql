@@ -130,41 +130,34 @@ describe('pilots', function () {
 			[
 				'Body',
 				[
-					'Not',
+					'Equals',
 					[
-						'Exists',
+						'SelectQuery',
+						['Select', [['Count', '*']]],
+						['From', ['Alias', ['Table', 'pilot'], 'pilot.0']],
 						[
-							'SelectQuery',
-							['Select', []],
-							['From', ['Alias', ['Table', 'pilot'], 'pilot.0']],
+							'Where',
 							[
-								'Where',
+								'Not',
 								[
-									'Not',
+									'Exists',
 									[
-										'Exists',
+										'SelectQuery',
+										['Select', []],
 										[
-											'SelectQuery',
-											['Select', []],
+											'From',
 											[
-												'From',
-												[
-													'Alias',
-													['Table', 'pilot-can fly-plane'],
-													'pilot.0-can fly-plane.1',
-												],
+												'Alias',
+												['Table', 'pilot-can fly-plane'],
+												'pilot.0-can fly-plane.1',
 											],
+										],
+										[
+											'Where',
 											[
-												'Where',
-												[
-													'Equals',
-													[
-														'ReferencedField',
-														'pilot.0-can fly-plane.1',
-														'pilot',
-													],
-													['ReferencedField', 'pilot.0', 'id'],
-												],
+												'Equals',
+												['ReferencedField', 'pilot.0-can fly-plane.1', 'pilot'],
+												['ReferencedField', 'pilot.0', 'id'],
 											],
 										],
 									],
@@ -172,6 +165,7 @@ describe('pilots', function () {
 							],
 						],
 					],
+					['Number', 0],
 				],
 			],
 			[

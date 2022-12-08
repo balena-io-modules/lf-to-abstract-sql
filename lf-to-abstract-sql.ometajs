@@ -672,6 +672,15 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			-> ['And', variable.whereBody, where]
 		|	-> where
 		),
+	UniversalQuantification =
+		[	'UniversalQuantification'
+			anything:v
+			anything+:xs
+			// For a universal quantification instead of checking that everything matches to checking there are no counter examples
+			// We use an `COUNT(*) = 0` rather than `NOT EXISTS` because it reliably performs better
+			Exactly(['ExactQuantification', ['Cardinality', ['Number', 0]], v, ['LogicalNegation'].concat(xs)]):x
+		]
+		-> x,
 	Exactly =
 		[	'ExactQuantification'
 			Cardinality:card
@@ -750,9 +759,14 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		),
 	Negation =
 		[	'LogicalNegation'
-			RulePart:whereBody
+			(	Negation:n
+				// A hack to avoid double negation due to UniversalQuantification
+				-> n[1]
+			|	RulePart:whereBody
+				-> ['Not', whereBody]
+			):x
 		]
-		-> ['Not', whereBody],
+		-> x,
 
 
 	RulePart =
@@ -764,6 +778,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		|	Range
 		|	Disjunction
 		|	Conjunction
+		|	UniversalQuantification
 		|	:x
 			{console.error('Hit unhandled operation:', x)}
 			?(false)

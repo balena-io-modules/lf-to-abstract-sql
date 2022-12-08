@@ -680,8 +680,9 @@ exports.TableSpace = function () {
 								whereClause[1] = ['Not', whereClause[1]];
 							}
 
+							query[1][1].push(['Count', '*']);
 							query = queryConcat(query, extra);
-							return ['Not', ['Exists', query]];
+							return ['Equals', query, ['Number', 0]];
 						default:
 							throw new Error('Unknown quant: ' + lf[0]);
 					}
