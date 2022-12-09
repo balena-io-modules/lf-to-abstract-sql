@@ -62,6 +62,8 @@ module.exports = function (builtInVocab) {
 							.to.have.nested.property(property)
 							.to.deep.equal(matches);
 					}
+				} else if (typeof matches === 'function') {
+					expect(result).to.satisfy(matches);
 				} else if (ruleSQL) {
 					const lastRule = result.rules[result.rules.length - 1];
 					deleteWhereBodies(lastRule);

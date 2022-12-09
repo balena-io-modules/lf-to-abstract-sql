@@ -896,6 +896,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				:ruleText
 			]
 			(	?this.nonPrimitiveExists
+				{
+					this.lfInfo.rules[ruleText] = {
+						rootAlias: this.ruleRootAlias
+					}
+				}
 				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
 			// |	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
 			)?
@@ -939,7 +944,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			},
 			relationships: this.relationships,
 			rules: this.rules,
-			synonyms: this.synonyms
+			synonyms: this.synonyms,
+			lfInfo: this.lfInfo
 		}
 	,
 
@@ -1114,6 +1120,10 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		conceptTypeResolutions,
 		$elf = this;
 
+	if (!this.ruleRootAlias) {
+		this.ruleRootAlias = parentAlias;
+	}
+
 	if(this.conceptTypeResolvers[parentAlias]) {
 		throw new Error('Concept type resolver already added for "' + parentAlias + '"!')
 	}
@@ -1228,12 +1238,16 @@ LF2AbstractSQL.reset = function() {
 	this.attributes = {};
 	this.bindAttributes = [];
 	this.bindAttributeDepth = [];
+	this.lfInfo = {
+		rules: {}
+	};
 	this.ResetRuleState();
 };
 
 LF2AbstractSQL.ResetRuleState = function() {
 	this.conceptTypeResolvers = {};
 	this.linkTableResolvers = {};
+	this.ruleRootAlias = null;
 };
 
 LF2AbstractSQL.addTypes = function(types) {
