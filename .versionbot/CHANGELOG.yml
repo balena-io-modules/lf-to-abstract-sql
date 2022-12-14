@@ -1,4 +1,31 @@
 - commits:
+    - subject: Empty commit to force a new version to be generated
+      hash: 41bc55fa9af394d8c2294c243839d472c1ed92c6
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Carol Schulze <carol@balena.io>
+        signed-off-by: Carol Schulze <carol@balena.io>
+      author: Carol Schulze
+      nested: []
+    - subject: Add an `lfInfo` entry in the results object
+      hash: 167680ba65e73235307370c3e211a211a14a1acc
+      body: |
+        `lfInfo` will be used to pass extra context extracted from LF
+        downstream. Currently the only context is the root table alias for each
+        rule.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Carol Schulze <carol@balena.io>
+        signed-off-by: Carol Schulze <carol@balena.io>
+      author: Carol Schulze
+      nested: []
+  version: 4.7.0
+  title: ""
+  date: 2022-12-14T12:09:57.887Z
+- commits:
     - subject: Switch UniversalQuantification from NOT EXISTS to COUNT(*) = 0
       hash: a22870ca3143cbd12d4ffbdb911a1e1be177e952
       body: ""
