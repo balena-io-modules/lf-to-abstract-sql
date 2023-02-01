@@ -898,8 +898,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			(	?this.nonPrimitiveExists
 				{
 					this.lfInfo.rules[ruleText] = {
-						rootAlias: this.ruleRootAlias
+						rootAlias: this.ruleRoot.alias
 					}
+
+					this.InsertRowNarrowingInto(ruleBody);
 				}
 				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
 			// |	{console.warn('Ignoring rule with only primitives: ', ruleText, ruleBody)}
@@ -951,6 +953,49 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 
 	GetReference :table :field =
 		-> { resourceName: table.resourceName, fieldName: field || table.idField }
+}
+
+// Insert a binding that will narrow the rows checked by a rule to those
+// actually affected by an update if it's safe to do so. Right now it's only
+// safe to narrow the root table and only if it's selected from exactly once
+LF2AbstractSQL.InsertRowNarrowingInto = function(ruleBody) {
+	if (this.ruleRoot.count !== 1) {
+		return;
+	}
+
+	// Check if the table wasn't optimized away and bail in that case or
+	// otherwise the query will be referencing something that doesn't exist.
+	// The query must be in the following format:
+	//
+	// SELECT (SELECT COUNT(*) ...) = 0
+
+	if (ruleBody[0] !== 'Equals') {
+		throw new Error('Rule body must be an equality test');
+	}
+	var query = ruleBody[1];
+	if (query[0] !== 'SelectQuery') {
+		throw new Error('Equality test must include a select query');
+	}
+
+	// TODO: really necessary?
+	//var from = query.find(function(part) { return part[0] === 'From'; });
+
+	this.AddWhereClause(
+		query,
+		[
+			'Or',
+			[
+				'Equals',
+				['Bind', this.ruleRoot.table],
+				['EmbeddedText', '{}']
+			],
+			[
+				'Equals',
+				['ReferencedField', this.ruleRoot.alias, 'id'],
+				['Any', ['Bind', this.ruleRoot.table], 'Integer']
+			]
+		]
+	);
 }
 
 LF2AbstractSQL.CreateTable = function(resourceName, modelName) {
@@ -1120,8 +1165,19 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		conceptTypeResolutions,
 		$elf = this;
 
-	if (!this.ruleRootAlias) {
-		this.ruleRootAlias = parentAlias;
+	// Assume the first variable we encounter is the root table. Save it, its
+	// alias (that we return as extra metadata for this rule) and also keep a
+	// count of how many times we've seen this same table. If we've seen it
+	// more than once once then narrowing the root table is conservatively
+	// invalid
+	if (this.ruleRoot === null) {
+		this.ruleRoot = {
+			table: identifier.name,
+			alias: parentAlias,
+			count: 1
+		};
+	} else if (identifier.name === this.ruleRoot.table) {
+		this.ruleRoot.count++;
 	}
 
 	if(this.conceptTypeResolvers[parentAlias]) {
@@ -1247,7 +1303,7 @@ LF2AbstractSQL.reset = function() {
 LF2AbstractSQL.ResetRuleState = function() {
 	this.conceptTypeResolvers = {};
 	this.linkTableResolvers = {};
-	this.ruleRootAlias = null;
+	this.ruleRoot = null;
 };
 
 LF2AbstractSQL.addTypes = function(types) {
