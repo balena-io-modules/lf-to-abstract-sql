@@ -138,28 +138,44 @@ describe('pilots', function () {
 						[
 							'Where',
 							[
-								'Not',
+								'And',
 								[
-									'Exists',
+									'Not',
 									[
-										'SelectQuery',
-										['Select', []],
+										'Exists',
 										[
-											'From',
+											'SelectQuery',
+											['Select', []],
 											[
-												'Alias',
-												['Table', 'pilot-can fly-plane'],
-												'pilot.0-can fly-plane.1',
+												'From',
+												[
+													'Alias',
+													['Table', 'pilot-can fly-plane'],
+													'pilot.0-can fly-plane.1',
+												],
+											],
+											[
+												'Where',
+												[
+													'Equals',
+													['ReferencedField', 'pilot.0-can fly-plane.1', 'pilot'],
+													['ReferencedField', 'pilot.0', 'id'],
+												],
 											],
 										],
-										[
-											'Where',
-											[
-												'Equals',
-												['ReferencedField', 'pilot.0-can fly-plane.1', 'pilot'],
-												['ReferencedField', 'pilot.0', 'id'],
-											],
-										],
+									],
+								],
+								[
+									'Or',
+									[
+										'Equals',
+										['Bind', "pilot"],
+										['EmbeddedText', '{}'],
+									],
+									[
+										'Equals',
+										['ReferencedField', "pilot.0", 'id'],
+										['Any', ['Bind', "pilot"], 'Integer'],
 									],
 								],
 							],
