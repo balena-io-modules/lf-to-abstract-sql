@@ -898,7 +898,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			(	?this.nonPrimitiveExists
 				{
 					this.lfInfo.rules[ruleText] = {
-						rootAlias: this.ruleRootAlias
+						root: this.ruleRoot
 					}
 				}
 				{this.rules.push(['Rule', ['Body', ruleBody], ['StructuredEnglish', ruleText]])}
@@ -1120,8 +1120,13 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		conceptTypeResolutions,
 		$elf = this;
 
-	if (!this.ruleRootAlias) {
-		this.ruleRootAlias = parentAlias;
+	// Assume the first variable we encounter is the root table. Save it and
+	// its alias to be returned as extra metadata for this rule
+	if (this.ruleRoot === null) {
+		this.ruleRoot = {
+			table: identifier.name,
+			alias: parentAlias
+		};
 	}
 
 	if(this.conceptTypeResolvers[parentAlias]) {
@@ -1247,7 +1252,7 @@ LF2AbstractSQL.reset = function() {
 LF2AbstractSQL.ResetRuleState = function() {
 	this.conceptTypeResolvers = {};
 	this.linkTableResolvers = {};
-	this.ruleRootAlias = null;
+	this.ruleRoot = null;
 };
 
 LF2AbstractSQL.addTypes = function(types) {
