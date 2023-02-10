@@ -30,25 +30,37 @@ describe('lfInfo - pilots', function () {
 	// Rule: It is necessary that each pilot can fly at least 1 plane
 	test({
 		se: 'Rule: It is necessary that each pilot can fly at least 1 plane',
-		matches: (result) =>
-			result.lfInfo.rules[
-				'It is necessary that each pilot can fly at least 1 plane'
-			].rootAlias === 'pilot.0',
+		matches: (result) => {
+			const { table, alias } =
+				result.lfInfo.rules[
+					'It is necessary that each pilot can fly at least 1 plane'
+				].root;
+
+			return table === 'pilot' && alias === 'pilot.0';
+		},
 	});
 	// Rule: It is necessary that each pilot can fly at least one plane or a pilot can fly at least 10 planes
 	test({
 		se: 'Rule: It is necessary that each pilot can fly at least one plane or a pilot can fly at least 10 planes',
-		matches: (result) =>
-			result.lfInfo.rules[
-				'It is necessary that each pilot can fly at least one plane or a pilot can fly at least 10 planes'
-			].rootAlias === 'pilot.0',
+		matches: (result) => {
+			const { table, alias } =
+				result.lfInfo.rules[
+					'It is necessary that each pilot can fly at least one plane or a pilot can fly at least 10 planes'
+				].root;
+
+			return table === 'pilot' && alias === 'pilot.0';
+		},
 	});
 	// Rule: It is necessary that each plane that at least 3 pilots can fly, has a name
 	test({
 		se: 'Rule: It is necessary that each plane that at least 3 pilots can fly, has a name',
-		matches: (result) =>
-			result.lfInfo.rules[
-				'It is necessary that each plane that at least 3 pilots can fly, has a name'
-			].rootAlias === 'plane.0',
+		matches: (result) => {
+			const { table, alias } =
+				result.lfInfo.rules[
+					'It is necessary that each plane that at least 3 pilots can fly, has a name'
+				].root;
+
+			return table === 'plane' && alias === 'plane.0';
+		},
 	});
 });
