@@ -1,4 +1,137 @@
 - commits:
+    - subject: Update @balena/sbvr-types to 5.0.0
+      hash: 9acf28eac9790f47704d9103b5788fc4e1802e14
+      body: |
+        Update @balena/sbvr-types from 3.4.18 to 5.0.0
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested:
+        - commits:
+            - subject: Switch from `export =` to `export default`
+              hash: 6cd01340e0fee46833942691fce5a9f6a42ac104
+              body: ""
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+          version: sbvr-types-5.0.0
+          title: ""
+          date: 2023-05-16T15:56:09.861Z
+        - commits:
+            - subject: Improve typings
+              hash: a5fd4a319cd0336afc5a765af9e1a1eec851f2c3
+              body: ""
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Pagan Gazzard
+          version: sbvr-types-4.0.2
+          title: ""
+          date: 2023-05-03T11:40:24.422Z
+        - commits:
+            - subject: "boolean: Avoid unnecessary array creation to reduce GCs"
+              hash: 5ba948cd5f42844974d43dc19f1c371e56376fc8
+              body: ""
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Thodoris Greasidis
+          version: sbvr-types-4.0.1
+          title: ""
+          date: 2023-05-02T13:39:37.722Z
+        - commits:
+            - subject: Add test cases for Objects in JSON validate
+              hash: be8fc31c3754186dd4c43ca8d4c056b0def7ffbd
+              body: >
+                As balena-lint rejects `new Boolean()`, `new Number()` and `new
+                String()` constructor usage, test cases double check that they
+                are not instantiated as object but primitive type.
+              footer:
+                Change-type: patch
+                change-type: patch
+                Signed-off-by: fisehara <harald@balena.io>
+                signed-off-by: fisehara <harald@balena.io>
+              author: fisehara
+            - subject: Drop `require-npm4-to-publish` devDependency
+              hash: 46a369117c9d1222089498a8794c32d14edef85b
+              body: >
+                As engine and npm is now required as part of package.json we can
+                drop this dependency
+              footer:
+                Change-type: patch
+                change-type: patch
+                Signed-off-by: fisehara <harald@balena.io>
+                signed-off-by: fisehara <harald@balena.io>
+              author: fisehara
+            - subject: Set minimum supported nodejs version to 16.13.0 and tsconfig to es2021
+              hash: 54920d701a7aa4890c27801fc5cc6b9d74ece21c
+              body: ""
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+            - subject: Switch `JSON` to use `JSON` db type instead of `TEXT`
+              hash: 0d3561364ad018f59466c0dae9b3adb4390d9496
+              body: ""
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+            - subject: Switch `Boolean` to use `BOOLEAN` db type instead of `INTEGER`
+              hash: 5af2bd476a9032ab5d60c163a3940e0dd8e81cc6
+              body: ""
+              footer:
+                Change-type: major
+                change-type: major
+              author: Pagan Gazzard
+            - subject: Assert that JSON input typeof is object
+              hash: 1819ee97811e20da93c6e0f227db6a62ada8c00e
+              body: >
+                Ensure that the input passed in for JSON types is either an
+                object or
+
+                an array (typeof returns 'object' for arrays as well). This change is
+
+                mainly to prevent primitives from being stored as JSON.
+              footer:
+                Change-type: major
+                change-type: major
+                Signed-off-by: Josh Bowling <josh@monarci.com>
+                signed-off-by: Josh Bowling <josh@monarci.com>
+              author: Josh Bowling
+          version: sbvr-types-4.0.0
+          title: ""
+          date: 2023-04-26T15:00:16.169Z
+        - commits:
+            - subject: Add Big Serial type
+              hash: 49460ad51fcbc60f81e61329c573a1af5b207a46
+              body: ""
+              footer:
+                Change-type: minor
+                change-type: minor
+              author: Josh Bowling
+          version: sbvr-types-3.5.0
+          title: ""
+          date: 2023-03-21T11:16:27.398Z
+        - commits:
+            - subject: "Flowzone: Allow external contributions"
+              hash: 9f7bb028bbac327e6fe0711491d7c0f2c6464f98
+              body: ""
+              footer:
+                Change-type: patch
+                change-type: patch
+                Signed-off-by: Josh Bowling <josh@monarci.com>
+                signed-off-by: Josh Bowling <josh@monarci.com>
+              author: Josh Bowling
+          version: sbvr-types-3.4.19
+          title: ""
+          date: 2022-12-08T01:08:35.143Z
+  version: 5.0.1
+  title: ""
+  date: 2023-05-16T16:11:31.737Z
+- commits:
     - subject: Expand `lfInfo` to also include the root table name
       hash: cd6429c29d11d986d13b2f3a1c7090310e3e4d03
       body: |
@@ -300,7 +433,8 @@
             - subject: Add a `castType` property to type functions
               hash: 409077eb9d6c0315779ddd877220280c251b4eb5
               body: >
-                This allows specifying the correct type to cast to when necessary
+                This allows specifying the correct type to cast to when
+                necessary
 
                 rather than relying on the fact the currently all type functions happen
 
