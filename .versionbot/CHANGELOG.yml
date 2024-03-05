@@ -1,4 +1,106 @@
 - commits:
+    - subject: Update `@balena/sbvr-types` devDependency
+      hash: 01f9b8aea7750c6033d535c791fad2b853071bda
+      body: |
+        Update @balena/sbvr-types from 5.0.0 to 7.0.1
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Harald Fischer <harald@balena.io>
+        signed-off-by: Harald Fischer <harald@balena.io>
+      author: Harald Fischer
+      nested:
+        - commits:
+            - subject: Update dependency @balena/abstract-sql-compiler to v9
+              hash: 37684ebb1692f97780dd27056b9cfe299c456b3c
+              body: |
+                Update @balena/abstract-sql-compiler from 8.5.0 to 9.0.4
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Self-hosted Renovate Bot
+          version: sbvr-types-7.0.1
+          title: ""
+          date: 2024-03-04T19:48:17.416Z
+        - commits:
+            - subject: Return `ISODateString` instead of `date`
+              hash: 37e2d446c0ec11f2e3a1ab41b1a205280062bd5d
+              body: >
+                The internal and external representation of the returned object
+                from pinejs should be consistent.
+
+                Pinejs internal interface will return date or date time fields as date object. For the external interface the object is JSON.stringified so that date becomes an ISO string anyway.
+              footer:
+                Change-type: major
+                change-type: major
+                Signed-off-by: fisehara <harald@balena.io>
+                signed-off-by: fisehara <harald@balena.io>
+              author: fisehara
+          version: sbvr-types-7.0.0
+          title: ""
+          date: 2024-03-04T17:37:23.873Z
+        - commits:
+            - subject: Update dependency @types/chai-datetime to ^0.0.39
+              hash: 428c5a2c94bd753cc2ffc6d1e012c3a743e1b4d2
+              body: |
+                Update @types/chai-datetime from 0.0.37 to 0.0.39
+              footer:
+                Change-type: patch
+                change-type: patch
+              author: Self-hosted Renovate Bot
+          version: sbvr-types-6.1.1
+          title: ""
+          date: 2024-01-02T18:54:07.180Z
+        - commits:
+            - subject: Add checksum to WebResource
+              hash: be6a1e9bacad51f99d685f491b3bf81545536adb
+              body: ""
+              footer:
+                Change-type: minor
+                change-type: minor
+              author: Otávio Jacobi
+          version: sbvr-types-6.1.0
+          title: ""
+          date: 2023-10-03T22:49:47.984Z
+        - commits:
+            - subject: Change contents to snake_case
+              hash: aaa12269901e364533cf2aa45a958948ce0339de
+              body: ""
+              footer:
+                Change-Type: major
+                change-type: major
+              author: Otávio Jacobi
+          version: sbvr-types-6.0.0
+          title: ""
+          date: 2023-08-09T00:10:50.917Z
+        - commits:
+            - subject: Expose WebResource as WebResourceType
+              hash: 9e42bfffb2145b5096539492b36b0f19b1f2e209
+              body: ""
+              footer:
+                Change-type: minor
+                change-type: minor
+              author: Otávio Jacobi
+          version: sbvr-types-5.2.0
+          title: ""
+          date: 2023-08-08T21:01:49.459Z
+        - commits:
+            - subject: Adds WebResource type
+              hash: db7ff44e95a040a0b250d8c7612b126b31a3f325
+              body: ""
+              footer:
+                Change-type: minor
+                change-type: minor
+                Co-authored-by: ramirogm
+                co-authored-by: ramirogm
+              author: Otávio Jacobi
+          version: sbvr-types-5.1.0
+          title: ""
+          date: 2023-08-03T09:36:41.490Z
+  version: 5.0.2
+  title: ""
+  date: 2024-03-05T13:44:30.007Z
+- commits:
     - subject: Update @balena/sbvr-types to 5.0.0
       hash: 9acf28eac9790f47704d9103b5788fc4e1802e14
       body: |
