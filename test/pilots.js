@@ -19,12 +19,15 @@ const {
 	_nestedOr,
 	_nestedAnd,
 	stripLinkTable,
+	vocabulary,
 } = require('./sbvr-helper');
 const { Table, attribute, rule } = TableSpace();
 
 const shortTextType = term('Short Text', 'Type');
 const integerType = term('Integer', 'Type');
 const lengthType = term('Length', 'Type');
+const eventName = term('event name');
+const scopedEventName = term('event name', 'Event');
 
 const name = term('name');
 const honorific = term('honorific');
@@ -40,6 +43,15 @@ const pilots = numberedTerms(pilot, 2);
 const planes = numberedTerms(plane, 2);
 
 describe('pilots', function () {
+	// Vocabulary: Event
+	test(vocabulary('Event'));
+	// Term:      event name
+	test(Table(eventName));
+	// 	Concept Type: Short Text (Type)
+	test(attribute(conceptType(shortTextType)));
+
+	// Vocabulary: Default
+	test(vocabulary('Default'));
 	// Term:      name
 	test(Table(name));
 	// 	Concept Type: Short Text (Type)
@@ -118,6 +130,8 @@ describe('pilots', function () {
 	test(attribute(synonymousForm(pilots[1], verb('was taught by'), pilots[0])));
 	// Fact type: pilot is experienced
 	test(Table(factType(pilot, verb('is experienced'))));
+	// Fact type: pilot has name has event name (Event)
+	test(Table(factType(pilot, verb('has'), name, verb('has'), scopedEventName)));
 	// Term: veteran pilot
 	test(Table(veteranPilot));
 	// 	Definition: pilot that can fly at least 2 planes
