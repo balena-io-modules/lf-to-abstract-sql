@@ -201,13 +201,11 @@ LF2AbstractSQLPrep.defaultAttributes = function(termOrFactType, attrsFound, attr
 					this.primitives[actualFactType[1]] = false;
 				} // Tertiary or higher fact type
 				else if(actualFactType.length > 4) {
-					// The terms in a tertiary or higher fact type cannot become attributes.
-					for(var i = 1;i < actualFactType.length; i+=2) {
-						if(!this.attributes.hasOwnProperty(actualFactType[i]) || this.attributes[actualFactType[i]] !== false) {
-							this.SetHelped();
-						}
-						this.attributes[actualFactType[i]] = false;
+					// The first term in a tertiary or higher fact type cannot become an attribute.
+					if(!this.attributes.hasOwnProperty(actualFactType[1]) || this.attributes[actualFactType[1]] !== false) {
+						this.SetHelped();
 					}
+					this.attributes[actualFactType[1]] = false;
 				}
 			}
 		break;
