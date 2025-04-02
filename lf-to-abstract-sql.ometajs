@@ -79,6 +79,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				'DatabaseIDField',
 				'DatabasePrimitive',
 				'TermForm',
+				'TermFormSynonym',
 				'ConceptType',
 				'SynonymousForm',
 				'Synonym',
@@ -317,6 +318,11 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				}
 			}
 		},
+	AttrTermFormSynonym :factType =
+		:synonym
+		GetResourceName(factType):linkResourceName
+		{this.synonyms[synonym[1]] = linkResourceName}
+	,
 	AttrNecessity :tableID =
 		Rule,
 	AttrDefinition :factType =
