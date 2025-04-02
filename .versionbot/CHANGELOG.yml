@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency mocha to v11
+      hash: 8e4d2bb26584004c5bccf9c32244e59023082372
+      body: |
+        Update mocha from 10.8.2 to 11.1.0
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 5.0.4
+  title: ""
+  date: 2025-04-02T15:10:22.415Z
+- commits:
     - subject: Add multiple vocabulary ternary FactType test
       hash: 9c970468f97eabc70f02987db244162259a2bd9c
       body: ""
