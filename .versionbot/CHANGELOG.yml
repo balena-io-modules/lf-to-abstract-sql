@@ -1,4 +1,16 @@
 - commits:
+    - subject: Support multiple attributes of the same name/type
+      hash: e4fab5433ca617bc72d89cc87a271025ec8549d4
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 5.0.7
+  title: ""
+  date: 2025-06-20T12:05:42.012Z
+- commits:
     - subject: Update dependency @balena/sbvr-types to v9
       hash: ffe67f4ce0c2d3c6b240206da5c4ed2fea2c353a
       body: |

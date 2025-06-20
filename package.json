@@ -1,6 +1,6 @@
 {
   "name": "@balena/lf-to-abstract-sql",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "description": "LF to Abstract SQL translator.",
   "main": "index.js",
   "scripts": {
@@ -35,6 +35,6 @@
     "_": "test/**/*.js"
   },
   "versionist": {
-    "publishedAt": "2025-04-11T10:51:21.484Z"
+    "publishedAt": "2025-06-20T12:05:42.161Z"
   }
 }
