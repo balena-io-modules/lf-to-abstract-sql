@@ -2,6 +2,7 @@ const typeVocab = require('fs').readFileSync(
 	require.resolve('@balena/sbvr-types/Type.sbvr'),
 );
 const test = require('./test')(typeVocab);
+const { expect } = require('chai');
 const {
 	TableSpace,
 	term,
@@ -30,6 +31,7 @@ const eventName = term('event name');
 const scopedEventName = term('event name', 'Event');
 
 const name = term('name');
+const nickname = term('nickname');
 const honorific = term('honorific');
 const yearsOfExperience = term('years of experience');
 const person = term('person');
@@ -54,6 +56,10 @@ describe('pilots', function () {
 	test(vocabulary('Default'));
 	// Term:      name
 	test(Table(name));
+	// 	Concept Type: Short Text (Type)
+	test(attribute(conceptType(shortTextType)));
+	// Term:     nickname
+	test(Table(nickname));
 	// 	Concept Type: Short Text (Type)
 	test(attribute(conceptType(shortTextType)));
 	// Term:      honorific
@@ -82,6 +88,51 @@ describe('pilots', function () {
 	test(
 		attribute(necessity('each', pilot, verb('has'), ['exactly', 'one'], name)),
 	);
+	// Fact Type: pilot has nickname
+	test(Table(factType(pilot, verb('has'), nickname)));
+	// 	Necessity: each pilot has at most one name
+	test(
+		attribute(
+			necessity('each', pilot, verb('has'), ['at most', 'one'], nickname),
+		),
+	);
+	// 	Necessity: each pilot that has a nickname, has a nickname has a length (Type) that is greater than 4
+	test(
+		attribute(
+			necessity('each', [pilot, verb('has'), 'a', nickname], verb('has'), 'a', [
+				nickname,
+				verb('has'),
+				'a',
+				[lengthType, verb('is greater than'), 4],
+			]),
+		),
+	);
+	// 	Necessity: each pilot that has a nickname, has a nickname has a length (Type) that is less than 10
+	test(
+		attribute(
+			necessity('each', [pilot, verb('has'), 'a', nickname], verb('has'), 'a', [
+				nickname,
+				verb('has'),
+				'a',
+				[lengthType, verb('is less than'), 10],
+			]),
+		),
+	);
+	test({
+		se: '-- should include both necessities in emitted rules',
+		matches: (result) => {
+			const seRules = result.rules
+				.map((r) => r[2][1])
+				.filter((se) =>
+					se.startsWith('It is necessary that each pilot that has a nickname,'),
+				);
+			expect(seRules).to.deep.equal([
+				'It is necessary that each pilot that has a nickname, has a nickname that has a Length (Type) that is greater than 4.',
+				'It is necessary that each pilot that has a nickname, has a nickname that has a Length (Type) that is less than 10.',
+			]);
+			return true;
+		},
+	});
 	// 	Fact type: pilot is addressed by honorific
 	test(Table(factType(pilot, verb('is addressed by'), honorific)));
 	// 	Necessity: each pilot is addressed by exactly one honorific
