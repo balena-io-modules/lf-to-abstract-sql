@@ -71,7 +71,8 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				(	[	:attributeName
 						(anything)*:attributeVals
 					]
-					{attributes[attributeName] = attributeVals}
+					{attributes[attributeName] = attributes[attributeName] || []}
+					{attributes[attributeName].push(attributeVals)}
 				)*
 			]
 			{[
@@ -91,11 +92,15 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{
 				attrOrder.forEach(function(attributeName) {
 					if(attributes.hasOwnProperty(attributeName)) {
-						$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributes[attributeName]));
+						attributes[attributeName].forEach(function(attributeVal) {
+							$elf._applyWithArgs.apply($elf, ['Attr' + attributeName, termOrFactType].concat(attributeVal));
+						});
 					}
 				});
-				_(attributes).omit(attrOrder).each(function(attributeVals, attributeName) {
-					$elf._applyWithArgs.apply($elf, ['ApplyFirstExisting', ['Attr' + attributeName, 'DefaultAttr'], [termOrFactType].concat(attributeVals)]);
+				_(attributes).omit(attrOrder).forEach(function(attributeVals, attributeName) {
+					attributeVals.forEach(function(attributeVal) {
+						$elf._applyWithArgs.apply($elf, ['ApplyFirstExisting', ['Attr' + attributeName, 'DefaultAttr'], [termOrFactType].concat(attributeVal)]);
+					});
 				});
 			}
 	,
