@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency chai to v5
+      hash: da263a226f63e04911dbd9d7f352fa25625e3aeb
+      body: |
+        Update chai from 4.5.0 to 5.2.0
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 5.0.8
+  title: ""
+  date: 2025-06-20T13:09:15.384Z
+- commits:
     - subject: Support multiple attributes of the same name/type
       hash: e4fab5433ca617bc72d89cc87a271025ec8549d4
       body: ""
