@@ -1,4 +1,16 @@
 - commits:
+    - subject: Add test for multiple Necessities on the same name/type
+      hash: 6538d3d92b1ab337e4c46f0af8be472cfaac5a1f
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 5.0.9
+  title: ""
+  date: 2025-06-24T07:05:18.175Z
+- commits:
     - subject: Update dependency chai to v5
       hash: da263a226f63e04911dbd9d7f352fa25625e3aeb
       body: |
