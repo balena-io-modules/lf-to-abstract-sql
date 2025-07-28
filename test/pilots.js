@@ -25,8 +25,10 @@ const {
 const { Table, attribute, rule } = TableSpace();
 
 const shortTextType = term('Short Text', 'Type');
+const textType = term('Text', 'Type');
 const integerType = term('Integer', 'Type');
 const lengthType = term('Length', 'Type');
+const jsonType = term('JSON', 'Type');
 const eventName = term('event name');
 const scopedEventName = term('event name', 'Event');
 
@@ -34,6 +36,7 @@ const name = term('name');
 const nickname = term('nickname');
 const honorific = term('honorific');
 const yearsOfExperience = term('years of experience');
+const statsCollection = term('stats collection');
 const person = term('person');
 const pilot = term('pilot');
 const veteranPilot = term('veteran pilot');
@@ -70,6 +73,10 @@ describe('pilots', function () {
 	test(Table(yearsOfExperience));
 	// 	Concept Type: Integer (Type)
 	test(attribute(conceptType(integerType)));
+	// Term:      name
+	test(Table(statsCollection));
+	// 	Concept Type: JSON (Type)
+	test(attribute(conceptType(jsonType)));
 	// Term:      test
 	test(Table(testTerm));
 	// Term:      person
@@ -161,6 +168,93 @@ describe('pilots', function () {
 			),
 		),
 	);
+	// Fact Type: pilot has stats collection
+	test(Table(factType(pilot, verb('has'), statsCollection)));
+	// 	Necessity: each pilot has exactly one stats collection
+	test(
+		attribute(
+			necessity(
+				'each',
+				pilot,
+				verb('has'),
+				['exactly', 'one'],
+				statsCollection,
+			),
+		),
+	);
+	// 	Necessity: each pilot has a stats collection that is represented by a Text (Type) that has a Length (Type) that is less than or equal to 1000.
+	test({
+		se: 'Necessity: each pilot has a stats collection that is represented by a Text (Type) that has a Length (Type) that is less than or equal to 1000',
+		ruleSQL: [
+			'Rule',
+			[
+				'Body',
+				[
+					'Equals',
+					[
+						'SelectQuery',
+						['Select', [['Count', '*']]],
+						['From', ['Alias', ['Table', 'pilot'], 'pilot.0']],
+						[
+							'Where',
+							[
+								'Not',
+								[
+									'And',
+									[
+										'And',
+										[
+											'And',
+											[
+												'LessThanOrEqual',
+												[
+													'CharacterLength',
+													[
+														'Cast',
+														['ReferencedField', 'pilot.0', 'stats collection'],
+														'Text',
+													],
+												],
+												['Integer', 1000],
+											],
+											[
+												'Exists',
+												[
+													'CharacterLength',
+													[
+														'Cast',
+														['ReferencedField', 'pilot.0', 'stats collection'],
+														'Text',
+													],
+												],
+											],
+										],
+										[
+											'Exists',
+											[
+												'Cast',
+												['ReferencedField', 'pilot.0', 'stats collection'],
+												'Text',
+											],
+										],
+									],
+									[
+										'Exists',
+										['ReferencedField', 'pilot.0', 'stats collection'],
+									],
+								],
+							],
+						],
+					],
+					['Number', 0],
+				],
+			],
+			[
+				'StructuredEnglish',
+				'It is necessary that each pilot has a stats collection that is represented by a Text (Type) that has a Length (Type) that is less than or equal to 1000',
+			],
+		],
+	});
 	// Fact Type: plane has name
 	test(Table(factType(plane, verb('has'), name)));
 	// 	Necessity: each plane has exactly one name
