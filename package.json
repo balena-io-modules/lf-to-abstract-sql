@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@balena/lint": "^6.2.1",
-    "@balena/sbvr-types": "^9.0.0",
+    "@balena/sbvr-types": "11.1.0-build-json-is-represented-by-text-4de0b318d04d63ef8c0ba5fa75e8a6282e9a09ec-1",
     "chai": "^5.0.0",
     "mocha": "^11.0.0",
     "require-npm4-to-publish": "^1.0.0"
