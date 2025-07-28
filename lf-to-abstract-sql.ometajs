@@ -8,6 +8,15 @@ var SBVRCompilerLibs = require('./sbvr-compiler-libs').SBVRCompilerLibs,
 	LINK_RESOLVE_QUEUED = true,
 	LINK_RESOLVE_DONE = false;
 
+function createReferencedFieldRebinder (bindAttributes, nativePropertyGetter, binds) {
+	return function rebindReferencedField () {
+		// Rebind the attributes
+		var newBind0 = bindAttributes[binds[0].number];
+		var binding = nativePropertyGetter(newBind0.binding, binds[1].binding);
+		bindAttributes[binds[1].number].binding = binding;
+	}
+}
+
 export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	Number =
 		[	'Number'
@@ -809,7 +818,17 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		{this.nonPrimitiveExists = false}
 		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsAttributes')
 		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNonPrimitive')
-		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNativeProperties'),
+		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNativeProperties')
+		{
+			for (var i = 0; i < this.bindAttributes.length; i++) {
+				var bindAttribute = this.bindAttributes[i];
+				if (bindAttribute != null && bindAttribute.rebind != null) {
+					bindAttribute.rebind();
+					delete bindAttribute.rebind;
+				}
+			}
+		}
+	,
 	ProcessAtomicFormulationsRecurse :depth :rule =
 		(	// Bit of a hack, but we only want to drill into the input if it's an array, otherwise we get infinite recursion.
 			?(Array.isArray(this.input.hd))
@@ -884,9 +903,23 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			this.sbvrTypes[primitive].nativeProperties &&
 			this.sbvrTypes[primitive].nativeProperties[verb] &&
 			this.sbvrTypes[primitive].nativeProperties[verb][property])
-		{this.sbvrTypes[primitive].nativeProperties[verb][property](binds[0].binding, binds[1].binding)}:binding
+		{this.sbvrTypes[primitive].nativeProperties[verb][property]}:nativePropertyGetter
+		{nativePropertyGetter(binds[0].binding, binds[1].binding)}:binding
 		{	this.bindAttributeDepth[binds[1].number] = depth;
-			this.bindAttributes[binds[1].number] = {binding: binding};
+			this.bindAttributes[binds[1].number] = {
+				binding: binding
+			};
+			// Check whether the binding that the formulation depends on, is a 'ReferencedField'
+			// of an sbvr 'Type' that it is not yet resolved to a bindAttribute.
+			if (
+				this.bindAttributes[binds[0].number] == null &&
+				binds[0].binding[0] === 'ReferencedField' &&
+				this.sbvrTypes[binds[0].binding[2]] != null
+			) {
+				// We use a factory function instead of an inline function,
+				// to avoid having all local variables being referenced by the closure.
+				this.bindAttributes[binds[1].number].rebind = createReferencedFieldRebinder(this.bindAttributes, nativePropertyGetter, binds);
+			}
 		},
 
 	Rule =
