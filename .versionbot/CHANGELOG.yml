@@ -1,4 +1,21 @@
 - commits:
+    - subject: Switch `ProcessAtomicFormulationsRecurse` to use a breadth first search
+      hash: 6b748b23d3f7e9bf994f68beb707e03e9f7627f1
+      body: |
+        This creates the bindings in the correct order and means that they are
+        available for later levels if they need to be used there. It also
+        avoids the need to store a depth attribute in order to use the
+        shallowest version, since due to being breadth first now we know that
+        the first time we see them will be at the shallowest level they exist
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 5.0.10
+  title: ""
+  date: 2025-07-29T16:24:13.572Z
+- commits:
     - subject: Add test for multiple Necessities on the same name/type
       hash: 6538d3d92b1ab337e4c46f0af8be472cfaac5a1f
       body: ""
