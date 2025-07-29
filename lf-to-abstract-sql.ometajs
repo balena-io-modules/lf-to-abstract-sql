@@ -805,26 +805,47 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 
 	ProcessAtomicFormulations =
 		{this.bindAttributes = []}
-		{this.bindAttributeDepth = []}
 		{this.nonPrimitiveExists = false}
-		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsAttributes')
-		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNonPrimitive')
-		&ProcessAtomicFormulationsRecurse(0, 'ProcessAtomicFormulationsNativeProperties'),
-	ProcessAtomicFormulationsRecurse :depth :rule =
-		(	// Bit of a hack, but we only want to drill into the input if it's an array, otherwise we get infinite recursion.
-			?(Array.isArray(this.input.hd))
-			[	'AtomicFormulation'
-				[	'FactType'
-					anything+:factType
+		ProcessAtomicFormulationsRecurse('ProcessAtomicFormulationsAttributes')
+		ProcessAtomicFormulationsRecurse('ProcessAtomicFormulationsNonPrimitive')
+		ProcessAtomicFormulationsRecurse('ProcessAtomicFormulationsNativeProperties'),
+	ProcessAtomicFormulationsRecurse :rule =
+		&(
+			ProcessAtomicFormulationsLevel(rule):inputs
+			{	for(var i = 0; i < inputs.length; i++) {
+					// `_prependInput` lets us pass a string/array and ometa will convert it to an input, this relies on us
+					// being at the end of the current input so that in practice prepending means setting the input.
+					this._prependInput(inputs[i]);
+					// Add the next level inputs to the current inputs, so that we process all levels 1s, then all level 2s, etc. in order to be fully breadth first.
+					inputs = inputs.concat(this._applyWithArgs('ProcessAtomicFormulationsLevel', rule));
+				}
+			}
+		)
+	,
+	ProcessAtomicFormulationsLevel :rule =
+		{[]}:nextLevelInputs
+		// First step is a breadth first search through the input to find all the atomic formulations and create bindings for them.
+		(
+			(	// Bit of a hack, but we only want to drill into the input if it's an array, otherwise we get infinite recursion.
+				?(Array.isArray(this.input.hd))
+				[	'AtomicFormulation'
+					[	'FactType'
+						anything+:factType
+					]
+					UnmappedFactType(factType):unmappedFactType
+					MappedFactType(factType):actualFactType
+					{this._applyWithArgs(rule, unmappedFactType, actualFactType)}
+				|	(	anything:nextLevelInput
+						// Accumulate the next level inputs to return them
+						{nextLevelInputs.push(nextLevelInput)}
+					)+
 				]
-				UnmappedFactType(factType):unmappedFactType
-				MappedFactType(factType):actualFactType
-				{this._applyWithArgs(rule, depth, unmappedFactType, actualFactType)}
-			|	ProcessAtomicFormulationsRecurse(depth+1, rule)
-			]
-		|	anything
-		)*,
-	ProcessAtomicFormulationsNonPrimitive :depth :unmappedFactType :actualFactType =
+			|	anything
+			)*
+		)
+		-> nextLevelInputs
+	,
+	ProcessAtomicFormulationsNonPrimitive :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
 		{	for(var i=0; i < binds.length; i++) {
 				if(!this.IsPrimitive(this.ReconstructIdentifier(binds[i].identifier))) {
@@ -833,7 +854,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				}
 			}
 		},
-	ProcessAtomicFormulationsAttributes :depth :unmappedFactType :actualFactType =
+	ProcessAtomicFormulationsAttributes :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
 		(	?(this.attributes.hasOwnProperty(unmappedFactType) && this.attributes[unmappedFactType])
 			// Find the "base" binding - the one that isn't primitive
@@ -843,14 +864,13 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			// Use the "base" binding in the attribute binding list, but only if we are as shallow as possible.
 			{binds.find(function(bind) {
 				return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier))
-						&& ($elf.bindAttributeDepth[bind.number] == null || $elf.bindAttributeDepth[bind.number] > depth);
+					&& $elf.bindAttributes[bind.number] == null;
 			})}:attrBinding
+			?attrBinding
 			{_.cloneDeep(unmappedFactType)}:baseAttrFactType
 			{baseAttrFactType[2][1] = attrBinding.identifier.name}
 			FactTypeFieldName(baseAttrFactType):attrFieldName
-			{	this.bindAttributeDepth[attrBinding.number] = depth;
-				this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]};
-			}
+			{this.bindAttributes[attrBinding.number] = {binding: ['ReferencedField', baseBinding.binding[1], attrFieldName]}}
 		|	// Ignore primitive only fact types.
 			?binds.some(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
@@ -859,11 +879,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			{	for(var i = 0; i < actualFactType.length; i += 2) {
 					var table = this.GetTable(actualFactType[i][1]),
 						bindNumber = binds[i/2].number;
-					if(table && table.primitive && (
-						this.bindAttributeDepth[bindNumber] == null ||
-						this.bindAttributeDepth[bindNumber] > depth
-					)) {
-						this.bindAttributeDepth[bindNumber] = depth;
+					if(table && table.primitive && this.bindAttributes[bindNumber] == null) {
 						this.bindAttributes[bindNumber] = {
 							binding: ['ReferencedField', tableAlias, actualFactType[i][1]]
 						};
@@ -871,7 +887,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				}
 			}
 		),
-	ProcessAtomicFormulationsNativeProperties :depth :unmappedFactType :actualFactType =
+	ProcessAtomicFormulationsNativeProperties :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
 		?binds.every(function(bind) {
 			return $elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
@@ -884,10 +900,10 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 			this.sbvrTypes[primitive].nativeProperties &&
 			this.sbvrTypes[primitive].nativeProperties[verb] &&
 			this.sbvrTypes[primitive].nativeProperties[verb][property])
-		{this.sbvrTypes[primitive].nativeProperties[verb][property](binds[0].binding, binds[1].binding)}:binding
-		{	this.bindAttributeDepth[binds[1].number] = depth;
-			this.bindAttributes[binds[1].number] = {binding: binding};
-		},
+		(	?(this.bindAttributes[binds[1].number] == null)
+			{this.sbvrTypes[primitive].nativeProperties[verb][property](binds[0].binding, binds[1].binding)}:binding
+			{this.bindAttributes[binds[1].number] = {binding: binding}}
+		)?,
 
 	Rule =
 		ResetRuleState
@@ -1247,7 +1263,6 @@ LF2AbstractSQL.reset = function() {
 	this.rules = [];
 	this.attributes = {};
 	this.bindAttributes = [];
-	this.bindAttributeDepth = [];
 	this.lfInfo = {
 		rules: {}
 	};

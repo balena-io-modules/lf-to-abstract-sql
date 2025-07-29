@@ -90,7 +90,7 @@ describe('pilots', function () {
 	);
 	// Fact Type: pilot has nickname
 	test(Table(factType(pilot, verb('has'), nickname)));
-	// 	Necessity: each pilot has at most one name
+	// 	Necessity: each pilot has at most one nickname
 	test(
 		attribute(
 			necessity('each', pilot, verb('has'), ['at most', 'one'], nickname),
