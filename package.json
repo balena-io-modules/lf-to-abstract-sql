@@ -8,6 +8,7 @@
     "lint-fix": "balena-lint --fix -e js test index.js",
     "pretest": "npm run prepare",
     "test": "mocha",
+    "test-profile": "npm run prepare && npm run test -- --inspect-brk=0.0.0.0",
     "posttest": "npm run lint",
     "prepublish": "require-npm4-to-publish",
     "prepare": "ometajs2js --commonjs --input lf-to-abstract-sql.ometajs --output lf-to-abstract-sql.js && ometajs2js --commonjs --input lf-to-abstract-sql-prep.ometajs --output lf-to-abstract-sql-prep.js && ometajs2js --commonjs --input sbvr-compiler-libs.ometajs --output sbvr-compiler-libs.js"
@@ -22,7 +23,7 @@
   },
   "devDependencies": {
     "@balena/lint": "^6.2.1",
-    "@balena/sbvr-types": "^9.0.0",
+    "@balena/sbvr-types": "^11.1.0",
     "chai": "^5.0.0",
     "mocha": "^11.0.0",
     "require-npm4-to-publish": "^1.0.0"
