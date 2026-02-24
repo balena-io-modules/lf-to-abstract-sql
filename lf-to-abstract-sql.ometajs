@@ -1145,7 +1145,7 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 	// its alias to be returned as extra metadata for this rule
 	if (this.ruleRoot === null) {
 		this.ruleRoot = {
-			table: identifier.name,
+			table: this.GetTable(identifier.name).name,
 			alias: parentAlias
 		};
 	}
