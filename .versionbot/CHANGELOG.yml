@@ -1,4 +1,16 @@
 - commits:
+    - subject: Fix rule info table name for term forms
+      hash: 5ce073f5774e6137d2651ae945425ab80e6147f2
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Pagan Gazzard
+      nested: []
+  version: 5.0.14
+  title: ""
+  date: 2026-02-24T00:27:35.372Z
+- commits:
     - subject: "Add id-token: write permission for NPM OIDC publishing"
       hash: 45940cc781ebdb9f75613f21f25758b7c3f9ff82
       body: ""
