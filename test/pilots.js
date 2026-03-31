@@ -35,6 +35,7 @@ const scopedEventName = term('event name', 'Event');
 const name = term('name');
 const nickname = term('nickname');
 const honorific = term('honorific');
+const certificationName = term('certification name');
 const yearsOfExperience = term('years of experience');
 const statsCollection = term('stats collection');
 const person = term('person');
@@ -43,6 +44,7 @@ const veteranPilot = term('veteran pilot');
 const plane = term('plane');
 const testTerm = term('test term');
 const testTermForm = term('test term form');
+const pilotCertification = term('pilot certification');
 
 const pilots = numberedTerms(pilot, 2);
 const planes = numberedTerms(plane, 2);
@@ -67,6 +69,10 @@ describe('pilots', function () {
 	test(attribute(conceptType(shortTextType)));
 	// Term:      honorific
 	test(Table(honorific));
+	// 	Concept Type: Short Text (Type)
+	test(attribute(conceptType(shortTextType)));
+	// Term:      certification name
+	test(Table(certificationName));
 	// 	Concept Type: Short Text (Type)
 	test(attribute(conceptType(shortTextType)));
 	// Term:      years of experience
@@ -252,6 +258,94 @@ describe('pilots', function () {
 			[
 				'StructuredEnglish',
 				'It is necessary that each pilot has a stats collection that is represented by a Text (Type) that has a Length (Type) that is less than or equal to 1000',
+			],
+		],
+	});
+	// Fact Type: pilot has certification name
+	test(Table(factType(pilot, verb('has'), certificationName)));
+	// 	Term Form: pilot certification
+	test(attribute(termForm(pilotCertification)));
+	// 	Necessity: each pilot certification has a certification name that has a Length (Type) that is greater than 1.
+	test(
+		attribute(
+			necessity('each', pilotCertification, verb('has'), 'a', [
+				certificationName,
+				verb('has'),
+				'a',
+				[lengthType, verb('is greater than'), 1],
+			]),
+		),
+	);
+	// Rule:       It is necessary that each pilot certification has a certification name that has a Length (Type) that is less than or equal to 64.
+	test({
+		se: 'Rule: It is necessary that each pilot certification has a certification name that has a Length (Type) that is less than or equal to 64',
+		ruleSQL: [
+			'Rule',
+			[
+				'Body',
+				[
+					'Equals',
+					[
+						'SelectQuery',
+						['Select', [['Count', '*']]],
+						[
+							'From',
+							[
+								'Alias',
+								['Table', 'pilot-has-certification name'],
+								'pilot certification.0',
+							],
+						],
+						[
+							'Where',
+							[
+								'Not',
+								[
+									'And',
+									[
+										'And',
+										[
+											'LessThanOrEqual',
+											[
+												'CharacterLength',
+												[
+													'ReferencedField',
+													'pilot certification.0',
+													'certification name',
+												],
+											],
+											['Integer', 64],
+										],
+										[
+											'Exists',
+											[
+												'CharacterLength',
+												[
+													'ReferencedField',
+													'pilot certification.0',
+													'certification name',
+												],
+											],
+										],
+									],
+									[
+										'Exists',
+										[
+											'ReferencedField',
+											'pilot certification.0',
+											'certification name',
+										],
+									],
+								],
+							],
+						],
+					],
+					['Number', 0],
+				],
+			],
+			[
+				'StructuredEnglish',
+				'It is necessary that each pilot certification has a certification name that has a Length (Type) that is less than or equal to 64',
 			],
 		],
 	});
