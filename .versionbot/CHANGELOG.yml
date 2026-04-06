@@ -1,4 +1,16 @@
 - commits:
+    - subject: Add test for Term Form Resource with FK + Field composite natural key
+      hash: 8ca14268f22547cace51ce99a3b81affb3abf7cb
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Thodoris Greasidis
+      nested: []
+  version: 5.0.31
+  title: ""
+  date: 2026-04-06T15:58:39.531Z
+- commits:
     - subject: Revert flowzone pinning to master
       hash: b39464917b5ecce5f6ec38acbd2162f059cfd9b0
       body: ""
