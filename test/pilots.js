@@ -305,45 +305,26 @@ describe('pilots', function () {
 									[
 										'And',
 										[
-											'And',
+											'LessThanOrEqual',
 											[
-												'LessThanOrEqual',
+												'CharacterLength',
 												[
-													'CharacterLength',
-													[
-														'ReferencedField',
-														// TODO: This is wrong and it should instead be the table's alias
-														'pilot certification.0-has-certification name.1',
-														'certification name',
-													],
-												],
-												['Integer', 64],
-											],
-											[
-												'Exists',
-												[
-													'CharacterLength',
-													[
-														'ReferencedField',
-														// TODO: This is wrong and it should instead be the table's alias
-														'pilot certification.0-has-certification name.1',
-														'certification name',
-													],
+													'ReferencedField',
+													'pilot certification.0',
+													'certification name',
 												],
 											],
+											['Integer', 64],
 										],
 										[
-											'Equals',
+											'Exists',
 											[
-												'ReferencedField',
-												'pilot certification.0',
-												'certification name',
-											],
-											[
-												'ReferencedField',
-												// TODO: This is wrong and it should instead be the table's alias
-												'pilot certification.0-has-certification name.1',
-												'certification name',
+												'CharacterLength',
+												[
+													'ReferencedField',
+													'pilot certification.0',
+													'certification name',
+												],
 											],
 										],
 									],
@@ -351,8 +332,7 @@ describe('pilots', function () {
 										'Exists',
 										[
 											'ReferencedField',
-											// TODO: This is wrong and it should instead be the table's alias
-											'pilot certification.0-has-certification name.1',
+											'pilot certification.0',
 											'certification name',
 										],
 									],

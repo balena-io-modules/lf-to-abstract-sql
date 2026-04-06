@@ -192,7 +192,6 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 	AttrDatabaseAttribute :factType =
 		:attrVal
 		(	?attrVal
-			{this.attributes[factType] = attrVal}
 			GetResourceName(factType):linkResourceName
 			{delete this.relationships[linkResourceName]}
 			{this.tables[linkResourceName] = 'Attribute'}
@@ -856,7 +855,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 		},
 	ProcessAtomicFormulationsAttributes :unmappedFactType :actualFactType =
 		RoleBindings(actualFactType):binds
-		(	?(this.attributes.hasOwnProperty(unmappedFactType) && this.attributes[unmappedFactType])
+		(	?(this.GetTable(unmappedFactType) === 'Attribute')
 			// Find the "base" binding - the one that isn't primitive
 			{binds.find(function(bind) {
 				return !$elf.IsPrimitive($elf.ReconstructIdentifier(bind.identifier));
@@ -1261,7 +1260,6 @@ LF2AbstractSQL.reset = function() {
 	this.relationships = {};
 	this.synonymousForms = {};
 	this.rules = [];
-	this.attributes = {};
 	this.bindAttributes = [];
 	this.lfInfo = {
 		rules: {}

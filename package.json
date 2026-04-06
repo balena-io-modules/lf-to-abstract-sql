@@ -16,6 +16,10 @@
   "repository": "https://github.com/balena-io-modules/lf-to-abstract-sql.git",
   "author": "",
   "license": "BSD",
+  "engines": {
+    "node": ">=22.2.0",
+    "npm": ">=10.7.0"
+  },
   "dependencies": {
     "@balena/sbvr-parser": "^1.4.3",
     "lodash": "^4.17.21",
