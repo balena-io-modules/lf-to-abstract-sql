@@ -1,4 +1,32 @@
 - commits:
+    - subject: Drop support for nodejs < 22.2.0
+      hash: 6499c4f1b5e05382c3efc667619e1840130bad86
+      body: ""
+      footer:
+        Change-type: major
+        change-type: major
+      author: Thodoris Greasidis
+      nested: []
+    - subject: Replace attribute check with single this.tables lookup
+      hash: da88a79627609665328142984b8c60baf30413ae
+      body: |
+        this.attributes was a redundant registry that
+        only AttrDatabaseAttribute ever wrote to, causing
+        the term-form case to be missed. All other rules
+        already use GetTable() === 'Attribute' so align
+        ProcessAtomicFormulationsAttributes with the same
+        pattern.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: jaomaloy <jan.maloy@balena.io>
+        signed-off-by: jaomaloy <jan.maloy@balena.io>
+      author: jaomaloy
+      nested: []
+  version: 6.0.0
+  title: ""
+  date: 2026-04-06T16:06:16.378Z
+- commits:
     - subject: Add test for Term Form Resource with FK + Field composite natural key
       hash: 8ca14268f22547cace51ce99a3b81affb3abf7cb
       body: ""
