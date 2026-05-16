@@ -1,4 +1,17 @@
 - commits:
+    - subject: Pin dependencies
+      hash: 29e461fc87c26dc22db88dee8a24b564595eef4b
+      body: |
+        Update chai
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 6.0.1
+  title: ""
+  date: 2026-05-16T00:16:07.414Z
+- commits:
     - subject: Drop support for nodejs < 22.2.0
       hash: 6499c4f1b5e05382c3efc667619e1840130bad86
       body: ""
