@@ -1054,7 +1054,16 @@ LF2AbstractSQL.AddRelationship = function(resourceName, factType, fieldName, ref
 		relationReference.push([ references.resourceName, references.fieldName ]);
 	}
 
-	relationships.$ = relationReference;
+	// A fact type can have more than one role played by the same term (eg a self-referential
+	// ternary like `gadget1 assigns label to gadget2`). Every role - including
+	// ones that also register a verb-qualified path below - registers here under the bare term
+	// name too, so without this guard a later role silently clobbers an earlier role's mapping
+	// (`relationships.gadget.$` ending up pointing at the last role's field instead of the
+	// first's). Keep the first registered mapping; later roles for the same term remain reachable
+	// through their own verb-qualified path.
+	if (relationships.$ == null) {
+		relationships.$ = relationReference;
+	}
 };
 
 LF2AbstractSQL.FactTypeFieldName = function(factType) {
