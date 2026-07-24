@@ -368,6 +368,7 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 				AddRelationship(identifierTable, factType.slice(1), fieldName)
 			|	CreateTable(resourceName, _(factType).map(1).join(' ')):linkTable
 				{[]}:uniqueFields
+				{{}}:seenHasRoleTerms
 				(	Identifier:identifier
 					{[ ['Term', resourceName], ['Verb', 'has'], ['Term', identifier.name] ]}:linkHasFactType
 					{[ ['Term', resourceName], linkVerb, ['Term', identifier.name] ]}:linkVerbFactType
@@ -385,7 +386,19 @@ export ometa LF2AbstractSQL <: SBVRCompilerLibs {
 						AddTableField(linkTable, fieldName, 'ForeignKey', true, null, references):fieldID
 						-> references
 					):references
-					AddRelationship(resourceName, linkHasFactType.slice(2), fieldName, references)
+					// This automatic `has` relationship is keyed only on the term name, so a fact
+					// type with more than one role played by the same term (eg a self-referential
+					// ternary like `gadget1 assigns label to gadget2`) would otherwise create a
+					// duplicate `has` entry for that term, with the later role clobbering the
+					// earlier one. Only the first role to use a given term gets the `has` entry;
+					// later roles stay reachable via their own verb-qualified path below.
+					// In future all of these automatic entries should be removed entirely, in
+					// favour of the user creating the paths they want explicitly via synonymous
+					// forms.
+					(	?(!seenHasRoleTerms.hasOwnProperty(identifier.name))
+						{seenHasRoleTerms[identifier.name] = true}
+						AddRelationship(resourceName, linkHasFactType.slice(2), fieldName, references)
+					)?
 					(	?linkVerb
 						AddRelationship(resourceName, linkVerbFactType.slice(1), fieldName, references)
 					)?
