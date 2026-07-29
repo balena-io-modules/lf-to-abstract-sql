@@ -1,4 +1,43 @@
 - commits:
+    - subject: Fix self-referential ternary fact types
+      hash: 085b9145bc02be61a788a2baf09b16292803d027
+      body: >
+        A fact type can have more than one role played by the same term (eg a
+
+        self-referential ternary like `gadget1 assigns label to gadget2`). The
+        automatic
+
+        `has` relationship registered for each role is keyed only on the term
+        name, so a
+
+        second role for the same term created a duplicate `has` entry that
+        clobbered the
+
+        first role's mapping instead of each role being independently reachable.
+
+
+        Only the first role to use a given term now registers the automatic
+        `has` entry;
+
+        later roles for that term remain reachable through their own
+        verb-qualified path,
+
+        which was already being registered separately. In future all of these
+        automatic
+
+        entries should be removed entirely, in favour of the user creating the
+        paths they
+
+        want explicitly via synonymous forms.
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: Otavio Jacobi
+      nested: []
+  version: 6.0.3
+  title: ""
+  date: 2026-07-29T11:52:43.776Z
+- commits:
     - subject: Update dependency mocha to v11.7.6
       hash: dafb36950cd68425035bb7aff44413197df423f0
       body: |
