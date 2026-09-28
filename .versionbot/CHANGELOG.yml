@@ -1,4 +1,17 @@
 - commits:
+    - subject: Update dependency flowzonify to v0.4.12
+      hash: 77340883106e354165a2d1d80a95e97f1e4f5bae
+      body: |
+        Update flowzonify from 0.0.0 to 0.4.12
+      footer:
+        Change-type: patch
+        change-type: patch
+      author: balena-renovate[bot]
+      nested: []
+  version: 6.0.4
+  title: ""
+  date: 2026-09-28T09:07:05.703Z
+- commits:
     - subject: Fix self-referential ternary fact types
       hash: 085b9145bc02be61a788a2baf09b16292803d027
       body: >
