@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"module": "Node16",
+		"target": "es2021",
+		"strict": true,
+		"allowJs": true,
+		"noUnusedParameters": true,
+		"noUnusedLocals": true,
+		"noEmit": true,
+		"types": ["mocha"],
+		"skipLibCheck": true
+	},
+	"include": [
+		"index.js",
+		"index.d.ts",
+		"test/*.js",
+		"test/*.ts",
+		"test/*.mts"
+	]
+}

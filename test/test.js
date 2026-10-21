@@ -87,6 +87,7 @@ module.exports = function (builtInVocab) {
 
 	const ret = runExpectation.bind(null, describe);
 	ret.skip = runExpectation.bind(null, describe.skip);
+	// eslint-disable-next-line no-only-tests/no-only-tests
 	ret.only = runExpectation.bind(null, describe.only);
 	return ret;
 };
