@@ -1,4 +1,50 @@
 - commits:
+    - subject: Add typings
+      hash: b8bc9e7a82821d099512bb156e5e5e01c55f7c30
+      body: >
+        The package had no type definitions, so consumers such as pinejs have
+        had
+
+        to maintain their own. These are based on those, with fixes:
+
+        - Add `translate`, which was missing
+
+        - The translator from `createTranslator` no longer requires the `rule`
+          argument it ignores, it is still accepted (but deprecated) for
+          compatibility
+        - `LFModel` is imported and re-exported from @balena/sbvr-parser
+
+        - The types only need the native names/properties/fact types that are
+        used
+          during translation, so custom types can also be added
+        - The OMeta instance is available as `this` when extending a grammar
+
+        - Import the abstract sql compiler types with `resolution-mode: import`,
+        as
+          it is an ES module, otherwise it is an error
+
+        `@balena/abstract-sql-compiler` is added as an optional peer dependency
+
+        for the types it provides for the output. It is not needed at runtime,
+        so
+
+        consumers that use the types (which already depend on it) resolve them
+
+        from their own copy, and others are not made to install it.
+
+
+        The definitions are now checked when linting, both by themselves and
+
+        against example usage.
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Pagan Gazzard
+      nested: []
+  version: 6.1.0
+  title: ""
+  date: 2026-11-05T13:56:17.141Z
+- commits:
     - subject: Update dependency @balena/sbvr-types to v12
       hash: 8dedca349cb2994a18c5abe0b8a681bac3a7b2b7
       body: |
