@@ -1166,11 +1166,13 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		throw new Error('Concept type resolver already added for "' + parentAlias + '"!')
 	}
 
+	// The names of the concepts that have been joined so far, each one is aliased as `name + varNum`
 	conceptTypeResolutions = [];
 
 	var conceptTypeResolver = (function(untilConcept) {
 		var conceptTable,
-			conceptAlias;
+			conceptAlias,
+			lastResolution;
 
 		if (conceptTypeResolutions.length === 0) {
 			// Resolve the initial level on first call
@@ -1180,11 +1182,12 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 		}
 
 		// Pick up where we left off with previous concept type resolutions
-		parentAlias = _.last(conceptTypeResolutions);
-		if(parentAlias === true || conceptTypeResolutions.includes(untilConcept)) {
+		lastResolution = _.last(conceptTypeResolutions);
+		if(lastResolution === true || conceptTypeResolutions.includes(untilConcept)) {
 			// We already either resolved the entire chain, or at least as far as we need to, so we can just return :)
 			return;
 		}
+		parentAlias = lastResolution + varNum;
 		while((concept = this.FollowConceptType(concept)) !== false) {
 			conceptAlias = concept[1] + varNum;
 			conceptTable = this.GetTable(concept[1]);
@@ -1196,8 +1199,8 @@ LF2AbstractSQL.CreateConceptTypesResolver = function(query, identifier, varNum) 
 			this.ResolveLinkTable(parentAlias);
 
 			parentAlias = conceptAlias;
-			conceptTypeResolutions.push(parentAlias);
-			if (untilConcept != null && !this.IdentifiersEqual(concept, untilConcept)) {
+			conceptTypeResolutions.push(concept[1]);
+			if (concept[1] === untilConcept) {
 				// We've added the concept that was needed, we can exit now
 				break;
 			}
